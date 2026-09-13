@@ -1,0 +1,46 @@
+import { z } from 'zod';
+
+export const createListingSchema = z.object({
+  title: z
+    .string()
+    .min(5, 'Sarlavha kamida 5 ta belgidan iborat bo\'lishi kerak')
+    .max(120, 'Sarlavha 120 ta belgidan oshmasligi kerak'),
+  name: z
+    .string()
+    .min(2, 'Ism yoki kompaniya nomi kamida 2 ta belgidan iborat bo\'lishi kerak'),
+  description: z
+    .string()
+    .min(20, 'Tavsif kamida 20 ta belgidan iborat bo\'lishi kerak'),
+  phone: z
+    .string()
+    .min(9, 'Telefon raqam kamida 9 ta raqam bo\'lishi kerak')
+    .regex(
+      /^(\+?998)?[0-9\s\-()]{9,15}$/,
+      'Noto\'g\'ri telefon raqam formati. Masalan: +998901234567'
+    ),
+  telegram: z.string().optional().or(z.literal('')),
+  instagram: z.string().optional().or(z.literal('')),
+  location: z
+    .string()
+    .min(2, 'Iltimos, Sirdaryo hududini tanlang'),
+  address: z.string().optional().or(z.literal('')),
+  price: z.string().optional().or(z.literal('')),
+  experience: z.string().optional().or(z.literal('')),
+  categoryId: z
+    .string()
+    .min(1, 'Iltimos, asosiy kategoriyani tanlang'),
+  subCategoryId: z.string().optional().or(z.literal('')),
+  images: z.array(z.string().url('Rasm havolasi noto\'g\'ri')).optional().default([]),
+});
+
+export type CreateListingInput = z.infer<typeof createListingSchema>;
+
+export const listingFilterSchema = z.object({
+  q: z.string().optional(),
+  location: z.string().optional(),
+  category: z.string().optional(),
+  subCategory: z.string().optional(),
+  sortBy: z.enum(['popular', 'newest', 'rating']).optional().default('popular'),
+});
+
+export type ListingFilterParams = z.infer<typeof listingFilterSchema>;
