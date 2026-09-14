@@ -14,10 +14,12 @@ export default async function AdminPage() {
     redirect('/admin/login');
   }
 
-  const [stats, listings] = await Promise.all([
+  const [stats, rawListings] = await Promise.all([
     getAdminStatsAction(),
     getAdminListingsAction(),
   ]);
+
+  const listings = JSON.parse(JSON.stringify(rawListings));
 
   return (
     <div className="min-h-screen bg-[#fffdfa] py-6 sm:py-10">

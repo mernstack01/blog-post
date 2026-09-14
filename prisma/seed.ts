@@ -3,15 +3,15 @@ import { PrismaClient, ListingStatus } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding database with Sirdaryo services...');
+  console.log('Seeding MongoDB with rich Sirdaryo services...');
 
-  // Tozalash (avvalgi test ma'lumotlar bo'lsa)
+  // Tozalash
   await prisma.listing.deleteMany();
   await prisma.subCategory.deleteMany();
   await prisma.category.deleteMany();
   await prisma.user.deleteMany();
 
-  // 1. Kategoriyalar va Sub-kategoriyalar yaratish
+  // 1. Kategoriyalar va Sub-kategoriyalar
   const categoriesData = [
     {
       name: "Ustalar va Ta'mir",
@@ -102,13 +102,13 @@ async function main() {
     }
   }
 
-  // 2. Namunaviy foydalanuvchilar (Mutaxassislar)
+  // 2. Foydalanuvchilar
   const user1 = await prisma.user.create({
     data: {
       name: "Usta Otabek Xolmirzayev",
       phone: "+998901234567",
       telegram: "otabek_santexnik",
-      avatar: "https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=400&auto=format&fit=crop&q=80",
+      avatar: "https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=400",
     }
   });
 
@@ -117,25 +117,16 @@ async function main() {
       name: "Rustam Alimov",
       phone: "+998912345678",
       telegram: "rustam_elektrik_guliston",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
     }
   });
 
-  const user3 = await prisma.user.create({
-    data: {
-      name: "Jasur Murodov",
-      phone: "+998933456789",
-      telegram: "jasur_konditsioner",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80",
-    }
-  });
-
-  // 3. Sirdaryo hududiga xos 10 ta realistik e'lonlar
+  // 3. Sirdaryoning barcha tumanlariga xos 18 ta realistik e'lonlar
   const listingsData = [
     {
       title: "Santexnika va isitish tizimlarini montaj qilish (Kafolat 2 yil)",
       name: "Otabek Xolmirzayev (Usta Otabek)",
-      description: "Assalomu alaykum! Guliston shahri va unga yaqin hududlarda 10 yillik tajribaga ega santexnik xizmati. Issiq pol (teplyy pol), ariston, kotyol o'rnatish, plastik va temir quvurlarni almashtirish, vannaxona jihozlarini sozlash. Har qanday murakkablikdagi oqishlarni zudlik bilan bartaraf etamiz. Sifat kafolatlanadi, materiallarni sifatli va ulgurji narxda tanlashga yordam beramiz.",
+      description: "Assalomu alaykum! Guliston shahri va unga yaqin hududlarda 10 yillik tajribaga ega santexnik xizmati. Issiq pol, ariston, kotyol o'rnatish, plastik va temir quvurlarni almashtirish, vannaxona jihozlarini sozlash. Har qanday oqishlarni zudlik bilan bartaraf etamiz.",
       phone: "+998901234567",
       telegram: "otabek_santexnik",
       instagram: "otabek_santexnik_guliston",
@@ -146,9 +137,8 @@ async function main() {
       rating: 4.9,
       reviewCount: 38,
       images: [
-        "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=800",
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800",
       ],
       isVerified: true,
       status: ListingStatus.APPROVED,
@@ -160,7 +150,7 @@ async function main() {
     {
       title: "Xonadonlar va tashkilotlar uchun professional elektr montaj",
       name: "Rustam Alimov",
-      description: "Guliston, Yangiyer va Boyovut tumanlari bo'ylab yuqori darajadagi elektr montaj ishlari. 220V va 380V tarmoqlar, avtomatika, lyustra, LED lentalar, yashirin yoritish va elektr qalqonlarini (shit) yig'ish. To'liq xavfsizlik qoidalariga rioya qilinadi. Qisqa tutashuv va nosozliklarni tezkor topish va tuzatish.",
+      description: "Guliston, Yangiyer va Boyovut tumanlari bo'ylab yuqori darajadagi elektr montaj ishlari. 220V va 380V tarmoqlar, avtomatika, lyustra, LED lentalar, yashirin yoritish va shit yig'ish.",
       phone: "+998912345678",
       telegram: "rustam_elektrik_guliston",
       instagram: "elektrik_sirdaryo",
@@ -171,8 +161,7 @@ async function main() {
       rating: 5.0,
       reviewCount: 42,
       images: [
-        "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800",
       ],
       isVerified: true,
       status: ListingStatus.APPROVED,
@@ -184,31 +173,29 @@ async function main() {
     {
       title: "Konditsionerlarni o'rnatish, yuvish va R410 freon to'ldirish",
       name: "Jasur Murodov (Guliston Climat)",
-      description: "Barcha turdagi konditsionerlarni (Artel, LG, Midea, Gree, Chigo va boshqalar) montaj, demontaj qilish. Maxsus par va kimyoviy vositalar bilan ichki va tashqi bloklarni bakteriyalardan tozalash. Trassani devor ichidan chiroyli yotqizish. Guliston shahri va Yangiyer bo'ylab chaqiruvga 1 soatda yetib boramiz.",
+      description: "Barcha turdagi konditsionerlarni montaj, demontaj qilish. Maxsus par va kimyoviy vositalar bilan ichki va tashqi bloklarni chuqur tozalash. Yangiyer va Shirin shaharlariga ham boramiz.",
       phone: "+998933456789",
       telegram: "jasur_konditsioner",
       instagram: "climat_sirdaryo",
       location: "Yangiyer shahri",
-      address: "Tinchlik ko'chasi, mo'ljal: Yangiyer bozor yonida",
+      address: "Tinchlik ko'chasi, Yangiyer bozor yonida",
       price: "200,000 so'mdan boshlab",
       experience: "6 yil",
       rating: 4.8,
       reviewCount: 29,
       images: [
-        "https://images.unsplash.com/photo-1614633833026-062045db1264?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1614633833026-062045db1264?w=800",
       ],
       isVerified: true,
       status: ListingStatus.APPROVED,
       view_count: 289,
       categoryId: createdCategories["maishiy-texnika"].id,
       subCategoryId: createdSubCategories["konditsioner"].id,
-      userId: user3.id,
     },
     {
       title: "Kvartira va hovlilarni kalit topshirish (Pod klyuch) Yevro ta'mir",
       name: "Sherzod Usta Brigadasi",
-      description: "Bizning 6 kishilik tajribali ustalar jamoamiz xonadoningizni noldan zamonaviy ko'rinishga keltiradi: gipsokarton figuralar, shpaklyovka, sifatli oboy yopishtirish, polga laminat yotqizish, fasad bo'yoqlari. Ishlarni shartnoma asosida, o'z vaqtida va toza topshiramiz. Ko'rsatilgan ishlarimizni Gulistondagi ob'yektlarda ko'rishingiz mumkin.",
+      description: "Xonadoningizni noldan zamonaviy ko'rinishga keltiramiz: gipsokarton figuralar, shpaklyovka, sifatli oboy, polga laminat yotqizish. Ishlarni shartnoma asosida topshiramiz.",
       phone: "+998971112233",
       telegram: "sherzod_remont_sirdaryo",
       instagram: "sherzod_design_remont",
@@ -219,9 +206,7 @@ async function main() {
       rating: 4.9,
       reviewCount: 51,
       images: [
-        "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800",
       ],
       isVerified: true,
       status: ListingStatus.APPROVED,
@@ -232,19 +217,18 @@ async function main() {
     {
       title: "Yuk tashish xizmati: Labo va Gazel (Sirdaryo - Toshkent - Samarqand)",
       name: "Ilhomjon Haydovchi",
-      description: "Sirdaryo viloyatining barcha tumanlaridan (Guliston, Shirin, Yangiyer, Sayxunobod, Mirzaobod) O'zbekiston bo'ylab mebel, qurilish mollari va boshqa yuklarni arzon va ishonchli yetkazib beramiz. Yuk ortish va tushirish uchun baquvvat mardikorlarimiz ham bor. Mashinamiz toza va tentli.",
+      description: "Sayxunobod, Guliston va Shirin shaharlaridan mebel, qurilish mollari va boshqa yuklarni arzon va ishonchli yetkazib beramiz. Yuk ortish va tushirish xizmati ham mavjud.",
       phone: "+998993214567",
       telegram: "ilhom_labo_yuk",
       instagram: "yuk_tashish_sirdaryo",
       location: "Sayxunobod tumani",
       address: "Sayxunobod markaz, Paxtakor ko'chasi",
-      price: "1 km uchun 6,000 so'm yoki kelishuv",
+      price: "1 km uchun 6,000 so'm",
       experience: "7 yil",
       rating: 4.9,
       reviewCount: 64,
       images: [
-        "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=800&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=800",
       ],
       isVerified: true,
       status: ListingStatus.APPROVED,
@@ -255,7 +239,7 @@ async function main() {
     {
       title: "Kafel, granit va mozaika terish ustalari",
       name: "Farrux Usta",
-      description: "Hammom, tualet, oshxona va hovlilarga har qanday o'lchamdagi kafel (60x60, 60x120 kafelografiya) terish. 45 gradus burchaklarni tekis chiqarish (lasochek), lazer darajasida aniqlik. 100% silliq va bexato ish. Materiallarni hisoblab berish mutlaqo bepul.",
+      description: "Hammom, tualet, oshxona va hovlilarga har qanday o'lchamdagi kafel terish. 45 gradus burchaklarni tekis chiqarish, lazer darajasida aniqlik. 100% silliq va bexato ish.",
       phone: "+998904567890",
       telegram: "farrux_kafelchi",
       instagram: "kafelchi_guliston",
@@ -266,10 +250,9 @@ async function main() {
       rating: 4.7,
       reviewCount: 23,
       images: [
-        "https://images.unsplash.com/photo-1584622781564-1d987f7333c1?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=800&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1584622781564-1d987f7333c1?w=800",
       ],
-      isVerified: false,
+      isVerified: true,
       status: ListingStatus.APPROVED,
       view_count: 198,
       categoryId: createdCategories["ustalar"].id,
@@ -278,7 +261,7 @@ async function main() {
     {
       title: "Avtomobillarni kompyuter diagnostikasi va injektor tozalash",
       name: "Guliston Avto Master (Bekzod usta)",
-      description: "Cobalt, Gentra, Nexia 3, Tracker, Onix, Kia, Hyundai avtomobillarini zamonaviy Launch skaneri orqali diagnostika qilish. Check chirog'i yonish sababini aniqlash, drosselni adaptatsiya qilish, yonilg'i tizimi va forsunka (injektor)larni stendda yuvish.",
+      description: "Cobalt, Gentra, Nexia 3, Tracker, Onix avtomobillarini kompyuter diagnostika qilish, injektorlarni stendda tozalash, drosselni sozlash.",
       phone: "+998918889900",
       telegram: "bekzod_avto_diag",
       instagram: "guliston_avto_master",
@@ -289,8 +272,7 @@ async function main() {
       rating: 5.0,
       reviewCount: 47,
       images: [
-        "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=800&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800",
       ],
       isVerified: true,
       status: ListingStatus.APPROVED,
@@ -301,7 +283,7 @@ async function main() {
     {
       title: "Kir yuvish mashinalari va muzlatgichlarni uyingizda tuzatish",
       name: "Azizbek Texno Servis",
-      description: "Samsung, LG, Artel, Indesit, Beko kir yuvish mashinalari suv chiqarmayotgan, siqmayotgan yoki shovqin solayotgan bo'lsa darhol murojaat qiling. Asl ehtiyot qismlar (nasos, podshipnik, ten, plata) o'zimizda bor. Shirin, Yangiyer va Guliston bo'ylab uyingizga borib joyida ta'mirlaymiz.",
+      description: "Samsung, LG, Artel, Indesit kir yuvish mashinalarini joyida tuzatish. Shirin shahri va Yangiyer bo'ylab chaqiruvga darhol boramiz.",
       phone: "+998945554433",
       telegram: "azizbek_texno",
       instagram: "texnoservis_sirdaryo",
@@ -312,8 +294,7 @@ async function main() {
       rating: 4.8,
       reviewCount: 19,
       images: [
-        "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=800&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800",
       ],
       isVerified: true,
       status: ListingStatus.APPROVED,
@@ -324,7 +305,7 @@ async function main() {
     {
       title: "Darvoza, panjara (reshyotka) va naveslar tayyorlash",
       name: "Bobur Usta Temirchi",
-      description: "Sifatli metalldan zamonaviy dizayndagi darvozalar, hovli va garaj naveslari, deraza panjaralari, zina tutqichlari (perila). Bo'yoqlari chang emal va patinalar bilan bezatiladi. O'lchash va yetkazib berish butun Sirdaryo viloyati bo'yicha bepul.",
+      description: "Sifatli metalldan zamonaviy darvozalar, hovli va garaj naveslari, deraza panjaralari. Mirzaobod va Guliston bo'ylab o'lchash bepul.",
       phone: "+998939991122",
       telegram: "bobur_temirchi",
       instagram: "darvoza_sirdaryo",
@@ -335,8 +316,7 @@ async function main() {
       rating: 4.9,
       reviewCount: 31,
       images: [
-        "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1508873696983-2df5703bc20d?w=800&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800",
       ],
       isVerified: true,
       status: ListingStatus.APPROVED,
@@ -347,19 +327,18 @@ async function main() {
     {
       title: "Ingliz tili (IELTS 7.5+ va General English) kurslari",
       name: "Guliston Academic IELTS Center",
-      description: "Guliston shahrida yoshlar va abituriyentlar uchun professional ingliz tili darslari. O'qituvchilarimiz IELTS 8.0 ball sohiblari. Speaking klublar, xorijiy universitetlarga grantlar yutish bo'yicha konsultatsiyalar. Birinchi dars bepul!",
+      description: "Guliston shahrida yoshlar va abituriyentlar uchun professional ingliz tili darslari. Speaking klublar, individual va guruh darslari.",
       phone: "+998907770011",
       telegram: "guliston_ielts_center",
       instagram: "guliston_ielts",
       location: "Guliston shahri",
-      address: "Guliston davlat universiteti (GulDU) ro'parasida, 2-qavat",
+      address: "Guliston davlat universiteti ro'parasida",
       price: "Oyiga 350,000 so'm",
       experience: "5 yil",
       rating: 5.0,
       reviewCount: 78,
       images: [
-        "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800",
       ],
       isVerified: true,
       status: ListingStatus.APPROVED,
@@ -370,7 +349,7 @@ async function main() {
     {
       title: "To'y va marosimlar uchun kelinlar makiyaji va soch turmaklash",
       name: "Malika Beauty Salon",
-      description: "Guliston shahrida eng go'zal kelin obrazlari, fason soch turmaklari, zamonaviy visaj va parvarish. Biz faqat jahonning yetakchi brendlari (MAC, Dior, Huda Beauty) sifatli kosmetikasidan foydalanamiz. Marosimingizda beqiyos ko'rinishga ega bo'ling.",
+      description: "Guliston shahrida eng go'zal kelin obrazlari, fason soch turmaklari, zamonaviy visaj va parvarish. Sifatli brend kosmetika.",
       phone: "+998946663322",
       telegram: "malika_beauty_guliston",
       instagram: "malika_beauty_salon",
@@ -381,8 +360,7 @@ async function main() {
       rating: 4.9,
       reviewCount: 56,
       images: [
-        "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=800",
       ],
       isVerified: true,
       status: ListingStatus.APPROVED,
@@ -393,7 +371,7 @@ async function main() {
     {
       title: "Uylar va binolar uchun tom yopish (Profildan tunika va cherepitsa)",
       name: "Sardoba Qurilish Ustalari",
-      description: "Sardoba, Oqoltin va Mirzaobod tumanlari bo'ylab yengil va mustahkam temir konstruksiyali tomlar qurish. Qor va yomg'ir suvlari sizmaydigan qilib yopish, suv novlari (vodostok) o'rnatish. Tezkor, sifatli va o'rtadagi dallollarsiz to'g'ridan-to'g'ri usta bilan shartnoma qiling.",
+      description: "Sardoba, Oqoltin va Mirzaobod tumanlari bo'ylab yengil va mustahkam temir konstruksiyali tomlar qurish, suv novlari o'rnatish.",
       phone: "+998935559988",
       telegram: "sardoba_tomchi",
       instagram: "tom_yopish_sirdaryo",
@@ -404,14 +382,128 @@ async function main() {
       rating: 4.8,
       reviewCount: 34,
       images: [
-        "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1541888946425-d0fbb186c5f6?w=800&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800",
       ],
       isVerified: true,
       status: ListingStatus.APPROVED,
       view_count: 245,
       categoryId: createdCategories["qurilish"].id,
       subCategoryId: createdSubCategories["tom-yopish"].id,
+    },
+    // Qo'shimcha tumanlar uchun xizmatlar:
+    {
+      title: "Oqoltin tumani: G'isht va shlakoblok terish brigadasi",
+      name: "Qahramon Usta Quruvchi",
+      description: "Oqoltin va Sardoba tumanlarida uylar, fermer xo'jaliklari va omborlar qurish. Poydevor quyish, g'isht terish va beton ishlari kafolatli.",
+      phone: "+998913334455",
+      telegram: "qahramon_qurilish",
+      location: "Oqoltin tumani",
+      address: "Oqoltin markazi, Bozor ko'chasi",
+      price: "Kvadratiga 40,000 so'mdan",
+      experience: "15 yil",
+      rating: 4.9,
+      reviewCount: 22,
+      images: ["https://images.unsplash.com/photo-1541888946425-d0fbb186c5f6?w=800"],
+      isVerified: true,
+      status: ListingStatus.APPROVED,
+      view_count: 180,
+      categoryId: createdCategories["qurilish"].id,
+      subCategoryId: createdSubCategories["gisht-terish"].id,
+    },
+    {
+      title: "Xovos tumani: Damas yuk tashish va ko'chirish",
+      name: "Shavkatjon Haydovchi",
+      description: "Xovos va Yangiyer bo'ylab arzon yuk tashish. Xonadon mebellari, qopdagi yuklar va mahsulotlarni o'z vaqtida manzilga yetkazamiz.",
+      phone: "+998902221144",
+      telegram: "shavkat_xovos_yuk",
+      location: "Xovos tumani",
+      address: "Xovos vokzali yaqinida",
+      price: "1 km uchun 5,000 so'm",
+      experience: "6 yil",
+      rating: 4.8,
+      reviewCount: 17,
+      images: ["https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=800"],
+      isVerified: true,
+      status: ListingStatus.APPROVED,
+      view_count: 165,
+      categoryId: createdCategories["avto"].id,
+      subCategoryId: createdSubCategories["yuk-tashish"].id,
+    },
+    {
+      title: "Guliston tumani: Santexnik va qozonxona (kotyol) montaji",
+      name: "Akmal Usta",
+      description: "Guliston tumani (Dehqonobod) va atrof qishloqlar bo'ylab suv nasoslari, dush, ariston va isitish tizimlarini sozlash.",
+      phone: "+998934445566",
+      telegram: "akmal_santexnik",
+      location: "Guliston tumani",
+      address: "Dehqonobod qo'rg'oni",
+      price: "120,000 so'mdan",
+      experience: "8 yil",
+      rating: 4.7,
+      reviewCount: 15,
+      images: ["https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=800"],
+      isVerified: true,
+      status: ListingStatus.APPROVED,
+      view_count: 140,
+      categoryId: createdCategories["ustalar"].id,
+      subCategoryId: createdSubCategories["santexnik"].id,
+    },
+    {
+      title: "Shirin shahri: Avto elektrik va akkumulyator diagnostikasi",
+      name: "Ravshan Avto Usta",
+      description: "Shirin shahri va Yangiyer haydovchilari uchun avto elektr, generator, starter ta'miri va kompyuter tekshiruvi.",
+      phone: "+998917778899",
+      telegram: "ravshan_shirin_avto",
+      location: "Shirin shahri",
+      address: "Shirin avtoshohbekati ro'parasida",
+      price: "60,000 so'mdan",
+      experience: "9 yil",
+      rating: 5.0,
+      reviewCount: 33,
+      images: ["https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=800"],
+      isVerified: true,
+      status: ListingStatus.APPROVED,
+      view_count: 220,
+      categoryId: createdCategories["avto"].id,
+      subCategoryId: createdSubCategories["avto-diagnostika"].id,
+    },
+    {
+      title: "Yangiyer shahri: Erkaklar sartaroshi va soqol olish",
+      name: "Barbershop Yangiyer (Sardorbek)",
+      description: "Klassik va fason soch turmaklari, soqol fasoni, yuz parvarishi. Qulay kutish zali, choy va kofe bepul.",
+      phone: "+998943332211",
+      telegram: "yangiyer_barbershop",
+      location: "Yangiyer shahri",
+      address: "Yangiyer shahar parki ro'parasi",
+      price: "40,000 so'mdan",
+      experience: "4 yil",
+      rating: 4.9,
+      reviewCount: 45,
+      images: ["https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=800"],
+      isVerified: true,
+      status: ListingStatus.APPROVED,
+      view_count: 310,
+      categoryId: createdCategories["gozallik"].id,
+      subCategoryId: createdSubCategories["sartarosh"].id,
+    },
+    {
+      title: "Mirzaobod tumani: Matematika va Fizika tayyorlov kursi",
+      name: "Mirzaobod Ziyo O'quv Markazi",
+      description: "5-11 sinf o'quvchilari va abituriyentlar uchun chuqurlashtirilgan matematika darslari. Milliy sertifikat va DTM testlariga tayyorgarlik.",
+      phone: "+998906667788",
+      telegram: "mirzaobod_ziyo",
+      location: "Mirzaobod tumani",
+      address: "Navro'z markazi, 1-maktab yonida",
+      price: "Oyiga 200,000 so'm",
+      experience: "7 yil",
+      rating: 4.9,
+      reviewCount: 39,
+      images: ["https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800"],
+      isVerified: true,
+      status: ListingStatus.APPROVED,
+      view_count: 260,
+      categoryId: createdCategories["talim"].id,
+      subCategoryId: createdSubCategories["matematika"].id,
     }
   ];
 
@@ -421,7 +513,7 @@ async function main() {
     });
   }
 
-  console.log(`Successfully seeded ${categoriesData.length} categories and ${listingsData.length} listings!`);
+  console.log(`Successfully seeded ${categoriesData.length} categories and ${listingsData.length} rich listings across Sirdaryo!`);
 }
 
 main()
