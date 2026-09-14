@@ -30,7 +30,17 @@ export const createListingSchema = z.object({
     .string()
     .min(1, 'Iltimos, asosiy kategoriyani tanlang'),
   subCategoryId: z.string().optional().or(z.literal('')),
-  images: z.array(z.string().url('Rasm havolasi noto\'g\'ri')).optional().default([]),
+  images: z
+    .array(
+      z
+        .string()
+        .url("Rasm havolasi noto'g'ri")
+        .refine((url) => /^https?:\/\//i.test(url), {
+          message: "Rasm havolasi http:// yoki https:// bilan boshlanishi kerak",
+        })
+    )
+    .optional()
+    .default([]),
 });
 
 export type CreateListingInput = z.infer<typeof createListingSchema>;

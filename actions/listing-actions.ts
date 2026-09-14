@@ -239,6 +239,15 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
 
     const val = validatedData.data;
 
+    // Matnli maydonlarni XSS va ortiqcha belgilardan tozalash
+    const sanitize = (text?: string | null) => (text ? text.replace(/<[^>]*>?/gm, '').trim() : '');
+
+    // Telefon raqamni toza formatga keltirish
+    let cleanPhone = val.phone.replace(/[^\d+]/g, '').trim();
+    if (!cleanPhone.startsWith('+') && cleanPhone.startsWith('998')) {
+      cleanPhone = `+${cleanPhone}`;
+    }
+
     // 2. Agar rasm berilmagan bo'lsa, default zamonaviy rasm qo'yish
     let finalImages = val.images && val.images.length > 0 ? val.images : [];
     if (finalImages.length === 0) {
@@ -254,16 +263,16 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
     // 4. Bazaga yaratish
     const newListing = await prisma.listing.create({
       data: {
-        title: val.title.trim(),
-        name: val.name.trim(),
-        description: val.description.trim(),
-        phone: val.phone.trim(),
-        telegram: val.telegram?.trim() || null,
-        instagram: val.instagram?.trim() || null,
-        location: val.location.trim(),
-        address: val.address?.trim() || null,
-        price: val.price?.trim() || 'Kelishilgan holda',
-        experience: val.experience?.trim() || "Mavjud",
+        title: sanitize(val.title),
+        name: sanitize(val.name),
+        description: sanitize(val.description),
+        phone: cleanPhone,
+        telegram: sanitize(val.telegram) || null,
+        instagram: sanitize(val.instagram) || null,
+        location: sanitize(val.location),
+        address: sanitize(val.address) || null,
+        price: sanitize(val.price) || 'Kelishilgan holda',
+        experience: sanitize(val.experience) || 'Mavjud',
         rating: 5.0,
         reviewCount: 1,
         images: finalImages,

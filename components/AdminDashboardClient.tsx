@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import {
   adminUpdateListingStatusAction,
   adminDeleteListingAction,
+  adminToggleVerifyAction,
   adminLogoutAction,
 } from '@/actions/admin-actions';
 import { ListingStatus } from '@prisma/client';
@@ -22,9 +23,11 @@ import {
   Layers,
   Sparkles,
   AlertCircle,
+  Search,
+  ShieldCheck,
+  BadgeCheck,
 } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
-
 
 interface AdminDashboardClientProps {
   stats: {
@@ -40,14 +43,25 @@ interface AdminDashboardClientProps {
 export default function AdminDashboardClient({ stats, initialListings }: AdminDashboardClientProps) {
   const [listings, setListings] = useState(initialListings);
   const [statusFilter, setStatusFilter] = useState<'ALL' | ListingStatus>('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const router = useRouter();
 
-  // Filtrlangan e'lonlar
-  const filteredListings = statusFilter === 'ALL'
-    ? listings
-    : listings.filter((l) => l.status === statusFilter);
+  // Qidiruv va status bo'yicha filtrlash
+  const filteredListings = listings.filter((l) => {
+    const matchesStatus = statusFilter === 'ALL' || l.status === statusFilter;
+    if (!matchesStatus) return false;
+
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      (l.title && l.title.toLowerCase().includes(q)) ||
+      (l.name && l.name.toLowerCase().includes(q)) ||
+      (l.phone && l.phone.includes(q)) ||
+      (l.location && l.location.toLowerCase().includes(q))
+    );
+  });
 
   // Statusni o'zgartirish
   const handleStatusChange = async (id: string, newStatus: ListingStatus) => {
@@ -60,6 +74,27 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
           prev.map((l) => (l.id === id ? { ...l, status: newStatus } : l))
         );
         setMessage({ text: `Status ${newStatus} ga o'zgartirildi`, type: 'success' });
+      } else {
+        setMessage({ text: res.message || "Xatolik", type: 'error' });
+      }
+    } catch {
+      setMessage({ text: "Kutilmagan xatolik", type: 'error' });
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  // Usta verifikatsiyasini o'zgartirish
+  const handleToggleVerify = async (id: string) => {
+    setActionLoadingId(id);
+    setMessage(null);
+    try {
+      const res = await adminToggleVerifyAction(id);
+      if (res.success) {
+        setListings((prev) =>
+          prev.map((l) => (l.id === id ? { ...l, isVerified: res.isVerified } : l))
+        );
+        setMessage({ text: res.message || "Verifikatsiya yangilandi", type: 'success' });
       } else {
         setMessage({ text: res.message || "Xatolik", type: 'error' });
       }
@@ -202,27 +237,50 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
         </div>
       </div>
 
-      {/* Filtr tablari */}
-      <div className="bg-white p-2 rounded-2xl border border-[#e6e0da] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-        {[
-          { label: `Hammasi (${listings.length})`, value: 'ALL' },
-          { label: `Tasdiqlangan (${listings.filter((l) => l.status === 'APPROVED').length})`, value: 'APPROVED' },
-          { label: `Kutilmoqda (${listings.filter((l) => l.status === 'PENDING').length})`, value: 'PENDING' },
-          { label: `Rad etilgan (${listings.filter((l) => l.status === 'REJECTED').length})`, value: 'REJECTED' },
-        ].map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setStatusFilter(tab.value as any)}
-            type="button"
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-              statusFilter === tab.value
-                ? 'bg-[#282624] text-white'
-                : 'text-[#67625d] hover:bg-[#f6f3ef] hover:text-[#282624]'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* Qidiruv va Filtr boshqaruvi */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-3xl border border-[#e6e0da] shadow-xs">
+        {/* Qidiruv qatori */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3.5 top-3 w-4 h-4 text-[#67625d] pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Usta ismi, e'lon sarlavhasi, telefon yoki tuman bo'yicha tezkor qidiruv..."
+            className="w-full pl-10 pr-16 py-2.5 rounded-xl border border-[#e6e0da] text-xs sm:text-sm text-[#282624] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-2.5 text-xs text-[#67625d] hover:text-[#282624] px-1.5 py-0.5 rounded-md hover:bg-[#f6f3ef]"
+            >
+              Tozalash
+            </button>
+          )}
+        </div>
+
+        {/* Filtr tablari */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          {[
+            { label: `Hammasi (${listings.length})`, value: 'ALL' },
+            { label: `Tasdiqlangan (${listings.filter((l) => l.status === 'APPROVED').length})`, value: 'APPROVED' },
+            { label: `Kutilmoqda (${listings.filter((l) => l.status === 'PENDING').length})`, value: 'PENDING' },
+            { label: `Rad etilgan (${listings.filter((l) => l.status === 'REJECTED').length})`, value: 'REJECTED' },
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setStatusFilter(tab.value as any)}
+              type="button"
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                statusFilter === tab.value
+                  ? 'bg-[#282624] text-white shadow-xs'
+                  : 'text-[#67625d] hover:bg-[#f6f3ef] hover:text-[#282624]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* E'lonlar Ro'yxati */}
@@ -233,7 +291,7 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
             return (
               <div
                 key={item.id}
-                className="bg-white rounded-2xl border border-[#e6e0da] p-4 sm:p-5 shadow-2xs hover:border-orange-300 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                className="bg-white rounded-3xl border border-[#e6e0da] p-4 sm:p-5 shadow-xs hover:border-orange-300 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
                 {/* Chap taraf: Rasm va ma'lumotlar */}
                 <div className="flex items-start gap-3 sm:gap-4 min-w-0">
@@ -244,14 +302,14 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
                         : 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800'
                     }
                     alt={item.title}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover shrink-0 bg-[#f6f3ef] border border-[#e6e0da]"
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover shrink-0 bg-[#f6f3ef] border border-[#e6e0da]"
                   />
 
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
                       {/* Status nishoni */}
                       <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
+                        className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
                           item.status === 'APPROVED'
                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                             : item.status === 'PENDING'
@@ -261,6 +319,14 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
                       >
                         {item.status === 'APPROVED' ? 'Faol' : item.status === 'PENDING' ? 'Kutilmoqda' : 'Rad etilgan'}
                       </span>
+
+                      {/* Verifikatsiya belgisi */}
+                      {item.isVerified && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                          <CheckCircle2 className="w-3 h-3 text-blue-600 fill-blue-100" />
+                          Verified
+                        </span>
+                      )}
 
                       <span className="text-xs font-semibold text-orange-700 bg-orange-50 px-2 py-0.5 rounded-md">
                         {item.category?.name}
@@ -274,8 +340,13 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
                       {item.title}
                     </Link>
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-[#67625d] mt-1">
-                      <span className="font-semibold text-[#282624]">{item.name}</span>
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-[#67625d] mt-1.5">
+                      <span className="font-bold text-[#282624] flex items-center gap-1">
+                        {item.name}
+                        {item.isVerified && (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 fill-blue-100" />
+                        )}
+                      </span>
                       <span className="flex items-center gap-1">
                         <Phone className="w-3 h-3 text-emerald-600" />
                         {item.phone}
@@ -286,7 +357,7 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
                       </span>
                       <span className="flex items-center gap-1">
                         <Eye className="w-3 h-3 text-slate-400" />
-                        {item.view_count} marta
+                        {item.view_count} marta ko'rilgan
                       </span>
                     </div>
                   </div>
@@ -303,6 +374,22 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
                   >
                     <ExternalLink className="w-4 h-4" />
                   </Link>
+
+                  {/* Verifikatsiya berish / bekor qilish */}
+                  <button
+                    onClick={() => handleToggleVerify(item.id)}
+                    disabled={isLoading}
+                    type="button"
+                    className={`px-2.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50 ${
+                      item.isVerified
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
+                        : 'bg-[#f6f3ef] text-[#67625d] hover:text-blue-700 hover:bg-blue-50'
+                    }`}
+                    title={item.isVerified ? "Verifikatsiyani bekor qilish" : "Ustaga Verified ko'k galochka berish"}
+                  >
+                    <ShieldCheck className={`w-3.5 h-3.5 ${item.isVerified ? 'text-blue-600' : ''}`} />
+                    <span className="hidden sm:inline">{item.isVerified ? 'Tasdiqlangan' : 'Verifikatsiya'}</span>
+                  </button>
 
                   {/* Tasdiqlash */}
                   {item.status !== 'APPROVED' && (
@@ -348,7 +435,15 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
           })
         ) : (
           <div className="bg-white rounded-3xl border border-[#e6e0da] p-10 text-center text-[#67625d]">
-            Ushbu bo'limda hozircha hech qanday e'lon mavjud emas.
+            <p className="font-semibold text-sm mb-2">Qidiruv bo'yicha mos e'lonlar topilmadi.</p>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-xs text-orange-600 font-bold hover:underline"
+              >
+                Qidiruvni tozalash
+              </button>
+            )}
           </div>
         )}
       </div>

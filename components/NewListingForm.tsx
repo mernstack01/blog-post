@@ -159,23 +159,23 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {serverError && (
-        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2.5">
+        <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2.5 animate-in fade-in">
           <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
-          <span>{serverError}</span>
+          <span className="font-medium">{serverError}</span>
         </div>
       )}
 
       {/* 1-Bo'lim: Asosiy ma'lumotlar */}
-      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/90 shadow-xs space-y-6">
-        <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-          <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#e6e0da] shadow-xs space-y-6">
+        <div className="flex items-center gap-3 pb-4 border-b border-[#f6f3ef]">
+          <div className="w-10 h-10 rounded-2xl bg-orange-50 text-orange-600 border border-orange-100 flex items-center justify-center font-extrabold text-sm shadow-xs">
             1
           </div>
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900">
+            <h2 className="text-base sm:text-lg font-bold text-[#282624]">
               Xizmat yoki Usta haqida ma'lumot
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500">
+            <p className="text-xs sm:text-sm text-[#67625d]">
               Mijozlar sizni tezroq va oson topishi uchun sarlavha va yo'nalishni kiriting
             </p>
           </div>
@@ -184,7 +184,7 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {/* E'lon sarlavhasi */}
           <div className="sm:col-span-2">
-            <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-[#282624] mb-1.5">
               E'lon sarlavhasi <span className="text-red-500">*</span>
             </label>
             <input
@@ -192,10 +192,10 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="Masalan: Uylar uchun sifatli santexnika va isitish tizimlari montaji"
-              className={`w-full px-4 py-3 rounded-xl border text-sm text-slate-900 focus:outline-none focus:ring-2 ${
+              className={`w-full px-4 py-3 rounded-xl border text-sm text-[#282624] focus:outline-none focus:ring-2 transition-all ${
                 errors.title
                   ? 'border-red-400 focus:ring-red-200'
-                  : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
+                  : 'border-[#e6e0da] focus:ring-orange-500/20 focus:border-orange-500'
               }`}
             />
             {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
@@ -203,7 +203,7 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
 
           {/* Mutaxassis yoki Usta ismi */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-[#282624] mb-1.5">
               Ism-familiyangiz yoki Firma nomi <span className="text-red-500">*</span>
             </label>
             <input
@@ -211,10 +211,10 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Masalan: Usta Otabek yoki Guliston Climat"
-              className={`w-full px-4 py-3 rounded-xl border text-sm text-slate-900 focus:outline-none focus:ring-2 ${
+              className={`w-full px-4 py-3 rounded-xl border text-sm text-[#282624] focus:outline-none focus:ring-2 transition-all ${
                 errors.name
                   ? 'border-red-400 focus:ring-red-200'
-                  : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
+                  : 'border-[#e6e0da] focus:ring-orange-500/20 focus:border-orange-500'
               }`}
             />
             {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
@@ -222,15 +222,15 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
 
           {/* Hudud */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-[#282624] mb-1.5">
               Sirdaryo shahri / tumani <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-blue-500 pointer-events-none" />
+              <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-orange-600 pointer-events-none" />
               <select
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full pl-10 pr-8 py-3 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer appearance-none"
+                className="w-full pl-10 pr-8 py-3 rounded-xl border border-[#e6e0da] text-sm text-[#282624] bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 cursor-pointer appearance-none transition-all"
               >
                 {SIRDARYO_LOCATIONS.filter((l) => l !== 'Barcha hududlar').map((loc) => (
                   <option key={loc} value={loc}>
@@ -244,13 +244,13 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
 
           {/* Kategoriya */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-[#282624] mb-1.5">
               Asosiy Kategoriya <span className="text-red-500">*</span>
             </label>
             <select
               value={formData.categoryId}
               onChange={(e) => handleCategoryChange(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+              className="w-full px-4 py-3 rounded-xl border border-[#e6e0da] text-sm text-[#282624] bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 cursor-pointer transition-all"
             >
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -263,13 +263,13 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
 
           {/* Sub-kategoriya */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-[#282624] mb-1.5">
               Ichki yo'nalish (Ixtiyoriy)
             </label>
             <select
               value={formData.subCategoryId}
               onChange={(e) => setFormData({ ...formData, subCategoryId: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
+              className="w-full px-4 py-3 rounded-xl border border-[#e6e0da] text-sm text-[#282624] bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 cursor-pointer transition-all"
             >
               <option value="">-- Ichki yo'nalishni tanlang --</option>
               {currentCategory?.subCategories.map((sc) => (
@@ -282,7 +282,7 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
 
           {/* Aniq manzil */}
           <div className="sm:col-span-2">
-            <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-[#282624] mb-1.5">
               Aniqroq manzil yoki mo'ljal
             </label>
             <input
@@ -290,23 +290,23 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               placeholder="Masalan: 3-mavze, Sayxun restorani ro'parasida"
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full px-4 py-3 rounded-xl border border-[#e6e0da] text-sm text-[#282624] focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
             />
           </div>
         </div>
       </div>
 
       {/* 2-Bo'lim: Aloqa va Narxlar */}
-      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/90 shadow-xs space-y-6">
-        <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-          <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#e6e0da] shadow-xs space-y-6">
+        <div className="flex items-center gap-3 pb-4 border-b border-[#f6f3ef]">
+          <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-extrabold text-sm shadow-xs">
             2
           </div>
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900">
+            <h2 className="text-base sm:text-lg font-bold text-[#282624]">
               Bog'lanish va Xizmat narxlari
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500">
+            <p className="text-xs sm:text-sm text-[#67625d]">
               Mijozlar to'g'ridan-to'g'ri telefon yoki messenjer orqali qo'ng'iroq qilishadi
             </p>
           </div>
@@ -315,7 +315,7 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {/* Telefon raqam */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-[#282624] mb-1.5">
               Telefon raqamingiz <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -325,10 +325,10 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 placeholder="+998901234567"
-                className={`w-full pl-10 pr-4 py-3 rounded-xl border text-sm text-slate-900 focus:outline-none focus:ring-2 ${
+                className={`w-full pl-10 pr-4 py-3 rounded-xl border text-sm text-[#282624] focus:outline-none focus:ring-2 transition-all ${
                   errors.phone
                     ? 'border-red-400 focus:ring-red-200'
-                    : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
+                    : 'border-[#e6e0da] focus:ring-orange-500/20 focus:border-orange-500'
                 }`}
               />
             </div>
@@ -337,7 +337,7 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
 
           {/* Telegram username */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-[#282624] mb-1.5">
               Telegram username
             </label>
             <div className="relative">
@@ -347,14 +347,14 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
                 value={formData.telegram}
                 onChange={(e) => setFormData({ ...formData, telegram: e.target.value })}
                 placeholder="@usta_sirdaryo yoki link"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#e6e0da] text-sm text-[#282624] focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
               />
             </div>
           </div>
 
           {/* Instagram */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-[#282624] mb-1.5">
               Instagram sahifa (ixtiyoriy)
             </label>
             <div className="relative">
@@ -364,14 +364,14 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
                 value={formData.instagram}
                 onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
                 placeholder="usta_instagram"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#e6e0da] text-sm text-[#282624] focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
               />
             </div>
           </div>
 
           {/* Narx */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-[#282624] mb-1.5">
               Xizmat narxi
             </label>
             <div className="relative">
@@ -381,24 +381,24 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 placeholder="Masalan: 100,000 so'mdan yoki Kelishilgan"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#e6e0da] text-sm text-[#282624] focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
               />
             </div>
           </div>
 
           {/* Tajriba */}
           <div className="sm:col-span-2">
-            <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-[#282624] mb-1.5">
               Ish tajribasi
             </label>
             <div className="relative">
-              <Clock className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+              <Clock className="absolute left-3.5 top-3.5 w-4 h-4 text-[#67625d] pointer-events-none" />
               <input
                 type="text"
                 value={formData.experience}
                 onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
                 placeholder="Masalan: 5 yil yoki 10 yillik professional tajriba"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#e6e0da] text-sm text-[#282624] focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
               />
             </div>
           </div>
@@ -406,16 +406,16 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
       </div>
 
       {/* 3-Bo'lim: Rasm va Tavsif */}
-      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/90 shadow-xs space-y-6">
-        <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-          <div className="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center font-bold">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#e6e0da] shadow-xs space-y-6">
+        <div className="flex items-center gap-3 pb-4 border-b border-[#f6f3ef]">
+          <div className="w-10 h-10 rounded-2xl bg-orange-50 text-orange-600 border border-orange-100 flex items-center justify-center font-extrabold text-sm shadow-xs">
             3
           </div>
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900">
+            <h2 className="text-base sm:text-lg font-bold text-[#282624]">
               Tavsif va Mutaxassis rasmi
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500">
+            <p className="text-xs sm:text-sm text-[#67625d]">
               Qiladigan ishlaringizni batafsil tushuntiring va mos rasmni tanlang
             </p>
           </div>
@@ -423,7 +423,7 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
 
         {/* Tavsif textarea */}
         <div>
-          <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+          <label className="block text-xs sm:text-sm font-semibold text-[#282624] mb-1.5">
             Batafsil tavsif <span className="text-red-500">*</span>
           </label>
           <textarea
@@ -431,10 +431,10 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Xizmatlaringiz, qulayliklar, kafolat muddati, ishlatiladigan asbob-uskunalar haqida batafsil yozing (kamida 20 ta belgi)..."
-            className={`w-full px-4 py-3 rounded-xl border text-sm text-slate-900 focus:outline-none focus:ring-2 ${
+            className={`w-full px-4 py-3 rounded-xl border text-sm text-[#282624] focus:outline-none focus:ring-2 transition-all ${
               errors.description
                 ? 'border-red-400 focus:ring-red-200'
-                : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
+                : 'border-[#e6e0da] focus:ring-orange-500/20 focus:border-orange-500'
             }`}
           />
           {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description}</p>}
@@ -442,7 +442,7 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
 
         {/* Rasm tanlash / URL */}
         <div className="space-y-3">
-          <label className="block text-xs sm:text-sm font-semibold text-slate-700">
+          <label className="block text-xs sm:text-sm font-semibold text-[#282624]">
             E'lon uchun rasm (Tanlang yoki URL kiriting)
           </label>
 
@@ -461,24 +461,24 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
                       imageUrl: '',
                     });
                   }}
-                  className={`relative cursor-pointer rounded-xl overflow-hidden border-2 transition-all group ${
+                  className={`relative cursor-pointer rounded-2xl overflow-hidden border-2 transition-all group ${
                     isSelected
-                      ? 'border-orange-500 ring-2 ring-orange-500/20'
-                      : 'border-[#e6e0da] hover:border-slate-300'
+                      ? 'border-orange-500 ring-4 ring-orange-500/20 shadow-md'
+                      : 'border-[#e6e0da] hover:border-orange-300'
                   }`}
                 >
                   <SafeImage
                     src={preset.url}
                     alt={preset.label}
-                    className="w-full h-24 object-cover group-hover:scale-105 transition-transform"
+                    className="w-full h-24 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center p-1">
-                    <span className="text-white text-xs font-semibold text-center drop-shadow-md">
+                  <div className="absolute inset-0 bg-black/45 flex items-center justify-center p-1">
+                    <span className="text-white text-xs font-bold text-center drop-shadow-md">
                       {preset.label}
                     </span>
                   </div>
                   {isSelected && (
-                    <div className="absolute top-1.5 right-1.5 bg-orange-600 text-white rounded-full p-0.5">
+                    <div className="absolute top-1.5 right-1.5 bg-orange-600 text-white rounded-full p-0.5 shadow-sm">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                     </div>
                   )}
@@ -489,17 +489,17 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
 
           {/* Yoki o'z rasm havolasini kiritish */}
           <div className="pt-2">
-            <span className="text-xs text-slate-500 block mb-1">
+            <span className="text-xs text-[#67625d] block mb-1.5 font-medium">
               Yoki o'z rasmingiz havolasi (URL):
             </span>
             <div className="relative">
-              <ImageIcon className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+              <ImageIcon className="absolute left-3.5 top-3.5 w-4 h-4 text-[#67625d] pointer-events-none" />
               <input
                 type="url"
                 value={formData.imageUrl}
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                 placeholder="https://images.unsplash.com/photo-..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#e6e0da] text-xs sm:text-sm text-[#282624] focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
               />
             </div>
           </div>
@@ -511,7 +511,7 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-sm font-semibold transition-colors cursor-pointer"
+          className="w-full sm:w-auto px-6 py-3.5 rounded-2xl border border-[#e6e0da] hover:bg-[#f6f3ef] text-[#67625d] hover:text-[#282624] text-sm font-semibold transition-colors cursor-pointer"
         >
           Bekor qilish
         </button>
@@ -519,7 +519,7 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+          className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:opacity-95 active:scale-[0.99] text-white text-sm font-bold shadow-lg shadow-orange-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
         >
           {isSubmitting ? (
             <>

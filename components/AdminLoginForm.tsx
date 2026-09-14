@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminLoginAction } from '@/actions/admin-actions';
-import { ShieldCheck, KeyRound, ArrowRight, AlertCircle, Sparkles } from 'lucide-react';
+import { ShieldCheck, KeyRound, ArrowRight, AlertCircle, Eye, EyeOff, Lock } from 'lucide-react';
 
 export default function AdminLoginForm() {
   const [pin, setPin] = useState('');
+  const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -38,23 +39,23 @@ export default function AdminLoginForm() {
 
   return (
     <div className="w-full max-w-sm mx-auto bg-white rounded-3xl border border-[#e6e0da] p-6 sm:p-8 shadow-xl shadow-black/5">
-      <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center mx-auto mb-4 border border-orange-100">
+      <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center mx-auto mb-4 border border-orange-100 shadow-xs">
         <ShieldCheck className="w-6 h-6" />
       </div>
 
       <div className="text-center mb-6">
-        <h1 className="text-xl font-extrabold text-[#282624]">
+        <h1 className="text-xl font-extrabold text-[#282624] tracking-tight">
           Admin Panelga Kirish
         </h1>
-        <p className="text-xs text-[#67625d] mt-1">
-          Sirdaryo Xizmat platformasini boshqarish uchun PIN-kodni kiriting
+        <p className="text-xs text-[#67625d] mt-1.5 leading-relaxed">
+          Sirdaryo Xizmat platformasi ma'muriyati uchun xavfsiz boshqaruv tizimi
         </p>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+        <div className="mb-4 p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2.5 animate-in fade-in duration-150">
           <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
-          <span>{error}</span>
+          <span className="font-medium">{error}</span>
         </div>
       )}
 
@@ -66,33 +67,45 @@ export default function AdminLoginForm() {
           <div className="relative">
             <KeyRound className="absolute left-3.5 top-3 w-4 h-4 text-[#67625d] pointer-events-none" />
             <input
-              type="password"
+              type={showPin ? 'text' : 'password'}
               value={pin}
               onChange={(e) => setPin(e.target.value)}
-              placeholder="Masalan: sirdaryo2025"
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#e6e0da] text-sm text-[#282624] focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+              placeholder="••••••••"
+              autoComplete="current-password"
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-[#e6e0da] text-sm text-[#282624] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-mono tracking-wider"
               autoFocus
             />
+            <button
+              type="button"
+              onClick={() => setShowPin(!showPin)}
+              className="absolute right-3 top-2.5 text-[#67625d] hover:text-[#282624] p-0.5 rounded-md transition-colors"
+              title={showPin ? "Yashirish" : "Ko'rsatish"}
+              tabIndex={-1}
+            >
+              {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
-          <span className="text-[11px] text-[#67625d] block mt-1">
-            Standart PIN-kod: <strong className="text-orange-600">sirdaryo2025</strong>
-          </span>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white font-bold text-xs sm:text-sm shadow-md shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:opacity-95 active:scale-[0.99] text-white font-bold text-xs sm:text-sm shadow-md shadow-orange-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
         >
           {loading ? (
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
-              <span>Kirish</span>
+              <span>Tizimga kirish</span>
               <ArrowRight className="w-4 h-4" />
             </>
           )}
         </button>
+
+        <div className="pt-2 flex items-center justify-center gap-1.5 text-[11px] text-[#67625d]">
+          <Lock className="w-3 h-3 text-emerald-600" />
+          <span>Shifrlangan himoyalangan sessiya</span>
+        </div>
       </form>
     </div>
   );
