@@ -23,6 +23,8 @@ import {
   Sparkles,
   AlertCircle,
 } from 'lucide-react';
+import SafeImage from '@/components/SafeImage';
+
 
 interface AdminDashboardClientProps {
   stats: {
@@ -235,13 +237,13 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
               >
                 {/* Chap taraf: Rasm va ma'lumotlar */}
                 <div className="flex items-start gap-3 sm:gap-4 min-w-0">
-                  <img
+                  <SafeImage
                     src={
                       item.images && item.images.length > 0
                         ? item.images[0]
                         : 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800'
                     }
-                    alt=""
+                    alt={item.title}
                     className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover shrink-0 bg-[#f6f3ef] border border-[#e6e0da]"
                   />
 

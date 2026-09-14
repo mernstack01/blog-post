@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { createListingSchema, CreateListingInput, ListingFilterParams } from '@/lib/validations';
 import { ListingStatus, Prisma } from '@prisma/client';
+import { isUserAdmin } from '@/lib/admin-auth';
+
 
 export interface ListingWithRelations {
   id: string;
@@ -210,6 +212,7 @@ export type ActionResponse = {
   success: boolean;
   message?: string;
   listingId?: string;
+  isPending?: boolean;
   errors?: Record<string, string[]>;
 };
 
@@ -244,7 +247,11 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
       ];
     }
 
-    // 3. Bazaga yaratish
+    // 3. Adminligini tekshirish (Admin kiritgan postlar darhol APPROVED, oddiy e'lonlar PENDING)
+    const isAdmin = await isUserAdmin();
+    const initialStatus = isAdmin ? ListingStatus.APPROVED : ListingStatus.PENDING;
+
+    // 4. Bazaga yaratish
     const newListing = await prisma.listing.create({
       data: {
         title: val.title.trim(),
@@ -260,8 +267,8 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
         rating: 5.0,
         reviewCount: 1,
         images: finalImages,
-        isVerified: true, // Sinov va qulaylik uchun tasdiqlangan holatda
-        status: ListingStatus.APPROVED,
+        isVerified: isAdmin,
+        status: initialStatus,
         view_count: 1,
         categoryId: val.categoryId,
         subCategoryId: val.subCategoryId ? val.subCategoryId : null,
@@ -270,6 +277,7 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
 
     try {
       revalidatePath('/');
+      revalidatePath('/admin');
       revalidatePath('/categories');
     } catch {
       // Ignore if called outside of request context
@@ -277,10 +285,14 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
 
     return {
       success: true,
-      message: "E'lon muvaffaqiyatli joylashtirildi!",
+      isPending: !isAdmin,
+      message: isAdmin
+        ? "Admin posti muvaffaqiyatli chop etildi!"
+        : "E'loningiz qabul qilindi va admin tekshiruviga yuborildi. Tez orada saytda e'lon qilinadi!",
       listingId: newListing.id,
     };
   } catch (error: any) {
+
     console.error('createListingAction error:', error);
     return {
       success: false,

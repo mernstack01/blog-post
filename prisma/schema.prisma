@@ -96,5 +96,7 @@ model Listing {
   @@index([categoryId])
   @@index([subCategoryId])
   @@index([status])
+  @@index([status, createdAt])
+  @@index([status, view_count])
   @@map("listings")
 }

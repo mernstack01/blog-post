@@ -30,9 +30,9 @@ export default function ListingGrid({ listings }: ListingGridProps) {
       {/* Sarlavha va Saralash Paneli */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-[#282624] tracking-tight flex items-center gap-2">
             <span>Sirdaryo ustalari va xizmatlari</span>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800">
               {listings.length} ta
             </span>
           </h2>

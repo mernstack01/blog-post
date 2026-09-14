@@ -23,6 +23,8 @@ import {
   Sparkles,
 } from 'lucide-react';
 import InstagramIcon from '@/components/icons/InstagramIcon';
+import SafeImage from '@/components/SafeImage';
+
 
 interface CategoryItem {
   id: string;
@@ -42,7 +44,7 @@ const PRESET_IMAGES = [
   { label: "Ta'mir / Remont", url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&auto=format&fit=crop&q=80" },
   { label: "Avto master", url: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800&auto=format&fit=crop&q=80" },
   { label: "Yuk tashish", url: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=800&auto=format&fit=crop&q=80" },
-  { label: "Konditsioner", url: "https://images.unsplash.com/photo-1614633833026-062045db1264?w=800&auto=format&fit=crop&q=80" },
+  { label: "Konditsioner", url: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800&auto=format&fit=crop&q=80" },
   { label: "Maishiy texnika", url: "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&auto=format&fit=crop&q=80" },
   { label: "Temirchilik", url: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&auto=format&fit=crop&q=80" },
 ];
@@ -132,7 +134,11 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
     try {
       const res: ActionResponse = await createListingAction(payload);
       if (res.success && res.listingId) {
-        router.push(`/listing/${res.listingId}?created=true`);
+        if (res.isPending) {
+          router.push(`/listing/${res.listingId}?pending=true`);
+        } else {
+          router.push(`/listing/${res.listingId}?created=true`);
+        }
       } else {
         setServerError(res.message || "Xatolik yuz berdi");
         if (res.errors) {
@@ -457,11 +463,11 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
                   }}
                   className={`relative cursor-pointer rounded-xl overflow-hidden border-2 transition-all group ${
                     isSelected
-                      ? 'border-blue-600 ring-2 ring-blue-500/30'
-                      : 'border-slate-200 hover:border-slate-300'
+                      ? 'border-orange-500 ring-2 ring-orange-500/20'
+                      : 'border-[#e6e0da] hover:border-slate-300'
                   }`}
                 >
-                  <img
+                  <SafeImage
                     src={preset.url}
                     alt={preset.label}
                     className="w-full h-24 object-cover group-hover:scale-105 transition-transform"
@@ -472,7 +478,7 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
                     </span>
                   </div>
                   {isSelected && (
-                    <div className="absolute top-1.5 right-1.5 bg-blue-600 text-white rounded-full p-0.5">
+                    <div className="absolute top-1.5 right-1.5 bg-orange-600 text-white rounded-full p-0.5">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                     </div>
                   )}

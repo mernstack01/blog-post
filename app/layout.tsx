@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { Suspense } from 'react';
 import './globals.css';
@@ -12,10 +12,25 @@ const inter = Inter({
   display: 'swap',
 });
 
+
+export const viewport: Viewport = {
+  themeColor: '#ea580c',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+};
+
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://blog-post-iota-three.vercel.app';
+
 export const metadata: Metadata = {
-  title: "Sirdaryo Xizmatlari - Guliston va Sirdaryo viloyati ustalari portali",
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: "Sirdaryo Xizmatlari - Guliston va Sirdaryo viloyati ustalari portali",
+    template: "%s | Sirdaryo Xizmatlari",
+  },
   description:
-    "Guliston shahri, Yangiyer, Shirin, Boyovut va Sirdaryoning boshqa tumanlari bo'ylab ishonchli santexnik, elektrik, avto ta'mir, yuk tashish va maishiy xizmatlar katalogi.",
+    "Guliston shahri, Yangiyer, Shirin, Boyovut va Sirdaryoning barcha tumanlari bo'ylab ishonchli santexnik, elektrik, avto ta'mir, yuk tashish va maishiy xizmatlar katalogi.",
   keywords: [
     'Sirdaryo ustalar',
     'Guliston santexnik',
@@ -24,9 +39,39 @@ export const metadata: Metadata = {
     'Sirdaryo yuk tashish',
     'Konditsioner ustasi Guliston',
     'Yevro tamir Guliston',
+    'Sirdaryo xizmatlar',
+    'sindr sirdaryo',
   ],
   authors: [{ name: 'Sirdaryo Xizmat' }],
+  creator: 'Sirdaryo Xizmatlari',
+  openGraph: {
+    type: 'website',
+    locale: 'uz_UZ',
+    url: baseUrl,
+    siteName: 'Sirdaryo Xizmatlari',
+    title: 'Sirdaryo Xizmatlari - Ustalar va Xizmatlar Portali',
+    description: "Guliston va Sirdaryo viloyati ustalari, santexnik, elektrik, avto ta'mir xizmatlari.",
+    images: [
+      {
+        url: 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=1200&auto=format&fit=crop&q=80',
+        width: 1200,
+        height: 630,
+        alt: 'Sirdaryo Xizmatlari',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Sirdaryo Xizmatlari',
+    description: "Guliston va Sirdaryo viloyatining barcha xizmatlari va ustalari bir joyda.",
+    images: ['https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=1200&auto=format&fit=crop&q=80'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
+
 
 export default function RootLayout({
   children,

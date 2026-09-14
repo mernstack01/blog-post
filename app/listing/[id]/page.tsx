@@ -53,17 +53,17 @@ export default async function ListingPage({ params }: ListingPageProps) {
     .slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-slate-50/60 py-8 sm:py-12">
+    <div className="min-h-screen bg-[#fffdfa] py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Navigatsiya va Orqaga */}
         <div className="mb-6 flex items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#67625d] hover:text-orange-600 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Barcha xizmatlarga qaytish</span>
+            <span>Bosh sahifaga qaytish</span>
           </Link>
 
           <span className="text-xs text-slate-400">

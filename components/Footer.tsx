@@ -11,14 +11,14 @@ export default function Footer() {
           {/* Logo va tavsif */}
           <div className="md:col-span-1 space-y-4">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-md shadow-orange-500/20">
                 <Wrench className="w-5 h-5" />
               </div>
-              <span className="text-lg font-bold tracking-tight text-slate-900">
-                Sirdaryo<span className="text-blue-600">Xizmat</span>
+              <span className="text-lg font-bold tracking-tight text-[#282624]">
+                Sirdaryo<span className="text-orange-600 font-extrabold">Xizmat</span>
               </span>
             </Link>
-            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#67625d] leading-relaxed">
               Guliston shahri va unga tutash barcha tumanlar aholisi uchun eng qulay mahalliy ustalar, avtomobil va maishiy xizmatlar katalogi.
             </p>
             <div className="flex items-center gap-3 text-slate-400">
@@ -26,7 +26,7 @@ export default function Footer() {
                 href="https://t.me"
                 target="_blank"
                 rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-orange-50 hover:text-orange-600 flex items-center justify-center transition-colors"
                 aria-label="Telegram"
               >
                 <Send className="w-4 h-4" />
@@ -43,7 +43,7 @@ export default function Footer() {
 
           {/* Sirdaryo Tumanlari */}
           <div className="md:col-span-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#282624] mb-3.5">
               Viloyat shahar va tumanlari
             </h4>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
@@ -51,7 +51,7 @@ export default function Footer() {
                 <Link
                   key={loc}
                   href={`/?location=${encodeURIComponent(loc)}`}
-                  className="text-slate-500 hover:text-blue-600 transition-colors py-1 truncate"
+                  className="text-[#67625d] hover:text-orange-600 transition-colors py-1 truncate"
                 >
                   {loc}
                 </Link>

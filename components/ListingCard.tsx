@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import InstagramIcon from '@/components/icons/InstagramIcon';
 import { ListingWithRelations } from '@/actions/listing-actions';
+import SafeImage from '@/components/SafeImage';
 
 interface ListingCardProps {
   listing: ListingWithRelations;
@@ -22,7 +23,9 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const mainImage =
     listing.images && listing.images.length > 0
       ? listing.images[0]
-      : 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&auto=format&fit=crop&q=80';
+      : 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800';
+
+  const phoneHref = `tel:${listing.phone.replace(/\s+/g, '')}`;
 
   const telegramHref = listing.telegram
     ? listing.telegram.startsWith('http')
@@ -41,13 +44,12 @@ export default function ListingCard({ listing }: ListingCardProps) {
       
       {/* Rasm va yuqori nishonlar */}
       <div className="relative w-full h-44 sm:h-48 bg-[#f6f3ef] overflow-hidden">
-        <img
+        <SafeImage
           src={mainImage}
           alt={listing.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/15" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/15 pointer-events-none" />
 
         {/* Hudud nishoni */}
         <div className="absolute top-2.5 left-2.5 bg-black/60 backdrop-blur-md text-white px-2.5 py-0.5 rounded-full text-[11px] font-medium flex items-center gap-1">

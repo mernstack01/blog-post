@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import InstagramIcon from '@/components/icons/InstagramIcon';
 import Link from 'next/link';
+import SafeImage from '@/components/SafeImage';
 
 interface ListingDetailClientProps {
   listing: ListingWithRelations;
@@ -27,10 +28,11 @@ interface ListingDetailClientProps {
 export default function ListingDetailClient({ listing }: ListingDetailClientProps) {
   const searchParams = useSearchParams();
   const isJustCreated = searchParams.get('created') === 'true';
+  const isPending = searchParams.get('pending') === 'true' || listing.status === 'PENDING';
   const [selectedImage, setSelectedImage] = useState<string>(
     listing.images && listing.images.length > 0
       ? listing.images[0]
-      : 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&auto=format&fit=crop&q=80'
+      : 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800'
   );
   const [copied, setCopied] = useState(false);
   const [viewCount, setViewCount] = useState(listing.view_count);
@@ -56,6 +58,7 @@ export default function ListingDetailClient({ listing }: ListingDetailClientProp
     }
   };
 
+  const phoneHref = `tel:${listing.phone.replace(/\s+/g, '')}`;
   const telegramHref = listing.telegram
     ? listing.telegram.startsWith('http')
       ? listing.telegram
@@ -70,8 +73,26 @@ export default function ListingDetailClient({ listing }: ListingDetailClientProp
 
   return (
     <div className="space-y-6">
+      {/* Kutilayotgan e'lon xabari */}
+      {isPending && (
+        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-sm flex items-center justify-between shadow-xs animate-in fade-in slide-in-from-top-3 duration-300">
+          <div className="flex items-center gap-2.5">
+            <Clock className="w-5 h-5 text-amber-600 shrink-0" />
+            <div>
+              <strong className="font-bold">E'lon tekshiruvda:</strong> Ushbu e'lon qabul qilindi va moderator tomonidan tasdiqlangach saytda barchaga ko'rinadi.
+            </div>
+          </div>
+          <Link
+            href="/"
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition-colors shrink-0 ml-3"
+          >
+            Bosh sahifaga
+          </Link>
+        </div>
+      )}
+
       {/* Yangi yaratilgandagi muvaffaqiyat xabari */}
-      {isJustCreated && (
+      {isJustCreated && !isPending && (
         <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center justify-between shadow-xs animate-in fade-in slide-in-from-top-3 duration-300">
           <div className="flex items-center gap-2.5">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
@@ -96,17 +117,17 @@ export default function ListingDetailClient({ listing }: ListingDetailClientProp
           <div className="lg:col-span-5 p-4 sm:p-6 bg-slate-50/70 border-b lg:border-b-0 lg:border-r border-slate-200/80 flex flex-col justify-between">
             <div>
               {/* Asosiy katta rasm */}
-              <div className="relative w-full h-72 sm:h-80 md:h-96 rounded-2xl overflow-hidden shadow-xs bg-slate-200">
-                <img
+              <div className="relative w-full h-72 sm:h-80 md:h-96 rounded-2xl overflow-hidden shadow-xs bg-[#f6f3ef]">
+                <SafeImage
                   src={selectedImage}
                   alt={listing.title}
                   className="w-full h-full object-cover transition-all duration-300"
                 />
-                <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-blue-400" />
+                <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 pointer-events-none">
+                  <MapPin className="w-3.5 h-3.5 text-amber-400" />
                   <span>{listing.location}</span>
                 </div>
-                <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5">
+                <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 pointer-events-none">
                   <Eye className="w-3.5 h-3.5 text-slate-300" />
                   <span>{viewCount} marta ko'rildi</span>
                 </div>
@@ -121,11 +142,11 @@ export default function ListingDetailClient({ listing }: ListingDetailClientProp
                       onClick={() => setSelectedImage(img)}
                       className={`relative w-16 h-16 rounded-xl overflow-hidden border-2 shrink-0 transition-all cursor-pointer ${
                         selectedImage === img
-                          ? 'border-blue-600 ring-2 ring-blue-500/30'
-                          : 'border-slate-200 hover:border-slate-300'
+                          ? 'border-orange-500 ring-2 ring-orange-500/20'
+                          : 'border-[#e6e0da] hover:border-slate-300'
                       }`}
                     >
-                      <img
+                      <SafeImage
                         src={img}
                         alt=""
                         className="w-full h-full object-cover"
