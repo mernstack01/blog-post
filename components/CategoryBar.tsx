@@ -44,7 +44,7 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
       params.delete('subCategory');
     } else {
       params.set('category', categorySlug);
-      params.delete('subCategory'); // Kategoriya o'zgarganda subcategoryni tozalash
+      params.delete('subCategory');
     }
     router.push(`/?${params.toString()}`);
   };
@@ -59,9 +59,8 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
     router.push(`/?${params.toString()}`);
   };
 
-  // Dinamik ikonka olish
   const getIcon = (iconName: string | null, isSelected: boolean) => {
-    const className = `w-5 h-5 ${isSelected ? 'text-blue-600' : 'text-slate-500'}`;
+    const className = `w-4 h-4 ${isSelected ? 'text-white' : 'text-[#67625d]'}`;
     switch (iconName) {
       case 'Wrench':
         return <Wrench className={className} />;
@@ -80,27 +79,26 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
     }
   };
 
-  // Faol kategoriyaning sub-kategoriyalarini topish
   const activeCategoryObj = categories.find((c) => c.slug === currentCategory);
 
   return (
-    <div className="w-full bg-white border-b border-slate-200/70 py-4 shadow-2xs">
+    <div className="w-full bg-[#fffdfa] border-b border-[#e6e0da] py-3 shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Asosiy kategoriyalar (Scrollable) */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+        {/* Asosiy kategoriyalar (Pills - sindr.uz style) */}
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1">
           {/* Barchasi */}
           <button
             onClick={() => handleCategorySelect('all')}
             type="button"
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
               currentCategory === 'all'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200 hover:text-slate-900'
+                ? 'bg-orange-600 text-white shadow-sm shadow-orange-500/25'
+                : 'bg-[#f6f3ef] text-[#67625d] hover:bg-[#ede9e3] hover:text-[#282624]'
             }`}
           >
-            <LayoutGrid className="w-4 h-4" />
-            <span>Barcha xizmatlar</span>
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span>Barchasi</span>
           </button>
 
           {/* Dinamik kategoriyalar */}
@@ -111,10 +109,10 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat.slug)}
                 type="button"
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-blue-50 text-blue-700 border border-blue-300 shadow-xs'
-                    : 'bg-white text-slate-700 border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50'
+                    ? 'bg-orange-600 text-white shadow-sm shadow-orange-500/25'
+                    : 'bg-[#f6f3ef] text-[#67625d] hover:bg-[#ede9e3] hover:text-[#282624]'
                 }`}
               >
                 {getIcon(cat.icon, isSelected)}
@@ -124,23 +122,23 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
           })}
         </div>
 
-        {/* Ichki sub-kategoriyalar (agar kategoriya tanlangan bo'lsa) */}
+        {/* Ichki sub-kategoriyalar */}
         {activeCategoryObj && activeCategoryObj.subCategories && activeCategoryObj.subCategories.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-2 overflow-x-auto no-scrollbar">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1">
-              <span>Yo'nalishlar:</span>
-              <ChevronRight className="w-3 h-3" />
+          <div className="mt-2.5 pt-2.5 border-t border-[#e6e0da] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <span className="text-[11px] font-bold text-[#67625d] uppercase tracking-wider shrink-0 flex items-center gap-0.5">
+              <span>Yo'nalish:</span>
+              <ChevronRight className="w-3 h-3 text-[#67625d]" />
             </span>
 
             <button
               onClick={() => handleSubCategorySelect('all')}
-              className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
+              className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
                 currentSubCategory === 'all'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-[#282624] text-white font-bold'
+                  : 'bg-[#f6f3ef] text-[#67625d] hover:bg-[#ede9e3]'
               }`}
             >
-              Hammasi
+              Barcha yo'nalishlar
             </button>
 
             {activeCategoryObj.subCategories.map((sub) => {
@@ -149,10 +147,10 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
                 <button
                   key={sub.id}
                   onClick={() => handleSubCategorySelect(sub.slug)}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                  className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
                     isSubSelected
-                      ? 'bg-blue-600 text-white font-semibold shadow-xs'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      ? 'bg-[#282624] text-white font-bold shadow-2xs'
+                      : 'bg-[#f6f3ef] text-[#67625d] hover:bg-[#ede9e3]'
                   }`}
                 >
                   {sub.name}

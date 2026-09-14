@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
@@ -20,21 +20,21 @@ enum ListingStatus {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  phone        String    @unique
-  name         String
-  role         Role      @default(SPECIALIST)
-  telegram     String?
-  avatar       String?
-  listings     Listing[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  phone     String    @unique
+  name      String
+  role      Role      @default(SPECIALIST)
+  telegram  String?
+  avatar    String?
+  listings  Listing[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@map("users")
 }
 
 model Category {
-  id            String        @id @default(cuid())
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
   name          String
   slug          String        @unique
   icon          String?       // Lucide icon name, e.g., 'Wrench', 'Car', 'Home', etc.
@@ -48,11 +48,11 @@ model Category {
 }
 
 model SubCategory {
-  id          String    @id @default(cuid())
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   slug        String    @unique
   description String?
-  categoryId  String
+  categoryId  String    @db.ObjectId
   category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   listings    Listing[]
   createdAt   DateTime  @default(now())
@@ -62,35 +62,35 @@ model SubCategory {
 }
 
 model Listing {
-  id            String        @id @default(cuid())
-  title         String
-  name          String        // Mutaxassis yoki korxona nomi
-  description   String        @db.Text
-  phone         String        // Bog'lanish uchun telefon
-  telegram      String?       // @username yoki havola
-  instagram     String?       // username yoki havola
-  location      String        // Guliston, Yangiyer, Shirin, Boyovut, Sayxunobod, Mirzaobod, Sardoba va h.k.
-  address       String?       // Aniqroq manzil / mo'ljal
-  price         String?       // Masalan, "Kelishilgan holda" yoki "100,000 so'mdan"
-  experience    String?       // Masalan, "7 yil"
-  rating        Float         @default(5.0)
-  reviewCount   Int           @default(1)
-  images        String[]      @default([])
-  isVerified    Boolean       @default(false)
-  status        ListingStatus @default(APPROVED)
-  view_count    Int           @default(0)
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  name        String        // Mutaxassis yoki korxona nomi
+  description String
+  phone       String        // Bog'lanish uchun telefon
+  telegram    String?       // @username yoki havola
+  instagram   String?       // username yoki havola
+  location    String        // Guliston, Yangiyer, Shirin, Boyovut, Sayxunobod, Mirzaobod, Sardoba va h.k.
+  address     String?       // Aniqroq manzil / mo'ljal
+  price       String?       // Masalan, "Kelishilgan holda" yoki "100,000 so'mdan"
+  experience  String?       // Masalan, "7 yil"
+  rating      Float         @default(5.0)
+  reviewCount Int           @default(1)
+  images      String[]      @default([])
+  isVerified  Boolean       @default(false)
+  status      ListingStatus @default(APPROVED)
+  view_count  Int           @default(0)
   
-  categoryId    String
-  category      Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId  String        @db.ObjectId
+  category    Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   
-  subCategoryId String?
+  subCategoryId String?     @db.ObjectId
   subCategory   SubCategory?  @relation(fields: [subCategoryId], references: [id], onDelete: SetNull)
   
-  userId        String?
-  user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId      String?       @db.ObjectId
+  user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@index([location])
   @@index([categoryId])

@@ -71,24 +71,34 @@ export async function getListings(filters: Partial<ListingFilterParams> = {}): P
       };
     }
 
-    // Kategoriya bo'yicha (slug yoki ID)
+    // Kategoriya bo'yicha (slug yoki ObjectId)
     if (category && category !== 'all' && category.trim() !== '') {
-      where.category = {
-        OR: [
-          { slug: category },
-          { id: category },
-        ],
-      };
+      const catTrim = category.trim();
+      const isObjectId = /^[0-9a-fA-F]{24}$/.test(catTrim);
+      if (isObjectId) {
+        where.category = {
+          OR: [{ slug: catTrim }, { id: catTrim }],
+        };
+      } else {
+        where.category = {
+          slug: catTrim,
+        };
+      }
     }
 
-    // Sub-kategoriya bo'yicha (slug yoki ID)
+    // Sub-kategoriya bo'yicha (slug yoki ObjectId)
     if (subCategory && subCategory !== 'all' && subCategory.trim() !== '') {
-      where.subCategory = {
-        OR: [
-          { slug: subCategory },
-          { id: subCategory },
-        ],
-      };
+      const subTrim = subCategory.trim();
+      const isObjectId = /^[0-9a-fA-F]{24}$/.test(subTrim);
+      if (isObjectId) {
+        where.subCategory = {
+          OR: [{ slug: subTrim }, { id: subTrim }],
+        };
+      } else {
+        where.subCategory = {
+          slug: subTrim,
+        };
+      }
     }
 
     // Saralash qoidasi
