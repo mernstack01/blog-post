@@ -7,9 +7,12 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 interface ListingPageProps {
   params: Promise<{ id: string }>;
 }
+
 
 export async function generateMetadata({ params }: ListingPageProps): Promise<Metadata> {
   const { id } = await params;

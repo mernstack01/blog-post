@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { ArrowLeft, ShieldCheck, Sparkles } from 'lucide-react';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "Admin: Yangi Post Yaratish - Sirdaryo Xizmatlari",
 };

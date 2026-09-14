@@ -4,6 +4,8 @@ import { getAdminStatsAction, getAdminListingsAction } from '@/actions/admin-act
 import AdminDashboardClient from '@/components/AdminDashboardClient';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "Admin Boshqaruv Paneli - Sirdaryo Xizmatlari",
 };
@@ -14,12 +16,25 @@ export default async function AdminPage() {
     redirect('/admin/login');
   }
 
-  const [stats, rawListings] = await Promise.all([
-    getAdminStatsAction(),
-    getAdminListingsAction(),
-  ]);
+  let stats = {
+    totalListings: 0,
+    approvedCount: 0,
+    pendingCount: 0,
+    rejectedCount: 0,
+    totalViews: 0,
+  };
+  let listings: any[] = [];
 
-  const listings = JSON.parse(JSON.stringify(rawListings));
+  try {
+    const [fetchedStats, rawListings] = await Promise.all([
+      getAdminStatsAction(),
+      getAdminListingsAction(),
+    ]);
+    stats = fetchedStats;
+    listings = JSON.parse(JSON.stringify(rawListings));
+  } catch (err) {
+    console.error('AdminPage error fetching data:', err);
+  }
 
   return (
     <div className="min-h-screen bg-[#fffdfa] py-6 sm:py-10">
