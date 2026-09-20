@@ -3,7 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { isUserAdmin, setAdminAuthSession, clearAdminAuthSession, verifyAdminPin } from '@/lib/admin-auth';
-import { ListingStatus } from '@prisma/client';
+import { ListingStatus, PaidTier, PrivilegeType } from '@prisma/client';
+import { calculateListingScore } from '@/lib/scoring';
 import { redirect } from 'next/navigation';
 
 // Brute-force himoyasi uchun xotirada urinishlarni saqlash
@@ -105,11 +106,48 @@ export async function getAdminStatsAction() {
     throw new Error('Ruxsat berilmagan');
   }
 
-  const [totalListings, approvedCount, pendingCount, rejectedCount, totalViewsAggregate] = await Promise.all([
+  const [
+    totalListings,
+    approvedCount,
+    pendingCount,
+    rejectedCount,
+    vipCount,
+    privilegedCount,
+    totalCategories,
+    activeCategories,
+    totalDistricts,
+    totalViewsAggregate,
+  ] = await Promise.all([
     prisma.listing.count(),
     prisma.listing.count({ where: { status: ListingStatus.APPROVED } }),
     prisma.listing.count({ where: { status: ListingStatus.PENDING } }),
     prisma.listing.count({ where: { status: ListingStatus.REJECTED } }),
+    prisma.listing.count({
+      where: {
+        paidTier: { in: [PaidTier.VIP_GOLD, PaidTier.STANDARD] },
+      },
+    }),
+    prisma.listing.count({
+      where: {
+        privilegeType: {
+          in: [
+            PrivilegeType.DISABILITY,
+            PrivilegeType.YOUTH_STARTUP,
+            PrivilegeType.HONORARY_MASTER,
+            PrivilegeType.SOCIAL_PROTECT,
+          ],
+        },
+      },
+    }),
+    prisma.category.count(),
+    (async () => {
+      try {
+        return await (prisma.category as any).count({ where: { isActive: true } });
+      } catch {
+        return await prisma.category.count();
+      }
+    })(),
+    (prisma as any).district?.count ? (prisma as any).district.count() : Promise.resolve(10),
     prisma.listing.aggregate({ _sum: { view_count: true } }),
   ]);
 
@@ -118,6 +156,11 @@ export async function getAdminStatsAction() {
     approvedCount,
     pendingCount,
     rejectedCount,
+    vipCount,
+    privilegedCount,
+    totalCategories,
+    activeCategories,
+    totalDistricts,
     totalViews: totalViewsAggregate._sum.view_count || 0,
   };
 }
@@ -228,5 +271,204 @@ export async function adminDeleteListingAction(id: string) {
     return { success: true, message: "E'lon bazadan o'chirildi" };
   } catch (error: any) {
     return { success: false, message: error?.message || "O'chirishda xatolik" };
+  }
+}
+
+/**
+ * Xodimlar bahosini (Staff Rating) yangilash va qayta ball hisoblash
+ */
+export async function adminUpdateStaffRatingAction(id: string, staffRating: number) {
+  const isAdmin = await isUserAdmin();
+  if (!isAdmin) return { success: false, message: "Ruxsat yo'q" };
+
+  try {
+    const listing = await prisma.listing.findUnique({ where: { id } });
+    if (!listing) return { success: false, message: "E'lon topilmadi" };
+
+    const newScore = calculateListingScore({
+      adminRating: staffRating,
+      clientRating: listing.clientRating,
+      reviewCount: listing.reviewCount,
+      paidTier: listing.paidTier,
+      isPrivileged: listing.isPrivileged,
+      websiteUrl: listing.websiteUrl,
+      isVerified: listing.isVerified,
+    });
+
+    const updated = await prisma.listing.update({
+      where: { id },
+      data: {
+        adminRating: staffRating,
+        totalScore: newScore,
+      },
+    });
+
+    try {
+      revalidatePath('/');
+      revalidatePath('/admin');
+      revalidatePath(`/listing/${id}`);
+    } catch {}
+
+    return {
+      success: true,
+      message: `Xodim bahosi ${staffRating} ga o'rnatildi (Yangi ball: ${newScore})`,
+      adminRating: updated.adminRating,
+      totalScore: updated.totalScore,
+    };
+  } catch (error: any) {
+    return { success: false, message: error?.message || "Xatolik yuz berdi" };
+  }
+}
+
+/**
+ * Imtiyoz (Privilege) biriktirish yoki bekor qilish
+ */
+export async function adminUpdatePrivilegeAction(
+  id: string,
+  privilegeType: PrivilegeType,
+  privilegeReason?: string
+) {
+  const isAdmin = await isUserAdmin();
+  if (!isAdmin) return { success: false, message: "Ruxsat yo'q" };
+
+  try {
+    const listing = await prisma.listing.findUnique({ where: { id } });
+    if (!listing) return { success: false, message: "E'lon topilmadi" };
+
+    const isPrivileged = privilegeType !== PrivilegeType.NONE;
+
+    const newScore = calculateListingScore({
+      adminRating: listing.adminRating,
+      clientRating: listing.clientRating,
+      reviewCount: listing.reviewCount,
+      paidTier: listing.paidTier,
+      isPrivileged,
+      websiteUrl: listing.websiteUrl,
+      isVerified: listing.isVerified,
+    });
+
+    const updated = await prisma.listing.update({
+      where: { id },
+      data: {
+        privilegeType,
+        privilegeReason: isPrivileged ? privilegeReason || "Ijtimoiy imtiyoz" : null,
+        isPrivileged,
+        totalScore: newScore,
+      },
+    });
+
+    try {
+      revalidatePath('/');
+      revalidatePath('/admin');
+      revalidatePath(`/listing/${id}`);
+    } catch {}
+
+    return {
+      success: true,
+      message: isPrivileged
+        ? `Usta uchun imtiyoz tasdiqlandi (Yangi ball: ${newScore})`
+        : "Imtiyoz olib tashlandi",
+      isPrivileged: updated.isPrivileged,
+      privilegeType: updated.privilegeType,
+      totalScore: updated.totalScore,
+    };
+  } catch (error: any) {
+    return { success: false, message: error?.message || "Xatolik yuz berdi" };
+  }
+}
+
+/**
+ * To'lov / Homiylik (VIP Gold, Standard) statusini berish
+ */
+export async function adminUpdatePaidTierAction(
+  id: string,
+  paidTier: PaidTier,
+  durationDays: number = 30
+) {
+  const isAdmin = await isUserAdmin();
+  if (!isAdmin) return { success: false, message: "Ruxsat yo'q" };
+
+  try {
+    const listing = await prisma.listing.findUnique({ where: { id } });
+    if (!listing) return { success: false, message: "E'lon topilmadi" };
+
+    const paidUntil = paidTier !== PaidTier.FREE && durationDays > 0
+      ? new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000)
+      : null;
+
+    const newScore = calculateListingScore({
+      adminRating: listing.adminRating,
+      clientRating: listing.clientRating,
+      reviewCount: listing.reviewCount,
+      paidTier,
+      isPrivileged: listing.isPrivileged,
+      websiteUrl: listing.websiteUrl,
+      isVerified: listing.isVerified,
+    });
+
+    const updated = await prisma.listing.update({
+      where: { id },
+      data: {
+        paidTier,
+        paidUntil,
+        totalScore: newScore,
+      },
+    });
+
+    try {
+      revalidatePath('/');
+      revalidatePath('/admin');
+      revalidatePath(`/listing/${id}`);
+    } catch {}
+
+    return {
+      success: true,
+      message: `To'lov tarifi ${paidTier} ga o'zgartirildi (Yangi ball: ${newScore})`,
+      paidTier: updated.paidTier,
+      paidUntil: updated.paidUntil,
+      totalScore: updated.totalScore,
+    };
+  } catch (error: any) {
+    return { success: false, message: error?.message || "Xatolik yuz berdi" };
+  }
+}
+
+/**
+ * Barcha mavjud e'lonlarning reyting ballarini sinxronlashtirish
+ */
+export async function adminSyncListingScoresAction() {
+  const isAdmin = await isUserAdmin();
+  if (!isAdmin) return { success: false, message: "Ruxsat yo'q" };
+
+  try {
+    const listings = await prisma.listing.findMany();
+    let updatedCount = 0;
+
+    for (const item of listings) {
+      const score = calculateListingScore({
+        adminRating: item.adminRating,
+        clientRating: item.clientRating,
+        reviewCount: item.reviewCount,
+        paidTier: item.paidTier,
+        isPrivileged: item.isPrivileged,
+        websiteUrl: item.websiteUrl,
+        isVerified: item.isVerified,
+      });
+
+      await prisma.listing.update({
+        where: { id: item.id },
+        data: { totalScore: score },
+      });
+      updatedCount++;
+    }
+
+    try {
+      revalidatePath('/');
+      revalidatePath('/admin');
+    } catch {}
+
+    return { success: true, count: updatedCount, message: `${updatedCount} ta e'lonning ballari muvaffaqiyatli hisoblandi!` };
+  } catch (error: any) {
+    return { success: false, message: error?.message || "Xatolik yuz berdi" };
   }
 }

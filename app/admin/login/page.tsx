@@ -18,11 +18,11 @@ export default async function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-12">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-12 bg-[#fffdfa] dark:bg-[#0f172a] transition-colors">
       <div className="w-full max-w-sm mb-4">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#67625d] hover:text-orange-600 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#67625d] dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Bosh sahifaga qaytish</span>

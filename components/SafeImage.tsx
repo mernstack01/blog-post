@@ -36,7 +36,7 @@ export default function SafeImage({
   if (!imgSrc || (hasError && imgSrc === fallbackSrc)) {
     return (
       <div
-        className={`bg-gradient-to-tr from-amber-50 to-orange-100 flex items-center justify-center text-orange-600 ${className}`}
+        className={`bg-gradient-to-tr from-slate-100 to-blue-100 dark:from-slate-800 dark:to-blue-950/60 flex items-center justify-center text-blue-600 dark:text-blue-400 ${className}`}
         aria-label={alt}
       >
         <Wrench className="w-8 h-8 opacity-40 stroke-[1.5]" />

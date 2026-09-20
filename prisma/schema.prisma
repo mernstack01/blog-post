@@ -19,6 +19,20 @@ enum ListingStatus {
   REJECTED
 }
 
+enum PaidTier {
+  FREE
+  STANDARD
+  VIP_GOLD
+}
+
+enum PrivilegeType {
+  NONE
+  DISABILITY
+  YOUTH_STARTUP
+  HONORARY_MASTER
+  SOCIAL_PROTECT
+}
+
 model User {
   id        String    @id @default(auto()) @map("_id") @db.ObjectId
   phone     String    @unique
@@ -35,9 +49,13 @@ model User {
 
 model Category {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
+  name          String        @default("") // Fallback for existing references
+  nameUz        String
+  nameRu        String
   slug          String        @unique
   icon          String?       // Lucide icon name, e.g., 'Wrench', 'Car', 'Home', etc.
+  order         Int           @default(0)
+  isActive      Boolean       @default(true)
   description   String?
   subCategories SubCategory[]
   listings      Listing[]
@@ -61,6 +79,46 @@ model SubCategory {
   @@map("subcategories")
 }
 
+model Region {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  nameUz    String
+  nameRu    String
+  slug      String     @unique
+  order     Int        @default(0)
+  districts District[]
+  listings  Listing[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("regions")
+}
+
+model District {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  nameUz    String
+  nameRu    String
+  slug      String    @unique
+  order     Int       @default(0)
+  regionId  String    @db.ObjectId
+  region    Region    @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  listings  Listing[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("districts")
+}
+
+model SystemSetting {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  contactPhone      String    @default("+998 90 123 45 67")
+  telegramUsername  String    @default("xayrliish_admin")
+  supportEmail      String    @default("info@xayrliish.uz")
+  siteTitle         String?   @default("XayrliIsh.uz")
+  updatedAt         DateTime  @updatedAt
+
+  @@map("system_settings")
+}
+
 model Listing {
   id          String        @id @default(auto()) @map("_id") @db.ObjectId
   title       String
@@ -69,12 +127,28 @@ model Listing {
   phone       String        // Bog'lanish uchun telefon
   telegram    String?       // @username yoki havola
   instagram   String?       // username yoki havola
+  websiteUrl  String?       // Veb-sayt yoki portfolio URL manzili
   location    String        // Guliston, Yangiyer, Shirin, Boyovut, Sayxunobod, Mirzaobod, Sardoba va h.k.
   address     String?       // Aniqroq manzil / mo'ljal
   price       String?       // Masalan, "Kelishilgan holda" yoki "100,000 so'mdan"
   experience  String?       // Masalan, "7 yil"
+  
+  // Reyting va hisoblash tizimi
   rating      Float         @default(5.0)
+  adminRating Float         @default(4.5)  // Xodimlar bahosi (1.0 - 5.0)
+  clientRating Float        @default(5.0)  // Mijozlar bahosi
+  totalScore  Float         @default(60.0) // Formula asosida umumiy hisoblangan ball
   reviewCount Int           @default(1)
+  
+  // To'lov va Homiylik
+  paidTier    PaidTier      @default(FREE)
+  paidUntil   DateTime?     // To'lov amal qilish muddati
+  
+  // Imtiyoz tizimi
+  privilegeType   PrivilegeType @default(NONE)
+  privilegeReason String?       // Imtiyoz berilish asosi
+  isPrivileged    Boolean       @default(false)
+
   images      String[]      @default([])
   isVerified  Boolean       @default(false)
   status      ListingStatus @default(APPROVED)
@@ -85,6 +159,12 @@ model Listing {
   
   subCategoryId String?     @db.ObjectId
   subCategory   SubCategory?  @relation(fields: [subCategoryId], references: [id], onDelete: SetNull)
+
+  regionId    String?       @db.ObjectId
+  region      Region?       @relation(fields: [regionId], references: [id], onDelete: SetNull)
+
+  districtId  String?       @db.ObjectId
+  district    District?     @relation(fields: [districtId], references: [id], onDelete: SetNull)
   
   userId      String?       @db.ObjectId
   user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -95,8 +175,15 @@ model Listing {
   @@index([location])
   @@index([categoryId])
   @@index([subCategoryId])
+  @@index([regionId])
+  @@index([districtId])
+  @@index([regionId, categoryId, status])
   @@index([status])
   @@index([status, createdAt])
   @@index([status, view_count])
+  @@index([totalScore(sort: Desc)])
+  @@index([paidTier])
+  @@index([isPrivileged])
   @@map("listings")
 }
+

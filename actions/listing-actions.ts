@@ -15,11 +15,20 @@ export interface ListingWithRelations {
   phone: string;
   telegram: string | null;
   instagram: string | null;
+  websiteUrl: string | null;
   location: string;
   address: string | null;
   price: string | null;
   experience: string | null;
   rating: number;
+  adminRating: number;
+  clientRating: number;
+  totalScore: number;
+  paidTier: 'FREE' | 'STANDARD' | 'VIP_GOLD';
+  paidUntil: Date | null;
+  privilegeType: 'NONE' | 'DISABILITY' | 'YOUTH_STARTUP' | 'HONORARY_MASTER' | 'SOCIAL_PROTECT';
+  privilegeReason: string | null;
+  isPrivileged: boolean;
   reviewCount: number;
   images: string[];
   isVerified: boolean;
@@ -40,14 +49,17 @@ export interface ListingWithRelations {
     name: string;
     slug: string;
   } | null;
+  rank?: number;
 }
 
+import { calculateListingScore } from '@/lib/scoring';
+
 /**
- * E'lonlarni filtrlash va saralash bilan olish
+ * E'lonlarni filtrlash va saralash bilan olish ("Umumiy" va "Top 10" rejimlari)
  */
 export async function getListings(filters: Partial<ListingFilterParams> = {}): Promise<ListingWithRelations[]> {
   try {
-    const { q, location, category, subCategory, sortBy = 'popular' } = filters;
+    const { q, location, category, subCategory, sortBy = 'popular', mode = 'all' } = filters;
 
     const where: Prisma.ListingWhereInput = {
       status: ListingStatus.APPROVED,
@@ -103,19 +115,31 @@ export async function getListings(filters: Partial<ListingFilterParams> = {}): P
       }
     }
 
-    // Saralash qoidasi
-    let orderBy: Prisma.ListingOrderByWithRelationInput = { view_count: 'desc' };
-    if (sortBy === 'newest') {
-      orderBy = { createdAt: 'desc' };
-    } else if (sortBy === 'rating') {
-      orderBy = { rating: 'desc' };
+    // Saralash qoidasi: Top 10 yoki Umumiy
+    let orderBy: Prisma.ListingOrderByWithRelationInput[] | Prisma.ListingOrderByWithRelationInput = { view_count: 'desc' };
+    let take: number | undefined = undefined;
+
+    if (mode === 'top10') {
+      orderBy = [
+        { totalScore: 'desc' },
+        { view_count: 'desc' },
+        { createdAt: 'desc' },
+      ];
+      take = 10;
     } else {
-      orderBy = { view_count: 'desc' };
+      if (sortBy === 'newest') {
+        orderBy = { createdAt: 'desc' };
+      } else if (sortBy === 'rating') {
+        orderBy = { totalScore: 'desc' };
+      } else {
+        orderBy = { view_count: 'desc' };
+      }
     }
 
     const listings = await prisma.listing.findMany({
       where,
       orderBy,
+      take,
       include: {
         category: {
           select: { id: true, name: true, slug: true, icon: true },
@@ -126,7 +150,12 @@ export async function getListings(filters: Partial<ListingFilterParams> = {}): P
       },
     });
 
-    return listings as ListingWithRelations[];
+    const listingsWithRank = (listings as any[]).map((item, idx) => ({
+      ...item,
+      rank: mode === 'top10' ? idx + 1 : undefined,
+    }));
+
+    return listingsWithRank as ListingWithRelations[];
   } catch (error) {
     console.error('getListings error:', error);
     return [];
@@ -260,6 +289,16 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
     const isAdmin = await isUserAdmin();
     const initialStatus = isAdmin ? ListingStatus.APPROVED : ListingStatus.PENDING;
 
+    const initialScore = calculateListingScore({
+      adminRating: 4.5,
+      clientRating: 5.0,
+      reviewCount: 1,
+      paidTier: 'FREE',
+      isPrivileged: false,
+      websiteUrl: val.websiteUrl?.trim() || null,
+      isVerified: isAdmin,
+    });
+
     // 4. Bazaga yaratish
     const newListing = await prisma.listing.create({
       data: {
@@ -269,12 +308,19 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
         phone: cleanPhone,
         telegram: sanitize(val.telegram) || null,
         instagram: sanitize(val.instagram) || null,
+        websiteUrl: sanitize(val.websiteUrl) || null,
         location: sanitize(val.location),
         address: sanitize(val.address) || null,
         price: sanitize(val.price) || 'Kelishilgan holda',
         experience: sanitize(val.experience) || 'Mavjud',
         rating: 5.0,
+        adminRating: 4.5,
+        clientRating: 5.0,
+        totalScore: initialScore,
         reviewCount: 1,
+        paidTier: 'FREE',
+        privilegeType: 'NONE',
+        isPrivileged: false,
         images: finalImages,
         isVerified: isAdmin,
         status: initialStatus,

@@ -1,18 +1,38 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     --background: #fffdfa;
-    --foreground: #282624;
+    --foreground: #1e293b;
     --card: #ffffff;
-    --card-foreground: #282624;
-    --primary: #ea580c;
-    --primary-hover: #c2410c;
-    --accent: #f59e0b;
-    --muted: #f6f3ef;
-    --muted-foreground: #67625d;
-    --border: #e6e0da;
+    --card-foreground: #1e293b;
+    --popover: #ffffff;
+    --popover-foreground: #1e293b;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --accent: #0284c7;
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+    --border: #e2e8f0;
     --success: #0f7a35;
+  }
+
+  .dark {
+    --background: #0f172a;
+    --foreground: #f8fafc;
+    --card: #1e293b;
+    --card-foreground: #f8fafc;
+    --popover: #1e293b;
+    --popover-foreground: #f8fafc;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --accent: #38bdf8;
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+    --border: #334155;
+    --success: #10b981;
   }
 }
 
@@ -37,7 +57,13 @@ body {
 .sindr-card {
   background: var(--card);
   border: 1px solid var(--border);
-  box-shadow: 0 4px 20px rgba(40, 38, 36, 0.04);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+}
+
+.dark .sindr-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .sindr-pill {
@@ -47,13 +73,17 @@ body {
   transition: all 0.15s ease;
 }
 .sindr-pill:hover {
-  background: #ede9e3;
+  background: #e2e8f0;
+  color: var(--foreground);
+}
+.dark .sindr-pill:hover {
+  background: #334155;
   color: var(--foreground);
 }
 .sindr-pill.selected {
   background: var(--primary);
   color: #ffffff;
-  box-shadow: 0 3px 10px rgba(234, 88, 12, 0.25);
+  box-shadow: 0 3px 12px rgba(37, 99, 235, 0.3);
 }
 
 /* Jonli puls nuqtasi */

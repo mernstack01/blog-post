@@ -9,14 +9,65 @@ async function main() {
   await prisma.listing.deleteMany();
   await prisma.subCategory.deleteMany();
   await prisma.category.deleteMany();
+  await prisma.district.deleteMany();
+  await prisma.region.deleteMany();
+  await prisma.systemSetting.deleteMany();
   await prisma.user.deleteMany();
 
-  // 1. Kategoriyalar va Sub-kategoriyalar
+  // 1. Tizim sozlamalari (Singleton)
+  await prisma.systemSetting.create({
+    data: {
+      contactPhone: "+998 90 123 45 67",
+      telegramUsername: "xayrliish_admin",
+      supportEmail: "info@xayrliish.uz",
+      siteTitle: "XayrliIsh.uz",
+    },
+  });
+
+  // 2. Region va Districtlar (Sirdaryo viloyati)
+  const sirdaryoRegion = await prisma.region.create({
+    data: {
+      nameUz: "Sirdaryo viloyati",
+      nameRu: "Сырдарьинская область",
+      slug: "sirdaryo",
+      order: 1,
+    },
+  });
+
+  const districtsData = [
+    { nameUz: "Guliston shahri", nameRu: "г. Гулистан", slug: "guliston", order: 1 },
+    { nameUz: "Yangiyer shahri", nameRu: "г. Янгиер", slug: "yangiyer", order: 2 },
+    { nameUz: "Shirin shahri", nameRu: "г. Ширин", slug: "shirin", order: 3 },
+    { nameUz: "Boyovut tumani", nameRu: "Баяутский район", slug: "boyovut", order: 4 },
+    { nameUz: "Sayxunobod tumani", nameRu: "Сайхунабадский район", slug: "sayxunobod", order: 5 },
+    { nameUz: "Mirzaobod tumani", nameRu: "Мирзаабадский район", slug: "mirzaobod", order: 6 },
+    { nameUz: "Oqoltin tumani", nameRu: "Акалтынский район", slug: "oqoltin", order: 7 },
+    { nameUz: "Sardoba tumani", nameRu: "Сардобинский район", slug: "sardoba", order: 8 },
+    { nameUz: "Xovos tumani", nameRu: "Хавастский район", slug: "xovos", order: 9 },
+    { nameUz: "Sirdaryo tumani", nameRu: "Сырдарьинский район", slug: "sirdaryo-tumani", order: 10 },
+  ];
+
+  const districtMap: Record<string, any> = {};
+  for (const d of districtsData) {
+    const createdDistrict = await prisma.district.create({
+      data: {
+        ...d,
+        regionId: sirdaryoRegion.id,
+      },
+    });
+    districtMap[d.nameUz] = createdDistrict;
+  }
+
+  // 3. Kategoriyalar va Sub-kategoriyalar (Ikki tilli)
   const categoriesData = [
     {
+      nameUz: "Ustalar va Ta'mir",
+      nameRu: "Мастера и Ремонт",
       name: "Ustalar va Ta'mir",
       slug: "ustalar",
       icon: "Wrench",
+      order: 1,
+      isActive: true,
       description: "Santexnik, elektrik, pardozlash, yevro ta'mir ustalari",
       subCategories: [
         { name: "Santexnika xizmatlari", slug: "santexnik", description: "Quvurlar, kranlar, dush va ariston o'rnatish" },
@@ -27,9 +78,13 @@ async function main() {
       ]
     },
     {
+      nameUz: "Avto va Yuk tashish",
+      nameRu: "Авто и Грузоперевозки",
       name: "Avto va Yuk tashish",
       slug: "avto",
       icon: "Car",
+      order: 2,
+      isActive: true,
       description: "Yuk tashish, avto ijara, diagnostika va ta'mirlash",
       subCategories: [
         { name: "Yuk tashish (Labo, Damas, Gazel)", slug: "yuk-tashish", description: "Shahar va viloyatlararo yuk hamda mebellar ko'chirish" },
@@ -39,9 +94,13 @@ async function main() {
       ]
     },
     {
+      nameUz: "Maishiy texnika",
+      nameRu: "Бытовая техника",
       name: "Maishiy texnika",
       slug: "maishiy-texnika",
       icon: "Tv",
+      order: 3,
+      isActive: true,
       description: "Konditsioner, muzlatgich, kir yuvish mashinalari",
       subCategories: [
         { name: "Konditsioner ustasi", slug: "konditsioner", description: "O'rnatish, freon quyish va chuqur tozalash" },
@@ -50,9 +109,13 @@ async function main() {
       ]
     },
     {
+      nameUz: "Qurilish va Mahsulotlar",
+      nameRu: "Строительство и Материалы",
       name: "Qurilish va Mahsulotlar",
       slug: "qurilish",
       icon: "Hammer",
+      order: 4,
+      isActive: true,
       description: "Uy qurish, poydevor, g'isht terish va tom yopish",
       subCategories: [
         { name: "G'isht va Blok terish", slug: "gisht-terish", description: "Uylar va korxonalar uchun fundament va devor tiklash" },
@@ -60,9 +123,13 @@ async function main() {
       ]
     },
     {
+      nameUz: "Go'zallik va Salomatlik",
+      nameRu: "Красота и Здоровье",
       name: "Go'zallik va Salomatlik",
       slug: "gozallik",
       icon: "Sparkles",
+      order: 5,
+      isActive: true,
       description: "Sartarosh, stilist, massaj va parvarish xizmatlari",
       subCategories: [
         { name: "Sartaroshlik va Stilist", slug: "sartarosh", description: "Erkaklar va ayollar soch turmaklari" },
@@ -70,9 +137,13 @@ async function main() {
       ]
     },
     {
+      nameUz: "Ta'lim va Repetitorlik",
+      nameRu: "Образование и Репетиторы",
       name: "Ta'lim va Repetitorlik",
       slug: "talim",
       icon: "GraduationCap",
+      order: 6,
+      isActive: true,
       description: "Tillar, aniq fanlar va maktabga tayyorlov",
       subCategories: [
         { name: "Ingliz tili (IELTS / CEFR)", slug: "ingliz-tili", description: "Guliston markazida individual va guruh darslari" },
@@ -101,6 +172,7 @@ async function main() {
       createdSubCategories[sub.slug] = subCat;
     }
   }
+
 
   // 2. Foydalanuvchilar
   const user1 = await prisma.user.create({
@@ -508,12 +580,17 @@ async function main() {
   ];
 
   for (const listing of listingsData) {
+    const dist = districtMap[listing.location];
     await prisma.listing.create({
-      data: listing,
+      data: {
+        ...listing,
+        regionId: sirdaryoRegion.id,
+        districtId: dist ? dist.id : undefined,
+      },
     });
   }
 
-  console.log(`Successfully seeded ${categoriesData.length} categories and ${listingsData.length} rich listings across Sirdaryo!`);
+  console.log(`Successfully seeded ${categoriesData.length} categories, 1 region, ${districtsData.length} districts, and ${listingsData.length} rich listings across Sirdaryo!`);
 }
 
 main()

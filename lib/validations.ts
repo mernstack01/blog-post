@@ -20,6 +20,7 @@ export const createListingSchema = z.object({
     ),
   telegram: z.string().optional().or(z.literal('')),
   instagram: z.string().optional().or(z.literal('')),
+  websiteUrl: z.string().optional().or(z.literal('')),
   location: z
     .string()
     .min(2, 'Iltimos, Sirdaryo hududini tanlang'),
@@ -51,6 +52,7 @@ export const listingFilterSchema = z.object({
   category: z.string().optional(),
   subCategory: z.string().optional(),
   sortBy: z.enum(['popular', 'newest', 'rating']).optional().default('popular'),
+  mode: z.enum(['all', 'top10']).optional().default('all'),
 });
 
 export type ListingFilterParams = z.infer<typeof listingFilterSchema>;

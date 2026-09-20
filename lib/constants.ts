@@ -15,14 +15,16 @@ export const SIRDARYO_LOCATIONS = [
 export type SirdaryoLocation = (typeof SIRDARYO_LOCATIONS)[number];
 
 export const POPULAR_SEARCH_TAGS = [
+  'O\'quv markazi',
+  'Restoran & Kafe',
+  'Shifokor',
+  'Repetitor',
   'Santexnik',
   'Elektrik',
-  'Konditsioner',
+  'Dasturchi',
+  'Avto ta\'mir',
   'Yuk tashish',
-  'Yevro ta\'mir',
-  'Kafelchi',
-  'Avto diagnostika',
-  'Ingliz tili',
+  'Mehmonxona',
 ] as const;
 
 export const CATEGORY_ICONS: Record<string, string> = {

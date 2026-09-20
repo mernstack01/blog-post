@@ -12,6 +12,9 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
+import { useLanguage } from '@/context/LanguageContext';
+import { getCategoryLocalizedName, getSubCategoryLocalizedName } from '@/lib/translations';
+
 interface SubCategoryItem {
   id: string;
   name: string;
@@ -33,6 +36,7 @@ interface CategoryBarProps {
 export default function CategoryBar({ categories }: CategoryBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { lang, t } = useLanguage();
 
   const currentCategory = searchParams.get('category') || 'all';
   const currentSubCategory = searchParams.get('subCategory') || 'all';
@@ -79,26 +83,30 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
     }
   };
 
+  const getCatName = (cat: CategoryItem) => {
+    return getCategoryLocalizedName(cat.slug, lang) || cat.name;
+  };
+
   const activeCategoryObj = categories.find((c) => c.slug === currentCategory);
 
   return (
-    <div className="w-full bg-[#fffdfa] border-b border-[#e6e0da] py-3 shadow-2xs">
+    <div className="w-full bg-[#fffdfa] dark:bg-[#0f172a] border-b border-[#e2e8f0] dark:border-slate-800 py-3 shadow-2xs transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Asosiy kategoriyalar (Pills - sindr.uz style) */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1">
+        {/* Asosiy kategoriyalar (Pills) */}
+        <div className="flex items-center gap-2.5 sm:gap-3 overflow-x-auto no-scrollbar py-1 touch-pan-x">
           {/* Barchasi */}
           <button
             onClick={() => handleCategorySelect('all')}
             type="button"
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 min-h-[38px] rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer active:scale-95 touch-manipulation shrink-0 ${
               currentCategory === 'all'
-                ? 'bg-orange-600 text-white shadow-sm shadow-orange-500/25'
-                : 'bg-[#f6f3ef] text-[#67625d] hover:bg-[#ede9e3] hover:text-[#282624]'
+                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
+                : 'bg-[#f1f5f9] dark:bg-slate-800 text-[#64748b] dark:text-slate-300 hover:bg-[#e2e8f0] dark:hover:bg-slate-700 hover:text-[#1e293b] dark:hover:text-white'
             }`}
           >
-            <LayoutGrid className="w-3.5 h-3.5" />
-            <span>Barchasi</span>
+            <LayoutGrid className="w-4 h-4" />
+            <span>{t.categories.all}</span>
           </button>
 
           {/* Dinamik kategoriyalar */}
@@ -109,14 +117,14 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat.slug)}
                 type="button"
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2 min-h-[38px] rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer active:scale-95 touch-manipulation shrink-0 ${
                   isSelected
-                    ? 'bg-orange-600 text-white shadow-sm shadow-orange-500/25'
-                    : 'bg-[#f6f3ef] text-[#67625d] hover:bg-[#ede9e3] hover:text-[#282624]'
+                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
+                    : 'bg-[#f1f5f9] dark:bg-slate-800 text-[#64748b] dark:text-slate-300 hover:bg-[#e2e8f0] dark:hover:bg-slate-700 hover:text-[#1e293b] dark:hover:text-white'
                 }`}
               >
                 {getIcon(cat.icon, isSelected)}
-                <span>{cat.name}</span>
+                <span>{getCatName(cat)}</span>
               </button>
             );
           })}
@@ -124,21 +132,21 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
 
         {/* Ichki sub-kategoriyalar */}
         {activeCategoryObj && activeCategoryObj.subCategories && activeCategoryObj.subCategories.length > 0 && (
-          <div className="mt-2.5 pt-2.5 border-t border-[#e6e0da] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <span className="text-[11px] font-bold text-[#67625d] uppercase tracking-wider shrink-0 flex items-center gap-0.5">
-              <span>Yo'nalish:</span>
-              <ChevronRight className="w-3 h-3 text-[#67625d]" />
+          <div className="mt-3 pt-3 border-t border-[#e2e8f0] dark:border-slate-800 flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-1 touch-pan-x">
+            <span className="text-[11px] font-bold text-[#64748b] dark:text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-0.5">
+              <span>{lang === 'ru' ? 'Направление:' : "Yo'nalish:"}</span>
+              <ChevronRight className="w-3 h-3 text-[#64748b] dark:text-slate-400" />
             </span>
 
             <button
               onClick={() => handleSubCategorySelect('all')}
-              className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer active:scale-95 touch-manipulation shrink-0 ${
                 currentSubCategory === 'all'
-                  ? 'bg-[#282624] text-white font-bold'
-                  : 'bg-[#f6f3ef] text-[#67625d] hover:bg-[#ede9e3]'
+                  ? 'bg-slate-900 dark:bg-blue-600 text-white font-bold'
+                  : 'bg-[#f1f5f9] dark:bg-slate-800 text-[#64748b] dark:text-slate-300 hover:bg-[#e2e8f0] dark:hover:bg-slate-700'
               }`}
             >
-              Barcha yo'nalishlar
+              {lang === 'ru' ? 'Все направления' : "Barcha yo'nalishlar"}
             </button>
 
             {activeCategoryObj.subCategories.map((sub) => {
@@ -147,13 +155,13 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
                 <button
                   key={sub.id}
                   onClick={() => handleSubCategorySelect(sub.slug)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer active:scale-95 touch-manipulation shrink-0 ${
                     isSubSelected
-                      ? 'bg-[#282624] text-white font-bold shadow-2xs'
-                      : 'bg-[#f6f3ef] text-[#67625d] hover:bg-[#ede9e3]'
+                      ? 'bg-slate-900 dark:bg-blue-600 text-white font-bold shadow-2xs'
+                      : 'bg-[#f1f5f9] dark:bg-slate-800 text-[#64748b] dark:text-slate-300 hover:bg-[#e2e8f0] dark:hover:bg-slate-700'
                   }`}
                 >
-                  {sub.name}
+                  {getSubCategoryLocalizedName(sub.slug, lang) || sub.name}
                 </button>
               );
             })}

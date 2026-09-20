@@ -13,11 +13,15 @@ interface HomePageProps {
     category?: string;
     subCategory?: string;
     sortBy?: 'popular' | 'newest' | 'rating';
+    mode?: 'all' | 'top10';
   }>;
 }
 
+import ModeTabSwitcher from '@/components/ModeTabSwitcher';
+
 export default async function HomePage({ searchParams }: HomePageProps) {
   const resolvedSearchParams = await searchParams;
+  const currentMode = resolvedSearchParams.mode === 'top10' ? 'top10' : 'all';
 
   // Parallel data fetching
   const [listings, categories] = await Promise.all([
@@ -45,11 +49,20 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <LocationPills />
       </Suspense>
 
-      {/* 4. Asosiy E'lonlar Gridi */}
-      <ListingGrid listings={listings} />
+      {/* 4. Rejim Tanlash: Umumiy vs Top 10 Reyting */}
+      <Suspense fallback={<div className="h-14 bg-white" />}>
+        <ModeTabSwitcher currentMode={currentMode} totalCount={listings.length} />
+      </Suspense>
 
-      {/* 5. Ishonch va Statistika Bo'limi */}
-      <StatsSection />
+      {/* 5. Asosiy E'lonlar Gridi */}
+      <Suspense fallback={<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-96 bg-slate-100/50 dark:bg-slate-800/40 rounded-2xl animate-pulse my-6" />}>
+        <ListingGrid listings={listings} />
+      </Suspense>
+
+      {/* 6. Ishonch va Statistika Bo'limi */}
+      <Suspense fallback={null}>
+        <StatsSection />
+      </Suspense>
     </div>
   );
 }

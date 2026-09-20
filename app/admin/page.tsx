@@ -37,7 +37,7 @@ export default async function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fffdfa] py-6 sm:py-10">
+    <div className="min-h-screen bg-[#fffdfa] dark:bg-zinc-950 py-6 sm:py-10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <AdminDashboardClient stats={stats} initialListings={listings} />
       </div>
