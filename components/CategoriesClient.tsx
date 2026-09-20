@@ -148,7 +148,7 @@ export default function CategoriesClient({ categories }: CategoriesClientProps) 
                       {getIcon(cat.icon)}
                     </div>
                     <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#f6f3ef] dark:bg-slate-800 text-[#67625d] dark:text-slate-300">
-                      {cat._count.listings} {t.catalogPage.listingsCount}
+                      {cat._count?.listings ?? 0} {t.catalogPage.listingsCount}
                     </span>
                   </div>
 
@@ -179,7 +179,7 @@ export default function CategoriesClient({ categories }: CategoriesClientProps) 
                               {subName}
                             </span>
                             <span className="text-[11px] text-slate-400 dark:text-slate-500 group-hover:text-blue-500">
-                              {sub._count.listings} {t.catalogPage.subCount}
+                              {sub._count?.listings ?? 0} {t.catalogPage.subCount}
                             </span>
                           </Link>
                         );

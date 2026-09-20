@@ -1,4 +1,5 @@
 import { isUserAdmin } from '@/lib/admin-auth';
+import { getUserAuthSession } from '@/lib/user-auth';
 import { redirect } from 'next/navigation';
 import AdminLoginForm from '@/components/AdminLoginForm';
 import Link from 'next/link';

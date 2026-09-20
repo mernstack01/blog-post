@@ -10,7 +10,9 @@ const isPrismaClientValid = (client: any): boolean => {
     typeof client.listing?.count === 'function' &&
     typeof client.category?.count === 'function' &&
     typeof client.district?.count === 'function' &&
-    typeof client.systemSetting?.findFirst === 'function'
+    typeof client.systemSetting?.findFirst === 'function' &&
+    typeof client.otpCode?.deleteMany === 'function' &&
+    typeof client.user?.findUnique === 'function'
   );
 };
 
@@ -20,6 +22,7 @@ export const prisma =
     : new PrismaClient({
         log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
       });
+
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;

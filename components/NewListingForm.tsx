@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   createListingAction,
   ActionResponse,
 } from '@/actions/listing-actions';
+import { logoutUserAction } from '@/actions/user-auth-actions';
+import AuthGateModal from '@/components/AuthGateModal';
 import { SIRDARYO_LOCATIONS } from '@/lib/constants';
 import { createListingSchema } from '@/lib/validations';
 import {
@@ -22,48 +24,71 @@ import {
   Image as ImageIcon,
   Sparkles,
   Globe,
+  Trash2,
+  Plus,
+  Check,
 } from 'lucide-react';
 import InstagramIcon from '@/components/icons/InstagramIcon';
 import SafeImage from '@/components/SafeImage';
 import { useLanguage } from '@/context/LanguageContext';
-import { getCategoryLocalizedName, getLocationLocalizedName } from '@/lib/translations';
-
+import {
+  getCategoryLocalizedName,
+  getSubCategoryLocalizedName,
+  getLocationLocalizedName,
+} from '@/lib/translations';
 
 interface CategoryItem {
   id: string;
   name: string;
+  nameUz?: string | null;
+  nameRu?: string | null;
   slug: string;
-  subCategories: { id: string; name: string; slug: string }[];
+  subCategories: { id: string; name: string; nameUz?: string | null; nameRu?: string | null; slug: string }[];
 }
 
 interface NewListingFormProps {
   categories: CategoryItem[];
+  initialUser?: any;
+  isAdmin?: boolean;
 }
 
-// Ustalarga qulaylik uchun namunaviy professional rasmlar
+// Ustalarga qulaylik uchun namunaviy professional rasmlar (18 ta toifa)
 const PRESET_IMAGES = [
-  { slug: 'santexnika', labelUz: "Santexnik", labelRu: "Сантехника", url: "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'santexnika', labelUz: "Santexnika", labelRu: "Сантехника", url: "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=800&auto=format&fit=crop&q=80" },
   { slug: 'elektrik', labelUz: "Elektrik", labelRu: "Электрика", url: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800&auto=format&fit=crop&q=80" },
-  { slug: 'remont', labelUz: "Ta'mir / Remont", labelRu: "Ремонт", url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&auto=format&fit=crop&q=80" },
-  { slug: 'avto', labelUz: "Avto master", labelRu: "Автомастер", url: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800&auto=format&fit=crop&q=80" },
-  { slug: 'yuk-tashish', labelUz: "Yuk tashish", labelRu: "Грузоперевозки", url: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=800&auto=format&fit=crop&q=80" },
-  { slug: 'konditsioner', labelUz: "Konditsioner", labelRu: "Кондиционеры", url: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'remont', labelUz: "Ta'mir / Qurilish", labelRu: "Ремонт / Стройка", url: "https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'ichki-dizayn', labelUz: "Ichki dizayn & Pardoz", labelRu: "Дизайн и отделка", url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'avto', labelUz: "Avtoservis / Usta", labelRu: "Автомастер", url: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'yuk-tashish', labelUz: "Yuk tashish & Evakuator", labelRu: "Грузоперевозки", url: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'konditsioner', labelUz: "Konditsioner & Sovitkich", labelRu: "Кондиционеры", url: "https://images.unsplash.com/photo-1631545806609-b22305886475?w=800&auto=format&fit=crop&q=80" },
   { slug: 'maishiy-texnika', labelUz: "Maishiy texnika", labelRu: "Быттехника", url: "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&auto=format&fit=crop&q=80" },
-  { slug: 'temirchilik', labelUz: "Temirchilik", labelRu: "Кузнечное дело", url: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'temirchilik', labelUz: "Temirchilik & Svarka", labelRu: "Сварка / Металл", url: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'mebel', labelUz: "Mebel & Duradgor", labelRu: "Мебель / Плотник", url: "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'malyar', labelUz: "Bo'yoqchi & Malyar", labelRu: "Малярные работы", url: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'kafel', labelUz: "Kafel & Plitka", labelRu: "Плитка / Кафель", url: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'tozalash', labelUz: "Klining & Tozalash", labelRu: "Клининг / Уборка", url: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'tibbiyot', labelUz: "Shifokor & Tibbiyot", labelRu: "Медицина / Врач", url: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'talim', labelUz: "Ta'lim & Repetitor", labelRu: "Обучение / Репетитор", url: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'sartarosh', labelUz: "Sartarosh & Go'zallik", labelRu: "Барбер / Салон", url: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'it', labelUz: "Dasturlash & IT", labelRu: "IT и веб-услуги", url: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop&q=80" },
+  { slug: 'foto', labelUz: "Foto & Video", labelRu: "Фото и видео", url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&auto=format&fit=crop&q=80" },
 ];
 
-export default function NewListingForm({ categories }: NewListingFormProps) {
+export default function NewListingForm({ categories, initialUser, isAdmin }: NewListingFormProps) {
   const router = useRouter();
   const { t, lang } = useLanguage();
 
+  const [currentUser, setCurrentUser] = useState(initialUser);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState({
     title: '',
-    name: '',
+    name: initialUser?.name && !initialUser.name.startsWith('Mutaxassis (') ? initialUser.name : '',
     categoryId: categories[0]?.id || '',
     subCategoryId: '',
     location: 'Guliston shahri',
     address: '',
-    phone: '+998',
+    phone: initialUser?.phone || '+998',
     telegram: '',
     instagram: '',
     websiteUrl: '',
@@ -74,12 +99,107 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
     selectedPresetImage: PRESET_IMAGES[0].url,
   });
 
+  // Rasm yuklash holati
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [activeImageTab, setActiveImageTab] = useState<'upload' | 'preset' | 'url'>('upload');
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
+  // Fayl tanlanganda avtomatik yuklash
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploadError(null);
+
+    if (uploadedImages.length + files.length > 5) {
+      setUploadError(lang === 'ru' ? "Вы можете загрузить не более 5 фотографий." : "Maksimal 5 tagacha rasm yuklashingiz mumkin.");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const newUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) {
+          setUploadError(lang === 'ru' ? "Принимаются только изображения (JPG, PNG, WebP)." : "Faqat rasm fayllari (JPG, PNG, WebP) qabul qilinadi.");
+          continue;
+        }
+
+        const uploadData = new FormData();
+        uploadData.append('file', file);
+
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: uploadData,
+        });
+
+        const data = await res.json();
+        if (data.success && data.url) {
+          newUrls.push(data.url);
+        } else {
+          setUploadError(data.message || (lang === 'ru' ? "Ошибка при загрузке фото." : "Rasm yuklashda xatolik yuz berdi."));
+        }
+      }
+
+      if (newUrls.length > 0) {
+        setUploadedImages((prev) => [...prev, ...newUrls]);
+        setFormData((prev) => ({ ...prev, imageUrl: '' }));
+      }
+    } catch (err: any) {
+      setUploadError(lang === 'ru' ? "Произошла ошибка при загрузке фото на сервер." : "Rasmni serverga yuklashda xatolik yuz berdi.");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const removeUploadedImage = (index: number) => {
+    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Agar admin bo'lmasa va foydalanuvchi kirmagan bo'lsa, AuthGateModal ko'rsatiladi
+  if (!isAdmin && !currentUser) {
+    return (
+      <AuthGateModal
+        onSuccess={(user) => {
+          setCurrentUser(user);
+          setFormData((prev) => ({
+            ...prev,
+            phone: user.phone || prev.phone,
+            name: user.name && !user.name.startsWith('Mutaxassis (') ? user.name : prev.name,
+          }));
+        }}
+      />
+    );
+  }
+
+  const currentLimit = currentUser?.listingLimit ?? (currentUser as any)?.dailyLimit ?? 3;
+  const totalUsed = currentUser?.totalUsed ?? (currentUser as any)?.usedToday ?? 0;
+  const isLimitReached = !isAdmin && (currentUser?.remaining ?? (currentLimit - totalUsed)) <= 0;
+
   // Tanlangan kategoriya bo'yicha sub-kategoriyalarni olish
   const currentCategory = categories.find((c) => c.id === formData.categoryId);
+
+  const getCatName = (c: CategoryItem) => {
+    if (lang === 'ru') {
+      return (c as any).nameRu || getCategoryLocalizedName(c.slug, 'ru') || getCategoryLocalizedName(c.name, 'ru') || c.name;
+    }
+    return (c as any).nameUz || getCategoryLocalizedName(c.slug, 'uz') || getCategoryLocalizedName(c.name, 'uz') || c.name;
+  };
+
+  const getSubCatName = (sc: { id: string; name: string; slug: string; nameUz?: string | null; nameRu?: string | null }) => {
+    if (lang === 'ru') {
+      return (sc as any).nameRu || getSubCategoryLocalizedName(sc.slug, 'ru') || getCategoryLocalizedName(sc.name, 'ru') || sc.name;
+    }
+    return (sc as any).nameUz || getSubCategoryLocalizedName(sc.slug, 'uz') || getCategoryLocalizedName(sc.name, 'uz') || sc.name;
+  };
 
   const handleCategoryChange = (catId: string) => {
     setFormData((prev) => ({
@@ -96,7 +216,9 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
 
     // Rasmlar massivini tayyorlash
     const imageList: string[] = [];
-    if (formData.imageUrl.trim()) {
+    if (uploadedImages.length > 0) {
+      imageList.push(...uploadedImages);
+    } else if (formData.imageUrl.trim()) {
       imageList.push(formData.imageUrl.trim());
     } else if (formData.selectedPresetImage) {
       imageList.push(formData.selectedPresetImage);
@@ -162,6 +284,78 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Foydalanuvchi Profili va Kunlik Limit Banneri */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-[#e6e0da] dark:border-slate-800 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-base border border-blue-200/60 dark:border-blue-900/50 shrink-0">
+            {isAdmin ? '👑' : '👤'}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-black text-slate-900 dark:text-white">
+                {isAdmin ? 'Admin' : (currentUser?.name || (lang === 'ru' ? 'Специалист' : 'Mutaxassis'))}
+              </span>
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200/60 dark:border-blue-900/50">
+                {isAdmin ? 'ADMIN' : (currentUser?.role || 'SPECIALIST')}
+              </span>
+            </div>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+              {isAdmin ? (lang === 'ru' ? 'Сессия админа' : 'Admin sessiyasi') : currentUser?.phone}
+            </span>
+          </div>
+        </div>
+
+        {/* Limit Ko'rsatkichi */}
+        <div className="flex items-center gap-3 self-end sm:self-auto">
+          {isAdmin ? (
+            <div className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{lang === 'ru' ? 'Безлимитная публикация' : "Cheksiz e'lon berish"}</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs">
+              <div>
+                <span className="text-slate-500 dark:text-slate-400 block text-[10px] font-bold uppercase tracking-wider">
+                  {lang === 'ru' ? 'Лимит объявлений:' : "E'lon berish limiti:"}
+                </span>
+                <span className="font-extrabold text-slate-900 dark:text-white">
+                  {totalUsed} / {currentLimit} {lang === 'ru' ? 'объявлений' : "ta e'lon"}
+                </span>
+              </div>
+              <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1" />
+              <button
+                type="button"
+                onClick={async () => {
+                  await logoutUserAction();
+                  setCurrentUser(null);
+                }}
+                className="text-xs text-red-600 dark:text-red-400 hover:underline font-bold cursor-pointer"
+              >
+                {lang === 'ru' ? 'Выйти' : 'Chiqish'}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Limit tugagan bo'lsa ogohlantirish */}
+      {isLimitReached && (
+        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-700 flex items-center gap-3 text-amber-900 dark:text-amber-200 text-xs sm:text-sm animate-in fade-in">
+          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+          <div>
+            <span className="font-bold block">
+              {lang === 'ru' ? 'Лимит объявлений исчерпан!' : "E'lon berish limitingiz tugadi!"}
+            </span>
+            <span>
+              {lang === 'ru'
+                ? `Вы использовали свой лимит объявлений (${totalUsed}/${currentLimit}). Чтобы увеличить лимит, обратитесь к администратору.`
+                : `Siz e'lon berish limitingizga (${totalUsed}/${currentLimit}) yetdingiz. Limitni oshirish uchun adminga murojaat qiling.`}
+            </span>
+          </div>
+        </div>
+      )}
+
+
       {serverError && (
         <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2.5 animate-in fade-in">
           <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
@@ -258,7 +452,7 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
             >
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {getCategoryLocalizedName(c.name, lang)}
+                  {getCatName(c)}
                 </option>
               ))}
             </select>
@@ -278,7 +472,7 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
               <option value="">{lang === 'ru' ? "-- Выберите подкатегорию --" : "-- Ichki yo'nalishni tanlang --"}</option>
               {currentCategory?.subCategories.map((sc) => (
                 <option key={sc.id} value={sc.id}>
-                  {getCategoryLocalizedName(sc.name, lang)}
+                  {getSubCatName(sc)}
                 </option>
               ))}
             </select>
@@ -462,70 +656,255 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
           {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description}</p>}
         </div>
 
-        {/* Rasm tanlash / URL */}
-        <div className="space-y-3">
-          <label className="block text-xs sm:text-sm font-semibold text-[#282624] dark:text-slate-200">
-            {t.newListing.imageLabel}
-          </label>
-
-          {/* Oson tanlash uchun tayyor professional usta rasmlari */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {PRESET_IMAGES.map((preset) => {
-              const isSelected =
-                formData.selectedPresetImage === preset.url && !formData.imageUrl;
-              const presetLabel = lang === 'ru' ? preset.labelRu : preset.labelUz;
-              return (
-                <div
-                  key={preset.slug}
-                  onClick={() => {
-                    setFormData({
-                      ...formData,
-                      selectedPresetImage: preset.url,
-                      imageUrl: '',
-                    });
-                  }}
-                  className={`relative cursor-pointer rounded-2xl overflow-hidden border-2 transition-all group active:scale-95 touch-manipulation ${
-                    isSelected
-                      ? 'border-blue-600 ring-4 ring-blue-500/20 shadow-md'
-                      : 'border-[#e6e0da] dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500'
-                  }`}
-                >
-                  <SafeImage
-                    src={preset.url}
-                    alt={presetLabel}
-                    className="w-full h-24 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-black/45 flex items-center justify-center p-1">
-                    <span className="text-white text-xs font-bold text-center drop-shadow-md">
-                      {presetLabel}
-                    </span>
-                  </div>
-                  {isSelected && (
-                    <div className="absolute top-1.5 right-1.5 bg-blue-600 text-white rounded-full p-0.5 shadow-sm">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Yoki o'z rasm havolasini kiritish */}
-          <div className="pt-2">
-            <span className="text-xs text-[#67625d] dark:text-slate-400 block mb-1.5 font-medium">
-              {lang === 'ru' ? "Или укажите прямую ссылку на фото (URL):" : "Yoki o'z rasmingiz havolasi (URL):"}
+        {/* Rasm tanlash / Yuklash / URL */}
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <label className="block text-xs sm:text-sm font-semibold text-[#282624] dark:text-slate-200">
+              {t.newListing.imageLabel}
+            </label>
+            <span className="text-[11px] text-[#67625d] dark:text-slate-400">
+              {uploadedImages.length > 0
+                ? (lang === 'ru' ? `Загружено ${uploadedImages.length} фото` : `${uploadedImages.length} ta rasm yuklandi`)
+                : (lang === 'ru' ? 'Выберите способ добавления фото' : "Rasm qo'shish usulini tanlang")}
             </span>
-            <div className="relative">
-              <ImageIcon className="absolute left-3.5 top-3.5 w-4 h-4 text-[#67625d] dark:text-slate-400 pointer-events-none" />
-              <input
-                type="url"
-                value={formData.imageUrl}
-                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                placeholder="https://images.unsplash.com/photo-..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#e6e0da] dark:border-slate-700 text-xs sm:text-sm text-[#282624] dark:text-white bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-              />
-            </div>
           </div>
+
+          {/* Tab tugmalari */}
+          <div className="grid grid-cols-3 p-1 rounded-2xl bg-[#f6f3ef] dark:bg-slate-800/80 border border-[#e6e0da] dark:border-slate-700 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => setActiveImageTab('upload')}
+              className={`py-2 px-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation ${
+                activeImageTab === 'upload'
+                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                  : 'text-[#67625d] dark:text-slate-400 hover:text-[#282624] dark:hover:text-slate-200'
+              }`}
+            >
+              <UploadCloud className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">
+                {lang === 'ru' ? 'Загрузить' : 'Fayl yuklash'}
+              </span>
+              {uploadedImages.length > 0 && (
+                <span className="ml-1 w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center font-bold">
+                  {uploadedImages.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveImageTab('preset')}
+              className={`py-2 px-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation ${
+                activeImageTab === 'preset'
+                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                  : 'text-[#67625d] dark:text-slate-400 hover:text-[#282624] dark:hover:text-slate-200'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">
+                {lang === 'ru' ? 'Примеры (18)' : 'Namunalar (18)'}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveImageTab('url')}
+              className={`py-2 px-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation ${
+                activeImageTab === 'url'
+                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                  : 'text-[#67625d] dark:text-slate-400 hover:text-[#282624] dark:hover:text-slate-200'
+              }`}
+            >
+              <ImageIcon className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">
+                {lang === 'ru' ? 'Ссылка (URL)' : 'Havola (URL)'}
+              </span>
+            </button>
+          </div>
+
+          {/* TAB 1: Fayl yuklash */}
+          {activeImageTab === 'upload' && (
+            <div className="space-y-4">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/jpg"
+                multiple
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+
+              {/* Upload Dropzone */}
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-[#d5cec6] dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 rounded-3xl p-6 sm:p-8 text-center cursor-pointer transition-all bg-[#faf8f5] dark:bg-slate-800/40 hover:bg-blue-50/30 dark:hover:bg-slate-800/70 group"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                  <UploadCloud className="w-7 h-7" />
+                </div>
+                <h4 className="text-sm font-bold text-[#282624] dark:text-slate-200 mb-1">
+                  {lang === 'ru' ? 'Нажмите, чтобы загрузить фото с устройства' : "Qurilmadan rasm yuklash uchun bosing"}
+                </h4>
+                <p className="text-xs text-[#67625d] dark:text-slate-400 max-w-sm mx-auto">
+                  {lang === 'ru'
+                    ? 'JPG, PNG, WebP — до 10 МБ (до 5 фотографий)'
+                    : "JPG, PNG, WebP — 10 MB gacha (5 tagacha rasm yuklash mumkin)"}
+                </p>
+                <button
+                  type="button"
+                  className="mt-3 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{lang === 'ru' ? 'Выбрать файлы' : 'Fayllarni tanlash'}</span>
+                </button>
+              </div>
+
+              {/* Yuklanayotgan holat */}
+              {isUploading && (
+                <div className="flex items-center justify-center gap-3 p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-xs font-semibold">
+                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  <span>{lang === 'ru' ? 'Загрузка фотографий...' : 'Rasmlar yuklanmoqda...'}</span>
+                </div>
+              )}
+
+              {/* Xatolik bo'lsa */}
+              {uploadError && (
+                <div className="p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{uploadError}</span>
+                </div>
+              )}
+
+              {/* Yuklangan rasmlar ro'yxati */}
+              {uploadedImages.length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-xs font-semibold text-[#282624] dark:text-slate-200 block">
+                    {lang === 'ru' ? 'Загруженные фото:' : 'Yuklangan rasmlar:'}
+                  </span>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {uploadedImages.map((imgUrl, index) => (
+                      <div
+                        key={imgUrl + index}
+                        className="relative rounded-2xl overflow-hidden border border-[#e6e0da] dark:border-slate-700 group bg-slate-100 dark:bg-slate-800"
+                      >
+                        <SafeImage
+                          src={imgUrl}
+                          alt={lang === 'ru' ? `Загруженное фото ${index + 1}` : `Yuklangan rasm ${index + 1}`}
+                          className="w-full h-24 object-cover"
+                        />
+                        {index === 0 && (
+                          <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-blue-600 text-white text-[10px] font-bold shadow-xs">
+                            {lang === 'ru' ? 'Главная' : 'Asosiy'}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeUploadedImage(index)}
+                          className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md transition-transform hover:scale-110 cursor-pointer"
+                          title={lang === 'ru' ? 'Удалить' : "O'chirish"}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 2: Namunaviy rasmlar (18 ta) */}
+          {activeImageTab === 'preset' && (
+            <div className="space-y-3">
+              <p className="text-xs text-[#67625d] dark:text-slate-400">
+                {lang === 'ru'
+                  ? 'Выберите подходящее изображение из нашей подборки (18 категорий):'
+                  : "Ushbu 18 ta tayyor toifaviy rasmlardan mosini tanlashingiz mumkin:"}
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 max-h-[360px] overflow-y-auto pr-1">
+                {PRESET_IMAGES.map((preset) => {
+                  const isSelected =
+                    formData.selectedPresetImage === preset.url &&
+                    !formData.imageUrl &&
+                    uploadedImages.length === 0;
+                  const presetLabel = lang === 'ru' ? preset.labelRu : preset.labelUz;
+                  return (
+                    <div
+                      key={preset.slug}
+                      onClick={() => {
+                        setUploadedImages([]);
+                        setFormData({
+                          ...formData,
+                          selectedPresetImage: preset.url,
+                          imageUrl: '',
+                        });
+                      }}
+                      className={`relative cursor-pointer rounded-2xl overflow-hidden border-2 transition-all group active:scale-95 touch-manipulation ${
+                        isSelected
+                          ? 'border-blue-600 ring-4 ring-blue-500/20 shadow-md'
+                          : 'border-[#e6e0da] dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500'
+                      }`}
+                    >
+                      <SafeImage
+                        src={preset.url}
+                        alt={presetLabel}
+                        className="w-full h-20 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-black/45 flex items-center justify-center p-1">
+                        <span className="text-white text-[11px] font-bold text-center drop-shadow-md leading-tight">
+                          {presetLabel}
+                        </span>
+                      </div>
+                      {isSelected && (
+                        <div className="absolute top-1.5 right-1.5 bg-blue-600 text-white rounded-full p-0.5 shadow-sm">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: Rasm havolasi (URL) */}
+          {activeImageTab === 'url' && (
+            <div className="space-y-3">
+              <span className="text-xs text-[#67625d] dark:text-slate-400 block font-medium">
+                {lang === 'ru'
+                  ? "Укажите прямую интернет-ссылку на фотографию (URL):"
+                  : "Internetdagi rasmning to'g'ridan-to'g'ri havolasini (URL) kiriting:"}
+              </span>
+              <div className="relative">
+                <ImageIcon className="absolute left-3.5 top-3.5 w-4 h-4 text-[#67625d] dark:text-slate-400 pointer-events-none" />
+                <input
+                  type="url"
+                  value={formData.imageUrl}
+                  onChange={(e) => {
+                    setUploadedImages([]);
+                    setFormData({ ...formData, imageUrl: e.target.value });
+                  }}
+                  placeholder="https://images.unsplash.com/photo-..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#e6e0da] dark:border-slate-700 text-xs sm:text-sm text-[#282624] dark:text-white bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                />
+              </div>
+
+              {formData.imageUrl && (
+                <div className="mt-2">
+                  <span className="text-[11px] text-[#67625d] dark:text-slate-400 block mb-1">
+                    {lang === 'ru' ? 'Предпросмотр:' : "Ko'rinishi:"}
+                  </span>
+                  <div className="w-32 h-20 rounded-xl overflow-hidden border border-[#e6e0da] dark:border-slate-700">
+                    <SafeImage
+                      src={formData.imageUrl}
+                      alt="URL Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -541,7 +920,7 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
 
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isLimitReached}
           className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:opacity-95 active:scale-95 text-white text-sm font-bold shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer touch-manipulation"
         >
           {isSubmitting ? (
@@ -549,6 +928,8 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               <span>{t.newListing.submitting}</span>
             </>
+          ) : isLimitReached ? (
+            <span>{lang === 'ru' ? 'Лимит исчерпан' : 'Limit tugagan'}</span>
           ) : (
             <>
               <Sparkles className="w-4 h-4" />
@@ -557,6 +938,29 @@ export default function NewListingForm({ categories }: NewListingFormProps) {
           )}
         </button>
       </div>
+
+      {/* Yuklanish (Submitting) Modali */}
+      {isSubmitting && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-[#e6e0da] dark:border-zinc-800 p-8 max-w-sm w-full shadow-2xl flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-200">
+            <div className="relative w-16 h-16 mb-4 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border-3 border-transparent border-t-blue-600 border-r-indigo-500 animate-spin" />
+              <div
+                className="absolute inset-2 rounded-full border-2 border-transparent border-b-sky-400 border-l-blue-400 animate-spin"
+                style={{ animationDirection: 'reverse', animationDuration: '1s' }}
+              />
+              <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h4 className="text-base font-bold text-[#282624] dark:text-zinc-100 mb-1">
+              {lang === 'ru' ? 'Публикация объявления...' : "E'lon joylanmoqda..."}
+            </h4>
+            <p className="text-xs text-[#67625d] dark:text-zinc-400">
+              {lang === 'ru' ? 'Пожалуйста, подождите несколько секунд' : 'Iltimos, bir necha soniya kuting'}
+            </p>
+          </div>
+        </div>
+      )}
     </form>
   );
 }
+

@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminLoginAction } from '@/actions/admin-actions';
+import { useLanguage } from '@/context/LanguageContext';
 import { ShieldCheck, KeyRound, ArrowRight, AlertCircle, Eye, EyeOff, Lock } from 'lucide-react';
 
 export default function AdminLoginForm() {
+  const { lang } = useLanguage();
   const [pin, setPin] = useState('');
   const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +19,7 @@ export default function AdminLoginForm() {
     setError(null);
 
     if (!pin.trim()) {
-      setError('Iltimos, PIN-kodni kiriting');
+      setError(lang === 'ru' ? 'Пожалуйста, введите PIN-код' : 'Iltimos, PIN-kodni kiriting');
       return;
     }
 
@@ -28,10 +30,10 @@ export default function AdminLoginForm() {
         router.push('/admin');
         router.refresh();
       } else {
-        setError(res.message || "Noto'g'ri kod");
+        setError(res.message || (lang === 'ru' ? 'Неверный код' : "Noto'g'ri kod"));
       }
     } catch (err: any) {
-      setError(err?.message || "Kutilmagan xatolik");
+      setError(err?.message || (lang === 'ru' ? 'Непредвиденная ошибка' : 'Kutilmagan xatolik'));
     } finally {
       setLoading(false);
     }
@@ -45,10 +47,12 @@ export default function AdminLoginForm() {
 
       <div className="text-center mb-6">
         <h1 className="text-xl font-extrabold text-[#282624] dark:text-zinc-100 tracking-tight">
-          Admin Panelga Kirish
+          {lang === 'ru' ? 'Вход в панель администратора' : 'Admin Panelga Kirish'}
         </h1>
         <p className="text-xs text-[#67625d] dark:text-zinc-400 mt-1.5 leading-relaxed">
-          Sirdaryo Xizmat platformasi ma'muriyati uchun xavfsiz boshqaruv tizimi
+          {lang === 'ru'
+            ? 'Безопасная система управления платформой Сырдарья Услуги'
+            : "Sirdaryo Xizmat platformasi ma'muriyati uchun xavfsiz boshqaruv tizimi"}
         </p>
       </div>
 
@@ -62,7 +66,7 @@ export default function AdminLoginForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-xs font-bold text-[#282624] dark:text-zinc-200 mb-1.5">
-            Admin Maxfiy PIN-kod
+            {lang === 'ru' ? 'Секретный PIN-код администратора' : 'Admin Maxfiy PIN-kod'}
           </label>
           <div className="relative">
             <KeyRound className="absolute left-3.5 top-3 w-4 h-4 text-[#67625d] dark:text-zinc-400 pointer-events-none" />
@@ -79,7 +83,7 @@ export default function AdminLoginForm() {
               type="button"
               onClick={() => setShowPin(!showPin)}
               className="absolute right-3 top-2.5 text-[#67625d] dark:text-zinc-400 hover:text-[#282624] dark:hover:text-zinc-100 p-0.5 rounded-md transition-colors"
-              title={showPin ? "Yashirish" : "Ko'rsatish"}
+              title={showPin ? (lang === 'ru' ? 'Скрыть' : 'Yashirish') : (lang === 'ru' ? 'Показать' : "Ko'rsatish")}
               tabIndex={-1}
             >
               {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -96,7 +100,7 @@ export default function AdminLoginForm() {
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
-              <span>Tizimga kirish</span>
+              <span>{lang === 'ru' ? 'Войти в систему' : 'Tizimga kirish'}</span>
               <ArrowRight className="w-4 h-4" />
             </>
           )}
@@ -104,7 +108,7 @@ export default function AdminLoginForm() {
 
         <div className="pt-2 flex items-center justify-center gap-1.5 text-[11px] text-[#67625d]">
           <Lock className="w-3 h-3 text-emerald-600" />
-          <span>Shifrlangan himoyalangan sessiya</span>
+          <span>{lang === 'ru' ? 'Зашифрованная защищенная сессия' : 'Shifrlangan himoyalangan sessiya'}</span>
         </div>
       </form>
     </div>

@@ -34,8 +34,13 @@ import {
   Star,
   RefreshCw,
   Globe,
+  Edit3,
+  Users,
+  User,
 } from 'lucide-react';
 import SafeImage from '@/components/SafeImage';
+import AdminEditListingModal from '@/components/AdminEditListingModal';
+import AdminUsersTab from '@/components/AdminUsersTab';
 
 interface AdminDashboardClientProps {
   stats: {
@@ -51,21 +56,39 @@ interface AdminDashboardClientProps {
     totalViews: number;
   };
   initialListings: any[];
+  categories?: any[];
 }
 
-export default function AdminDashboardClient({ stats, initialListings }: AdminDashboardClientProps) {
+export default function AdminDashboardClient({
+  stats,
+  initialListings,
+  categories = [],
+}: AdminDashboardClientProps) {
   const [listings, setListings] = useState(initialListings);
   const [statusFilter, setStatusFilter] = useState<'ALL' | ListingStatus>('ALL');
+  const [ownershipFilter, setOwnershipFilter] = useState<'ALL' | 'MY' | 'OTHERS'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'LISTINGS' | 'USERS'>('LISTINGS');
+  const [editingListing, setEditingListing] = useState<any | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const router = useRouter();
 
-  // Qidiruv va status bo'yicha filtrlash
+  // O'zimniki va boshqalar hisoblagichlari
+  const myCount = listings.filter((l) => !l.userId).length;
+  const othersCount = listings.filter((l) => !!l.userId).length;
+
+  // Qidiruv, status va egasi bo'yicha filtrlash
   const filteredListings = listings.filter((l) => {
+    // 1. Egasi bo'yicha filtrlash (Admin uchun 3 ta tab)
+    if (ownershipFilter === 'MY' && l.userId) return false;
+    if (ownershipFilter === 'OTHERS' && !l.userId) return false;
+
+    // 2. Status bo'yicha filtrlash
     const matchesStatus = statusFilter === 'ALL' || l.status === statusFilter;
     if (!matchesStatus) return false;
 
+    // 3. Qidiruv bo'yicha filtrlash
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase().trim();
     return (
@@ -247,12 +270,31 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
 
         {/* Sub-Navigatsiya Tablari va Tugmalar */}
         <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href="/admin"
-            className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50"
+          <button
+            type="button"
+            onClick={() => setActiveTab('LISTINGS')}
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === 'LISTINGS'
+                ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50'
+                : 'text-[#67625d] dark:text-zinc-400 hover:text-[#282624] dark:hover:text-zinc-100 hover:bg-[#f6f3ef] dark:hover:bg-zinc-800'
+            }`}
           >
-            E'lonlar
-          </Link>
+            E'lonlar ({listings.length})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('USERS')}
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'USERS'
+                ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50'
+                : 'text-[#67625d] dark:text-zinc-400 hover:text-[#282624] dark:hover:text-zinc-100 hover:bg-[#f6f3ef] dark:hover:bg-zinc-800'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Xodimlar va Limitlar</span>
+          </button>
+
           <Link
             href="/admin/categories"
             className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-[#67625d] dark:text-zinc-400 hover:text-[#282624] dark:hover:text-zinc-100 hover:bg-[#f6f3ef] dark:hover:bg-zinc-800 transition-colors"
@@ -317,8 +359,13 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
         </div>
       )}
 
-      {/* Real-time DB Statistika Kartalari */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+      {/* Agar Xodimlar va Limitlar tabi tanlangan bo'lsa */}
+      {activeTab === 'USERS' ? (
+        <AdminUsersTab />
+      ) : (
+        <>
+          {/* Real-time DB Statistika Kartalari */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         <div className="bg-white dark:bg-zinc-900 p-4 sm:p-5 rounded-2xl border border-[#e6e0da] dark:border-zinc-800 shadow-2xs">
           <span className="text-[11px] font-bold text-[#67625d] dark:text-zinc-400 uppercase tracking-wider block">
             Jami E'lonlar
@@ -414,27 +461,66 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
           )}
         </div>
 
-        {/* Filtr tablari */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          {[
-            { label: `Hammasi (${listings.length})`, value: 'ALL' },
-            { label: `Tasdiqlangan (${listings.filter((l) => l.status === 'APPROVED').length})`, value: 'APPROVED' },
-            { label: `Kutilmoqda (${listings.filter((l) => l.status === 'PENDING').length})`, value: 'PENDING' },
-            { label: `Rad etilgan (${listings.filter((l) => l.status === 'REJECTED').length})`, value: 'REJECTED' },
-          ].map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setStatusFilter(tab.value as any)}
-              type="button"
-              className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                statusFilter === tab.value
-                  ? 'bg-[#282624] dark:bg-blue-600 text-white shadow-xs'
-                  : 'text-[#67625d] dark:text-zinc-400 hover:bg-[#f6f3ef] dark:hover:bg-zinc-800 hover:text-[#282624] dark:hover:text-white'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Filtr paneli: Egasi (3 ta tab) va Status */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
+          {/* Admin uchun 3 ta tab: Barchasi, O'zimniki, Boshqalar */}
+          <div className="inline-flex items-center p-1 rounded-2xl bg-slate-100 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700/80 shadow-2xs">
+            {[
+              { id: 'ALL', label: 'Barchasi', count: listings.length, icon: Globe },
+              { id: 'MY', label: "O'zimniki", count: myCount, icon: User },
+              { id: 'OTHERS', label: 'Boshqalar', count: othersCount, icon: Users },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = ownershipFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setOwnershipFilter(tab.id as any)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    isActive
+                      ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-xs'
+                      : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-blue-600 dark:text-white' : 'text-slate-400'}`} />
+                  <span>{tab.label}</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                      isActive
+                        ? 'bg-blue-50 dark:bg-blue-700 text-blue-700 dark:text-white'
+                        : 'bg-slate-200 dark:bg-zinc-700 text-slate-600 dark:text-zinc-300'
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Status Filtr tablari */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            {[
+              { label: `Hammasi (${listings.length})`, value: 'ALL' },
+              { label: `Tasdiqlangan (${listings.filter((l) => l.status === 'APPROVED').length})`, value: 'APPROVED' },
+              { label: `Kutilmoqda (${listings.filter((l) => l.status === 'PENDING').length})`, value: 'PENDING' },
+              { label: `Rad etilgan (${listings.filter((l) => l.status === 'REJECTED').length})`, value: 'REJECTED' },
+            ].map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setStatusFilter(tab.value as any)}
+                type="button"
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                  statusFilter === tab.value
+                    ? 'bg-[#282624] dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-xs'
+                    : 'text-[#67625d] dark:text-zinc-400 hover:bg-[#f6f3ef] dark:hover:bg-zinc-800 hover:text-[#282624] dark:hover:text-white'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -482,6 +568,19 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-full">
                             <CheckCircle2 className="w-3 h-3 text-blue-600 dark:text-blue-400 fill-blue-100 dark:fill-blue-950" />
                             Verified
+                          </span>
+                        )}
+
+                        {/* Mualliflik nishoni (Admin vs Foydalanuvchi) */}
+                        {item.userId ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-950/50 border border-violet-200 dark:border-violet-800 px-2 py-0.5 rounded-full">
+                            <Users className="w-3 h-3 text-violet-600 dark:text-violet-400" />
+                            Foydalanuvchi
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 px-2 py-0.5 rounded-full">
+                            <ShieldCheck className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                            Admin
                           </span>
                         )}
 
@@ -534,8 +633,19 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
                     </div>
                   </div>
 
-                  {/* O'ng taraf: Asosiy Harakatlar tugmalari */}
+                  {/* O'ng taraf: Boshqaruv tugmalari */}
                   <div className="flex items-center gap-1.5 self-end md:self-auto shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-[#e6e0da] dark:border-zinc-800 w-full md:w-auto justify-end">
+                    {/* To'liq tahrirlash (Edit) */}
+                    <button
+                      type="button"
+                      onClick={() => setEditingListing(item)}
+                      className="px-2.5 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                      title="E'lonni to'liq tahrirlash (Instagram, telefon, manzil va h.k.)"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                      <span>Tahrirlash</span>
+                    </button>
+
                     {/* Saytda ko'rish */}
                     <Link
                       href={`/listing/${item.id}`}
@@ -692,7 +802,24 @@ export default function AdminDashboardClient({ stats, initialListings }: AdminDa
           </div>
         )}
       </div>
+    </>
 
+  )}
+
+      {/* Admin To'liq Tahrirlash Modali */}
+      {editingListing && (
+        <AdminEditListingModal
+          listing={editingListing}
+          categories={categories}
+          onClose={() => setEditingListing(null)}
+          onSuccess={(updated) => {
+            setListings((prev) =>
+              prev.map((l) => (l.id === updated.id ? updated : l))
+            );
+            setMessage({ text: "E'lon muvaffaqiyatli to'liq tahrirlandi!", type: 'success' });
+          }}
+        />
+      )}
     </div>
   );
 }

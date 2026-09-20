@@ -73,8 +73,11 @@ export const metadata: Metadata = {
 
 
 import { LanguageProvider } from '@/context/LanguageContext';
+import { AuthProvider } from '@/context/AuthContext';
+import { getCurrentUserAction } from '@/actions/user-auth-actions';
 import { ThemeProvider } from '@/components/theme-provider';
 import Header from '@/components/header';
+import NavigationProgressBar from '@/components/NavigationProgressBar';
 import { cookies } from 'next/headers';
 import type { Language } from '@/lib/translations';
 
@@ -87,22 +90,29 @@ export default async function RootLayout({
   const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value as Language | undefined;
   const initialLang: Language = cookieLocale === 'ru' ? 'ru' : 'uz';
 
+  const userRes = await getCurrentUserAction();
+
   return (
     <html lang={initialLang} suppressHydrationWarning className={`${inter.variable} h-full antialiased`}>
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-[#fffdfa] dark:bg-[#0f172a] text-[#1e293b] dark:text-[#f8fafc] selection:bg-blue-600 selection:text-white pb-20 md:pb-0 transition-colors duration-200">
+        <Suspense fallback={null}>
+          <NavigationProgressBar />
+        </Suspense>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange={false}>
-          <LanguageProvider initialLang={initialLang}>
-            <Suspense fallback={<div className="h-14 sm:h-16 bg-[#fffdfa] dark:bg-[#1c1917] border-b border-[#e6e0da] dark:border-[#383430]" />}>
-              <Header />
-            </Suspense>
-            <main className="flex-1">{children}</main>
-            <Suspense fallback={null}>
-              <Footer />
-            </Suspense>
-            <Suspense fallback={null}>
-              <BottomNav />
-            </Suspense>
-          </LanguageProvider>
+          <AuthProvider initialUser={userRes.user}>
+            <LanguageProvider initialLang={initialLang}>
+              <Suspense fallback={<div className="h-14 sm:h-16 bg-[#fffdfa] dark:bg-[#1c1917] border-b border-[#e6e0da] dark:border-[#383430]" />}>
+                <Header />
+              </Suspense>
+              <main className="flex-1">{children}</main>
+              <Suspense fallback={null}>
+                <Footer />
+              </Suspense>
+              <Suspense fallback={null}>
+                <BottomNav />
+              </Suspense>
+            </LanguageProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

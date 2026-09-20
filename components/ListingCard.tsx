@@ -154,8 +154,21 @@ export default function ListingCard({ listing }: ListingCardProps) {
       {/* 2. Kartochka Tanasi */}
       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
         <div>
-          {/* Nishonlar qatori: VIP Homiy & Imtiyozli Usta */}
+          {/* Nishonlar qatori: Status, VIP Homiy & Imtiyozli Usta */}
           <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
+            {/* Tekshiruvda (Kutilmoqda) nishoni */}
+            {listing.status === 'PENDING' && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700 animate-pulse">
+                <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                <span>{lang === 'ru' ? 'На проверке' : 'Tekshiruvda'}</span>
+              </span>
+            )}
+            {listing.status === 'REJECTED' && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-red-500/15 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-700">
+                <span>{lang === 'ru' ? 'Отклонено' : 'Rad etilgan'}</span>
+              </span>
+            )}
+
             {/* VIP Homiylik nishoni */}
             {listing.paidTier === 'VIP_GOLD' && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-gradient-to-r from-amber-500/15 via-yellow-500/20 to-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40">

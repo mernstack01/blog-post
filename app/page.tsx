@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 import { getListings, getCategoriesAction } from '@/actions/listing-actions';
+import { getCurrentUserAction } from '@/actions/user-auth-actions';
+import { isUserAdmin } from '@/lib/admin-auth';
 import HeroSearch from '@/components/HeroSearch';
 import CategoryBar from '@/components/CategoryBar';
 import LocationPills from '@/components/LocationPills';
@@ -19,15 +21,20 @@ interface HomePageProps {
 
 import ModeTabSwitcher from '@/components/ModeTabSwitcher';
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage({ searchParams }: HomePageProps) {
   const resolvedSearchParams = await searchParams;
   const currentMode = resolvedSearchParams.mode === 'top10' ? 'top10' : 'all';
 
   // Parallel data fetching
-  const [listings, categories] = await Promise.all([
+  const [listings, categories, userRes, isAdmin] = await Promise.all([
     getListings(resolvedSearchParams),
     getCategoriesAction(),
+    getCurrentUserAction(),
+    isUserAdmin(),
   ]);
+
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -56,8 +63,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       {/* 5. Asosiy E'lonlar Gridi */}
       <Suspense fallback={<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-96 bg-slate-100/50 dark:bg-slate-800/40 rounded-2xl animate-pulse my-6" />}>
-        <ListingGrid listings={listings} />
+        <ListingGrid listings={listings} currentUser={userRes.user} isAdmin={isAdmin} />
       </Suspense>
+
 
       {/* 6. Ishonch va Statistika Bo'limi */}
       <Suspense fallback={null}>

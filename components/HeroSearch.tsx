@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, FormEvent } from 'react';
 import { Search, MapPin, Sparkles, ArrowRight } from 'lucide-react';
-import { SIRDARYO_LOCATIONS, POPULAR_SEARCH_TAGS } from '@/lib/constants';
+import { SIRDARYO_LOCATIONS, POPULAR_SEARCH_TAGS_MAP } from '@/lib/constants';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface HeroSearchProps {
@@ -14,7 +14,7 @@ interface HeroSearchProps {
 export default function HeroSearch({ initialQuery = '', initialLocation = '' }: HeroSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   
   const [query, setQuery] = useState(initialQuery || searchParams.get('q') || '');
   const [location, setLocation] = useState(initialLocation || searchParams.get('location') || 'Barcha hududlar');
@@ -119,16 +119,19 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
             <Sparkles className="w-3 h-3 text-amber-500" />
             {t.hero.popularSearch}
           </span>
-          {POPULAR_SEARCH_TAGS.map((tag) => (
-            <button
-              key={tag}
-              onClick={() => handleTagClick(tag)}
-              type="button"
-              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-400 dark:hover:text-blue-400 text-xs font-medium transition-colors cursor-pointer"
-            >
-              {tag}
-            </button>
-          ))}
+          {POPULAR_SEARCH_TAGS_MAP.map((tagItem) => {
+            const tagLabel = tagItem[lang] || tagItem.uz;
+            return (
+              <button
+                key={tagItem.uz}
+                onClick={() => handleTagClick(tagLabel)}
+                type="button"
+                className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-400 dark:hover:text-blue-400 text-xs font-medium transition-colors cursor-pointer"
+              >
+                {tagLabel}
+              </button>
+            );
+          })}
         </div>
 
       </div>

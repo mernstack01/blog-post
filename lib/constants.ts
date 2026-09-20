@@ -14,18 +14,20 @@ export const SIRDARYO_LOCATIONS = [
 
 export type SirdaryoLocation = (typeof SIRDARYO_LOCATIONS)[number];
 
-export const POPULAR_SEARCH_TAGS = [
-  'O\'quv markazi',
-  'Restoran & Kafe',
-  'Shifokor',
-  'Repetitor',
-  'Santexnik',
-  'Elektrik',
-  'Dasturchi',
-  'Avto ta\'mir',
-  'Yuk tashish',
-  'Mehmonxona',
-] as const;
+export const POPULAR_SEARCH_TAGS_MAP: { uz: string; ru: string }[] = [
+  { uz: "O'quv markazi", ru: "Учебный центр" },
+  { uz: "Restoran & Kafe", ru: "Ресторан и Кафе" },
+  { uz: "Shifokor", ru: "Врач" },
+  { uz: "Repetitor", ru: "Репетитор" },
+  { uz: "Santexnik", ru: "Сантехник" },
+  { uz: "Elektrik", ru: "Электрик" },
+  { uz: "Dasturchi", ru: "Программист" },
+  { uz: "Avto ta'mir", ru: "Авторемонт" },
+  { uz: "Yuk tashish", ru: "Грузоперевозки" },
+  { uz: "Mehmonxona", ru: "Гостиница" },
+];
+
+export const POPULAR_SEARCH_TAGS = POPULAR_SEARCH_TAGS_MAP.map((t) => t.uz);
 
 export const CATEGORY_ICONS: Record<string, string> = {
   Wrench: 'Wrench',

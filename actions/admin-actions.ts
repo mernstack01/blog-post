@@ -3,9 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { isUserAdmin, setAdminAuthSession, clearAdminAuthSession, verifyAdminPin } from '@/lib/admin-auth';
-import { ListingStatus, PaidTier, PrivilegeType } from '@prisma/client';
-import { calculateListingScore } from '@/lib/scoring';
+import { Role } from '@prisma/client';
+import { ListingStatus, PaidTier, PrivilegeType, calculateListingScore } from '@/lib/scoring';
 import { redirect } from 'next/navigation';
+import { getUserAuthSession, setUserAuthSession, clearUserAuthSession } from '@/lib/user-auth';
 
 // Brute-force himoyasi uchun xotirada urinishlarni saqlash
 const MAX_FAILED_ATTEMPTS = 5;
@@ -74,6 +75,36 @@ export async function adminLoginAction(pin: string) {
     if (isValid) {
       resetAttempts(rateLimitKey);
       await setAdminAuthSession();
+
+      // Agar hozirda biror foydalanuvchi tizimga kirgan bo'lsa, uning hisobini ADMIN roliga yangilash, aks holda default SuperAdmin sessiyasi o'rnatish
+      try {
+        const userSession = await getUserAuthSession();
+        if (userSession?.userId) {
+          await prisma.user.update({
+            where: { id: userSession.userId },
+            data: { role: Role.ADMIN },
+          });
+          await setUserAuthSession(userSession.userId, userSession.phone, Role.ADMIN);
+        } else {
+          let adminUser = await prisma.user.findFirst({
+            where: { role: Role.ADMIN },
+          });
+          if (!adminUser) {
+            adminUser = await prisma.user.create({
+              data: {
+                phone: '+998000000000',
+                name: 'SuperAdmin',
+                role: Role.ADMIN,
+                listingLimit: 9999,
+              } as any,
+            });
+          }
+          await setUserAuthSession(adminUser.id, adminUser.phone, Role.ADMIN);
+        }
+      } catch (userErr) {
+        console.warn('Foydalanuvchi rolini ADMIN ga yangilashda ogohlantirish:', userErr);
+      }
+
       return { success: true };
     }
 
@@ -97,6 +128,7 @@ export async function adminLoginAction(pin: string) {
 
 export async function adminLogoutAction() {
   await clearAdminAuthSession();
+  await clearUserAuthSession();
   redirect('/admin/login');
 }
 
@@ -125,7 +157,7 @@ export async function getAdminStatsAction() {
     prisma.listing.count({
       where: {
         paidTier: { in: [PaidTier.VIP_GOLD, PaidTier.STANDARD] },
-      },
+      } as any,
     }),
     prisma.listing.count({
       where: {
@@ -137,7 +169,7 @@ export async function getAdminStatsAction() {
             PrivilegeType.SOCIAL_PROTECT,
           ],
         },
-      },
+      } as any,
     }),
     prisma.category.count(),
     (async () => {
@@ -282,7 +314,7 @@ export async function adminUpdateStaffRatingAction(id: string, staffRating: numb
   if (!isAdmin) return { success: false, message: "Ruxsat yo'q" };
 
   try {
-    const listing = await prisma.listing.findUnique({ where: { id } });
+    const listing: any = await prisma.listing.findUnique({ where: { id } });
     if (!listing) return { success: false, message: "E'lon topilmadi" };
 
     const newScore = calculateListingScore({
@@ -295,12 +327,12 @@ export async function adminUpdateStaffRatingAction(id: string, staffRating: numb
       isVerified: listing.isVerified,
     });
 
-    const updated = await prisma.listing.update({
+    const updated: any = await prisma.listing.update({
       where: { id },
       data: {
         adminRating: staffRating,
         totalScore: newScore,
-      },
+      } as any,
     });
 
     try {
@@ -332,7 +364,7 @@ export async function adminUpdatePrivilegeAction(
   if (!isAdmin) return { success: false, message: "Ruxsat yo'q" };
 
   try {
-    const listing = await prisma.listing.findUnique({ where: { id } });
+    const listing: any = await prisma.listing.findUnique({ where: { id } });
     if (!listing) return { success: false, message: "E'lon topilmadi" };
 
     const isPrivileged = privilegeType !== PrivilegeType.NONE;
@@ -347,14 +379,14 @@ export async function adminUpdatePrivilegeAction(
       isVerified: listing.isVerified,
     });
 
-    const updated = await prisma.listing.update({
+    const updated: any = await prisma.listing.update({
       where: { id },
       data: {
         privilegeType,
         privilegeReason: isPrivileged ? privilegeReason || "Ijtimoiy imtiyoz" : null,
         isPrivileged,
         totalScore: newScore,
-      },
+      } as any,
     });
 
     try {
@@ -389,7 +421,7 @@ export async function adminUpdatePaidTierAction(
   if (!isAdmin) return { success: false, message: "Ruxsat yo'q" };
 
   try {
-    const listing = await prisma.listing.findUnique({ where: { id } });
+    const listing: any = await prisma.listing.findUnique({ where: { id } });
     if (!listing) return { success: false, message: "E'lon topilmadi" };
 
     const paidUntil = paidTier !== PaidTier.FREE && durationDays > 0
@@ -406,13 +438,13 @@ export async function adminUpdatePaidTierAction(
       isVerified: listing.isVerified,
     });
 
-    const updated = await prisma.listing.update({
+    const updated: any = await prisma.listing.update({
       where: { id },
       data: {
         paidTier,
         paidUntil,
         totalScore: newScore,
-      },
+      } as any,
     });
 
     try {
@@ -441,7 +473,7 @@ export async function adminSyncListingScoresAction() {
   if (!isAdmin) return { success: false, message: "Ruxsat yo'q" };
 
   try {
-    const listings = await prisma.listing.findMany();
+    const listings: any[] = await prisma.listing.findMany();
     let updatedCount = 0;
 
     for (const item of listings) {
@@ -457,7 +489,7 @@ export async function adminSyncListingScoresAction() {
 
       await prisma.listing.update({
         where: { id: item.id },
-        data: { totalScore: score },
+        data: { totalScore: score } as any,
       });
       updatedCount++;
     }
@@ -470,5 +502,207 @@ export async function adminSyncListingScoresAction() {
     return { success: true, count: updatedCount, message: `${updatedCount} ta e'lonning ballari muvaffaqiyatli hisoblandi!` };
   } catch (error: any) {
     return { success: false, message: error?.message || "Xatolik yuz berdi" };
+  }
+}
+
+export interface AdminUpdateListingInput {
+  title?: string;
+  name?: string;
+  phone?: string;
+  description?: string;
+  instagram?: string | null;
+  telegram?: string | null;
+  websiteUrl?: string | null;
+  location?: string;
+  address?: string | null;
+  price?: string | null;
+  experience?: string | null;
+  categoryId?: string;
+  subCategoryId?: string | null;
+  status?: ListingStatus;
+  paidTier?: PaidTier;
+  isPrivileged?: boolean;
+  privilegeType?: PrivilegeType;
+  privilegeReason?: string | null;
+  adminRating?: number;
+  clientRating?: number;
+  isVerified?: boolean;
+}
+
+/**
+ * Admin: E'lonni to'liq tahrirlash (Instagram, telefon, tavsif, manzil, status va h.k.)
+ */
+export async function adminUpdateListingFullAction(id: string, data: AdminUpdateListingInput) {
+  const isAdmin = await isUserAdmin();
+  if (!isAdmin) return { success: false, message: "Ruxsat berilmagan" };
+
+  try {
+    const existing: any = await prisma.listing.findUnique({ where: { id } });
+    if (!existing) return { success: false, message: "E'lon topilmadi" };
+
+    const adminRating = data.adminRating !== undefined ? data.adminRating : existing.adminRating;
+    const clientRating = data.clientRating !== undefined ? data.clientRating : existing.clientRating;
+    const paidTier = data.paidTier !== undefined ? data.paidTier : existing.paidTier;
+    const isPrivileged = data.isPrivileged !== undefined ? data.isPrivileged : existing.isPrivileged;
+    const websiteUrl = data.websiteUrl !== undefined ? data.websiteUrl : existing.websiteUrl;
+    const isVerified = data.isVerified !== undefined ? data.isVerified : existing.isVerified;
+
+    const newScore = calculateListingScore({
+      adminRating,
+      clientRating,
+      reviewCount: existing.reviewCount,
+      paidTier,
+      isPrivileged,
+      websiteUrl,
+      isVerified,
+    });
+
+    const updated: any = await prisma.listing.update({
+      where: { id },
+      data: {
+        ...(data.title !== undefined && { title: data.title.trim() }),
+        ...(data.name !== undefined && { name: data.name.trim() }),
+        ...(data.phone !== undefined && { phone: data.phone.trim() }),
+        ...(data.description !== undefined && { description: data.description.trim() }),
+        ...(data.instagram !== undefined && { instagram: data.instagram ? data.instagram.trim() : null }),
+        ...(data.telegram !== undefined && { telegram: data.telegram ? data.telegram.trim() : null }),
+        ...(data.websiteUrl !== undefined && { websiteUrl: data.websiteUrl ? data.websiteUrl.trim() : null }),
+        ...(data.location !== undefined && { location: data.location.trim() }),
+        ...(data.address !== undefined && { address: data.address ? data.address.trim() : null }),
+        ...(data.price !== undefined && { price: data.price ? data.price.trim() : 'Kelishilgan holda' }),
+        ...(data.experience !== undefined && { experience: data.experience ? data.experience.trim() : 'Mavjud' }),
+        ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
+        ...(data.subCategoryId !== undefined && { subCategoryId: data.subCategoryId || null }),
+        ...(data.status !== undefined && { status: data.status }),
+        ...(data.paidTier !== undefined && { paidTier: data.paidTier }),
+        ...(data.isPrivileged !== undefined && { isPrivileged: data.isPrivileged }),
+        ...(data.privilegeType !== undefined && { privilegeType: data.privilegeType }),
+        ...(data.privilegeReason !== undefined && { privilegeReason: data.privilegeReason ? data.privilegeReason.trim() : null }),
+        ...(data.adminRating !== undefined && { adminRating }),
+        ...(data.clientRating !== undefined && { clientRating }),
+        ...(data.isVerified !== undefined && { isVerified }),
+        totalScore: newScore,
+      } as any,
+      include: {
+        category: { select: { id: true, name: true, slug: true } },
+        subCategory: { select: { id: true, name: true, slug: true } },
+      },
+    });
+
+    try {
+      revalidatePath('/');
+      revalidatePath('/admin');
+      revalidatePath(`/listing/${id}`);
+      revalidatePath('/categories');
+    } catch {}
+
+    return {
+      success: true,
+      message: "E'lon muvaffaqiyatli to'liq tahrirlandi!",
+      listing: updated,
+    };
+  } catch (error: any) {
+    console.error('adminUpdateListingFullAction error:', error);
+    return { success: false, message: error?.message || "Tahrirlashda xatolik yuz berdi" };
+  }
+}
+
+/**
+ * Admin: Ro'yxatdan o'tgan foydalanuvchilar va ularning limitlari ro'yxatini olish
+ */
+export async function adminGetUsersAction() {
+  const isAdmin = await isUserAdmin();
+  if (!isAdmin) return { success: false, users: [], message: "Ruxsat berilmagan" };
+
+  try {
+    const users = await prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: {
+          select: { listings: true },
+        },
+      },
+    });
+
+    // Har bir user uchun e'lonlar statistikasi
+    const usersWithStats = users.map((u) => {
+      const userLimit = (u as any).listingLimit ?? (u as any).dailyLimit ?? 3;
+      return {
+        id: u.id,
+        phone: u.phone,
+        name: u.name,
+        role: u.role,
+        listingLimit: userLimit,
+        totalListings: u._count.listings,
+        createdAt: u.createdAt,
+      };
+    });
+
+    return { success: true, users: usersWithStats };
+  } catch (error: any) {
+    console.error('adminGetUsersAction error:', error);
+    return { success: false, users: [], message: error?.message || "Xatolik yuz berdi" };
+  }
+}
+
+/**
+ * Admin: Foydalanuvchining butun umrlik e'lon limitini o'zgartirish (CRUD)
+ */
+export async function adminUpdateUserLimitAction(userId: string, newLimit: number) {
+  const isAdmin = await isUserAdmin();
+  if (!isAdmin) return { success: false, message: "Ruxsat berilmagan" };
+
+  if (typeof newLimit !== 'number' || newLimit < 0 || newLimit > 1000) {
+    return { success: false, message: "Limit 0 dan 1000 gacha bo'lgan butun son bo'lishi kerak." };
+  }
+
+  try {
+    const limitVal = Math.floor(newLimit);
+    let updated;
+    try {
+      updated = await prisma.user.update({
+        where: { id: userId },
+        data: { listingLimit: limitVal, dailyLimit: limitVal } as any,
+      });
+    } catch {
+      updated = await prisma.user.update({
+        where: { id: userId },
+        data: { dailyLimit: limitVal } as any,
+      });
+    }
+
+    return {
+      success: true,
+      message: `${updated.name} uchun e'lon berish limiti ${limitVal} taga o'zgartirildi!`,
+      listingLimit: limitVal,
+    };
+  } catch (error: any) {
+    console.error('adminUpdateUserLimitAction error:', error);
+    return { success: false, message: error?.message || "Limitni yangilashda xatolik yuz berdi" };
+  }
+}
+
+
+/**
+ * Admin: Foydalanuvchi rolini o'zgartirish
+ */
+export async function adminUpdateUserRoleAction(userId: string, newRole: Role) {
+  const isAdmin = await isUserAdmin();
+  if (!isAdmin) return { success: false, message: "Ruxsat berilmagan" };
+
+  try {
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: { role: newRole },
+    });
+
+    return {
+      success: true,
+      message: `${updated.name} roli ${updated.role} ga o'zgartirildi!`,
+      role: updated.role,
+    };
+  } catch (error: any) {
+    console.error('adminUpdateUserRoleAction error:', error);
+    return { success: false, message: error?.message || "Rolni yangilashda xatolik" };
   }
 }

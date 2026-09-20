@@ -35,10 +35,15 @@ export const createListingSchema = z.object({
     .array(
       z
         .string()
-        .url("Rasm havolasi noto'g'ri")
-        .refine((url) => /^https?:\/\//i.test(url), {
-          message: "Rasm havolasi http:// yoki https:// bilan boshlanishi kerak",
-        })
+        .refine(
+          (url) =>
+            /^https?:\/\//i.test(url) ||
+            /^\/uploads\//i.test(url) ||
+            /^data:image\//i.test(url),
+          {
+            message: "Rasm formati noto'g'ri (http://, https://, /uploads/ yoki yuklangan rasm bo'lishi kerak)",
+          }
+        )
     )
     .optional()
     .default([]),

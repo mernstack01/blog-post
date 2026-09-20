@@ -11,9 +11,11 @@ import {
   PlusCircle,
   Sparkles,
   Mail,
+  FileText,
 } from 'lucide-react';
 import { SIRDARYO_LOCATIONS } from '@/lib/constants';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 import { getLocationLocalizedName } from '@/lib/translations';
 
 interface FooterClientProps {
@@ -30,6 +32,7 @@ export default function FooterClient({
   email,
 }: FooterClientProps) {
   const { lang, t } = useLanguage();
+  const { user } = useAuth();
 
   return (
     <footer key={lang} className="bg-white dark:bg-[#0f172a] border-t border-[#e6e0da] dark:border-slate-800 text-[#67625d] dark:text-slate-400 pt-12 pb-8 mt-auto transition-colors">
@@ -81,16 +84,16 @@ export default function FooterClient({
           </div>
 
           {/* Sirdaryo Tumanlari */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-1">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#282624] dark:text-white mb-3.5">
               {t.footer.districtsTitle}
             </h4>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-              {SIRDARYO_LOCATIONS.filter((l) => l !== 'Barcha hududlar').map((loc) => (
+            <div className="grid grid-cols-2 gap-1.5 text-xs">
+              {SIRDARYO_LOCATIONS.filter((l) => l !== 'Barcha hududlar').slice(0, 10).map((loc) => (
                 <Link
                   key={loc}
                   href={`/?location=${encodeURIComponent(loc)}`}
-                  className="text-[#67625d] dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1 truncate font-medium"
+                  className="text-[#67625d] dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-0.5 truncate font-medium"
                 >
                   {getLocationLocalizedName(loc, lang)}
                 </Link>
@@ -98,20 +101,20 @@ export default function FooterClient({
             </div>
           </div>
 
-          {/* Tezkor havolalar va e'lon berish */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#282624] dark:text-white mb-3.5">
+          {/* Tezkor havolalar */}
+          <div>
+            <h4 className="text-xs font-bold text-[#1e293b] dark:text-white uppercase tracking-wider mb-3">
               {t.footer.forUsers}
             </h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
+            <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/new-listing" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline flex items-center gap-1.5">
-                  <PlusCircle className="w-4 h-4" />
+                <Link href="/new-listing" className="text-[#67625d] dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5">
+                  <PlusCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   <span>{t.footer.postFree}</span>
                 </Link>
               </li>
               <li>
-                <Link href="/?mode=top10" className="text-[#67625d] dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center gap-1.5 font-medium">
+                <Link href="/?mode=top10" className="text-[#67625d] dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400" />
                   <span>{t.footer.top10Board}</span>
                 </Link>
@@ -122,12 +125,62 @@ export default function FooterClient({
                   <span>{t.footer.catalogAll}</span>
                 </Link>
               </li>
+              {user && (
+                <li>
+                  <Link href="/my-listings" className="text-[#67625d] dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5">
+                    <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <span>{lang === 'ru' ? 'Мои объявления' : "Mening e'lonlarim"}</span>
+                  </Link>
+                </li>
+              )}
+              {user?.role === 'ADMIN' && (
+                <li>
+                  <Link href="/admin" className="text-[#67625d] dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <span>{t.footer.adminControl}</span>
+                  </Link>
+                </li>
+              )}
+            </ul>
+          </div>
+
+          {/* Bog'lanish */}
+          <div>
+            <h4 className="text-xs font-bold text-[#1e293b] dark:text-white uppercase tracking-wider mb-3">
+              {lang === 'ru' ? 'Контакты' : "Bog'lanish"}
+            </h4>
+            <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/admin" className="text-[#67625d] dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <span>{t.footer.adminControl}</span>
-                </Link>
+                <a
+                  href={`tel:${phone.replace(/\s+/g, '')}`}
+                  className="flex items-center gap-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  <PhoneCall className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                  <span>{phone}</span>
+                </a>
               </li>
+              <li>
+                <a
+                  href={telegram.startsWith('http') ? telegram : `https://t.me/${telegram.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  <Send className="w-4 h-4 text-blue-500 shrink-0" />
+                  <span>{telegram.startsWith('@') ? telegram : `@${telegram}`}</span>
+                </a>
+              </li>
+              {email && (
+                <li>
+                  <a
+                    href={`mailto:${email}`}
+                    className="flex items-center gap-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  >
+                    <Mail className="w-4 h-4 text-slate-500 shrink-0" />
+                    <span>{email}</span>
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
 
@@ -139,10 +192,14 @@ export default function FooterClient({
             © {new Date().getFullYear()} {siteTitle}. {t.footer.allRights}
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/admin/login" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
-              {t.footer.loginSystem}
-            </Link>
-            <span>•</span>
+            {user?.role === 'ADMIN' && (
+              <>
+                <Link href="/admin" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
+                  {t.footer.loginSystem}
+                </Link>
+                <span>•</span>
+              </>
+            )}
             <div className="flex items-center gap-1">
               <span>{lang === 'ru' ? 'Создано для жителей Сырдарьи и Узбекистана' : "Sirdaryo va butun O'zbekiston uchun yaratildi"}</span>
               <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />

@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { createListingSchema, CreateListingInput, ListingFilterParams } from '@/lib/validations';
 import { ListingStatus, Prisma } from '@prisma/client';
 import { isUserAdmin } from '@/lib/admin-auth';
+import { getUserAuthSession, getTashkentStartOfDay } from '@/lib/user-auth';
 
 
 export interface ListingWithRelations {
@@ -36,6 +37,7 @@ export interface ListingWithRelations {
   view_count: number;
   categoryId: string;
   subCategoryId: string | null;
+  userId: string | null;
   createdAt: Date;
   updatedAt: Date;
   category: {
@@ -60,102 +62,123 @@ import { calculateListingScore } from '@/lib/scoring';
 export async function getListings(filters: Partial<ListingFilterParams> = {}): Promise<ListingWithRelations[]> {
   try {
     const { q, location, category, subCategory, sortBy = 'popular', mode = 'all' } = filters;
+    const userSession = await getUserAuthSession();
 
-    const where: Prisma.ListingWhereInput = {
-      status: ListingStatus.APPROVED,
-    };
+    const andConditions: Prisma.ListingWhereInput[] = [];
 
-    // Qidiruv so'zi bo'yicha
+    // 1. Status sharti: tasdiqlangan e'lonlar YOKI joriy kirgan foydalanuvchining o'z e'lonlari
+    if (userSession?.userId) {
+      const userConditions: Prisma.ListingWhereInput[] = [
+        { status: ListingStatus.APPROVED },
+        { userId: userSession.userId },
+      ];
+      if (userSession.phone) {
+        userConditions.push({ phone: userSession.phone });
+      }
+      andConditions.push({
+        OR: userConditions,
+      });
+    } else {
+      andConditions.push({
+        status: ListingStatus.APPROVED,
+      });
+    }
+
+    // 2. Qidiruv so'zi bo'yicha
     if (q && q.trim() !== '') {
       const searchTerm = q.trim();
-      where.OR = [
-        { title: { contains: searchTerm, mode: 'insensitive' } },
-        { name: { contains: searchTerm, mode: 'insensitive' } },
-        { description: { contains: searchTerm, mode: 'insensitive' } },
-        { category: { name: { contains: searchTerm, mode: 'insensitive' } } },
-        { subCategory: { name: { contains: searchTerm, mode: 'insensitive' } } },
-      ];
+      andConditions.push({
+        OR: [
+          { title: { contains: searchTerm, mode: 'insensitive' } },
+          { name: { contains: searchTerm, mode: 'insensitive' } },
+          { description: { contains: searchTerm, mode: 'insensitive' } },
+          { category: { name: { contains: searchTerm, mode: 'insensitive' } } },
+          { subCategory: { name: { contains: searchTerm, mode: 'insensitive' } } },
+        ],
+      });
     }
 
-    // Hudud bo'yicha (agar "Barcha hududlar" bo'lmasa)
+    // 3. Hudud bo'yicha (agar "Barcha hududlar" bo'lmasa)
     if (location && location !== 'Barcha hududlar' && location.trim() !== '') {
-      where.location = {
-        contains: location.trim(),
-        mode: 'insensitive',
-      };
+      andConditions.push({
+        location: {
+          contains: location.trim(),
+          mode: 'insensitive',
+        },
+      });
     }
 
-    // Kategoriya bo'yicha (slug yoki ObjectId)
+    // 4. Kategoriya bo'yicha (slug orqali)
     if (category && category !== 'all' && category.trim() !== '') {
-      const catTrim = category.trim();
-      const isObjectId = /^[0-9a-fA-F]{24}$/.test(catTrim);
-      if (isObjectId) {
-        where.category = {
-          OR: [{ slug: catTrim }, { id: catTrim }],
-        };
-      } else {
-        where.category = {
-          slug: catTrim,
-        };
-      }
+      andConditions.push({
+        category: {
+          slug: category.trim(),
+        },
+      });
     }
 
-    // Sub-kategoriya bo'yicha (slug yoki ObjectId)
-    if (subCategory && subCategory !== 'all' && subCategory.trim() !== '') {
-      const subTrim = subCategory.trim();
-      const isObjectId = /^[0-9a-fA-F]{24}$/.test(subTrim);
-      if (isObjectId) {
-        where.subCategory = {
-          OR: [{ slug: subTrim }, { id: subTrim }],
-        };
-      } else {
-        where.subCategory = {
-          slug: subTrim,
-        };
-      }
+    // 5. Kichik kategoriya (subCategory) bo'yicha
+    if (subCategory && subCategory.trim() !== '') {
+      andConditions.push({
+        subCategory: {
+          slug: subCategory.trim(),
+        },
+      });
     }
 
-    // Saralash qoidasi: Top 10 yoki Umumiy
-    let orderBy: Prisma.ListingOrderByWithRelationInput[] | Prisma.ListingOrderByWithRelationInput = { view_count: 'desc' };
-    let take: number | undefined = undefined;
+    const where: Prisma.ListingWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
+
+    // 6. Saralash tartibini belgilash
+    let orderBy: any = [];
 
     if (mode === 'top10') {
-      orderBy = [
-        { totalScore: 'desc' },
-        { view_count: 'desc' },
-        { createdAt: 'desc' },
-      ];
-      take = 10;
+      orderBy = [{ totalScore: 'desc' }, { view_count: 'desc' }, { createdAt: 'desc' }];
     } else {
-      if (sortBy === 'newest') {
-        orderBy = { createdAt: 'desc' };
-      } else if (sortBy === 'rating') {
-        orderBy = { totalScore: 'desc' };
-      } else {
-        orderBy = { view_count: 'desc' };
+      switch (sortBy) {
+        case 'newest':
+          orderBy = [{ createdAt: 'desc' }];
+          break;
+        case 'rating':
+          orderBy = [{ rating: 'desc' }, { totalScore: 'desc' }];
+          break;
+        case 'popular':
+        default:
+          orderBy = [{ view_count: 'desc' }, { totalScore: 'desc' }, { createdAt: 'desc' }];
+          break;
       }
     }
 
+    // 7. Bazadan e'lonlarni yuklab olish
     const listings = await prisma.listing.findMany({
       where,
       orderBy,
-      take,
+      take: mode === 'top10' ? 10 : 60,
       include: {
         category: {
-          select: { id: true, name: true, slug: true, icon: true },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            icon: true,
+          },
         },
         subCategory: {
-          select: { id: true, name: true, slug: true },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
         },
       },
     });
 
-    const listingsWithRank = (listings as any[]).map((item, idx) => ({
+    // Top 10 uchun 1 dan 10 gacha aniq rank tayinlash
+    const result: ListingWithRelations[] = (listings as any[]).map((item, index) => ({
       ...item,
-      rank: mode === 'top10' ? idx + 1 : undefined,
-    }));
+      rank: mode === 'top10' ? index + 1 : undefined,
+    })) as any;
 
-    return listingsWithRank as ListingWithRelations[];
+    return result;
   } catch (error) {
     console.error('getListings error:', error);
     return [];
@@ -171,50 +194,65 @@ export async function getListingById(id: string): Promise<ListingWithRelations |
       where: { id },
       include: {
         category: {
-          select: { id: true, name: true, slug: true, icon: true },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            icon: true,
+          },
         },
         subCategory: {
-          select: { id: true, name: true, slug: true },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
         },
       },
     });
 
     return listing as ListingWithRelations | null;
   } catch (error) {
-    console.error(`getListingById(${id}) error:`, error);
+    console.error('getListingById error:', error);
     return null;
   }
 }
 
 /**
- * Ko'rishlar sonini 1 taga oshirish
+ * E'lon ko'rishlar sonini 1 taga oshirish
  */
 export async function incrementViewCountAction(id: string) {
   try {
-    await prisma.listing.update({
+    const updated = await prisma.listing.update({
       where: { id },
       data: {
         view_count: {
           increment: 1,
         },
       },
+      select: {
+        id: true,
+        view_count: true,
+      },
     });
-    return { success: true };
+    return { success: true, view_count: updated.view_count };
   } catch (error) {
-    console.error(`incrementViewCountAction(${id}) error:`, error);
+    console.error('incrementViewCountAction error:', error);
     return { success: false };
   }
 }
 
 /**
- * Barcha kategoriyalar va pastki kategoriyalarni e'lonlar soni bilan olish
+ * Barcha faol kategoriyalar va ularning ichki kategoriyalarini olish
  */
 export async function getCategoriesAction() {
   try {
     const categories = await prisma.category.findMany({
-      orderBy: { name: 'asc' },
+      where: { isActive: true },
+      orderBy: { order: 'asc' },
       include: {
         subCategories: {
+          orderBy: { createdAt: 'asc' },
           include: {
             _count: {
               select: { listings: { where: { status: ListingStatus.APPROVED } } },
@@ -226,7 +264,6 @@ export async function getCategoriesAction() {
         },
       },
     });
-
     return categories;
   } catch (error) {
     console.error('getCategoriesAction error:', error);
@@ -234,17 +271,17 @@ export async function getCategoriesAction() {
   }
 }
 
-/**
- * Yangi e'lon yaratish Server Action
- */
-export type ActionResponse = {
+export interface ActionResponse {
   success: boolean;
   message?: string;
-  listingId?: string;
   isPending?: boolean;
+  listingId?: string;
   errors?: Record<string, string[]>;
-};
+}
 
+/**
+ * Yangi e'lon yaratish
+ */
 export async function createListingAction(data: CreateListingInput): Promise<ActionResponse> {
   try {
     // 1. Zod validatsiya
@@ -285,8 +322,47 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
       ];
     }
 
-    // 3. Adminligini tekshirish (Admin kiritgan postlar darhol APPROVED, oddiy e'lonlar PENDING)
+    // 3. Foydalanuvchi yoki adminligini tekshirish
     const isAdmin = await isUserAdmin();
+    const userSession = await getUserAuthSession();
+
+    if (!isAdmin && !userSession) {
+      return {
+        success: false,
+        message: "E'lon berish uchun avval ro'yxatdan o'ting yoki tizimga kiring.",
+      };
+    }
+
+    let activeUserId: string | null = null;
+
+    if (!isAdmin && userSession) {
+      activeUserId = userSession.userId;
+      const user = await prisma.user.findUnique({ where: { id: activeUserId } });
+      if (!user) {
+        return {
+          success: false,
+          message: "Foydalanuvchi profilingiz topilmadi. Qaytadan kiring.",
+        };
+      }
+
+      // Butun umrlik limit tekshiruvi
+      const totalListings = await prisma.listing.count({
+        where: {
+          userId: activeUserId,
+        },
+      });
+
+      const userLimit = (user as any).listingLimit ?? (user as any).dailyLimit ?? 3;
+
+      if (totalListings >= userLimit) {
+        return {
+          success: false,
+          message: `Sizning e'lon berish limitingiz (${totalListings}/${userLimit}) tugagan. Yangi e'lon berish uchun adminga murojaat qiling.`,
+        };
+      }
+    }
+
+
     const initialStatus = isAdmin ? ListingStatus.APPROVED : ListingStatus.PENDING;
 
     const initialScore = calculateListingScore({
@@ -300,7 +376,7 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
     });
 
     // 4. Bazaga yaratish
-    const newListing = await prisma.listing.create({
+    const newListing = await (prisma.listing as any).create({
       data: {
         title: sanitize(val.title),
         name: sanitize(val.name),
@@ -327,6 +403,7 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
         view_count: 1,
         categoryId: val.categoryId,
         subCategoryId: val.subCategoryId ? val.subCategoryId : null,
+        userId: activeUserId,
       },
     });
 
@@ -334,6 +411,7 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
       revalidatePath('/');
       revalidatePath('/admin');
       revalidatePath('/categories');
+      revalidatePath('/my-listings');
     } catch {
       // Ignore if called outside of request context
     }
@@ -347,11 +425,132 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
       listingId: newListing.id,
     };
   } catch (error: any) {
-
     console.error('createListingAction error:', error);
     return {
       success: false,
       message: error?.message || "E'lonni saqlashda kutilmagan xatolik yuz berdi.",
     };
+  }
+}
+
+/**
+ * Joriy foydalanuvchining o'z e'lonlarini olish ("Mening e'lonlarim" sahifasi uchun)
+ */
+export async function getUserListingsAction(): Promise<{
+  success: boolean;
+  message?: string;
+  listings?: ListingWithRelations[];
+  user?: {
+    id: string;
+    name: string;
+    phone: string;
+    listingLimit: number;
+    totalUsed: number;
+    remaining: number;
+  };
+}> {
+  try {
+    const userSession = await getUserAuthSession();
+    if (!userSession) {
+      return { success: false, message: "Foydalanuvchi tizimga kirmagan" };
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userSession.userId },
+    });
+
+    if (!user) {
+      return { success: false, message: "Foydalanuvchi topilmadi" };
+    }
+
+    const userLimit = (user as any).listingLimit ?? (user as any).dailyLimit ?? 3;
+
+    const listings = await prisma.listing.findMany({
+      where: {
+        OR: [
+          { userId: user.id },
+          { phone: user.phone },
+        ],
+      },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            icon: true,
+          },
+        },
+        subCategory: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    const totalUsed = listings.length;
+
+    return {
+      success: true,
+      listings: listings as any,
+      user: {
+        id: user.id,
+        name: user.name,
+        phone: user.phone,
+        listingLimit: userLimit,
+        totalUsed,
+        remaining: Math.max(0, userLimit - totalUsed),
+      },
+    };
+  } catch (error: any) {
+    console.error('getUserListingsAction error:', error);
+    return { success: false, message: error?.message || "E'lonlarni yuklashda xatolik yuz berdi" };
+  }
+}
+
+/**
+ * Foydalanuvchi o'z e'lonini o'chirish
+ */
+export async function userDeleteListingAction(id: string) {
+  try {
+    const userSession = await getUserAuthSession();
+    if (!userSession) {
+      return { success: false, message: "Avval tizimga kiring." };
+    }
+
+    const listing = await prisma.listing.findUnique({
+      where: { id },
+    });
+
+    if (!listing) {
+      return { success: false, message: "E'lon topilmadi." };
+    }
+
+    // Foydalanuvchi o'z e'lonimi yoki Adminmi tekshirish
+    const isOwner = listing.userId === userSession.userId || listing.phone === userSession.phone;
+    if (!isOwner && userSession.role !== 'ADMIN') {
+      return { success: false, message: "Bu e'lonni o'chirishga faqat uning egasi yoki admin vakolatli." };
+    }
+
+    await prisma.listing.delete({
+      where: { id },
+    });
+
+    try {
+      revalidatePath('/my-listings');
+      revalidatePath('/');
+      revalidatePath('/admin');
+    } catch {}
+
+    return { success: true, message: "E'loningiz muvaffaqiyatli o'chirildi." };
+  } catch (error: any) {
+    console.error('userDeleteListingAction error:', error);
+    return { success: false, message: error?.message || "O'chirishda xatolik yuz berdi." };
   }
 }

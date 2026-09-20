@@ -34,17 +34,29 @@ enum PrivilegeType {
 }
 
 model User {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  phone     String    @unique
-  name      String
-  role      Role      @default(SPECIALIST)
-  telegram  String?
-  avatar    String?
-  listings  Listing[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  phone        String    @unique
+  name         String
+  role         Role      @default(SPECIALIST)
+  listingLimit Int       @default(3) // Butun umrlik e'lon berish limiti (standart 3 ta)
+  telegram     String?
+  avatar       String?
+  listings     Listing[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@map("users")
+}
+
+model OtpCode {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  phone     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  @@index([phone])
+  @@map("otp_codes")
 }
 
 model Category {

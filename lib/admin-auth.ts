@@ -67,19 +67,36 @@ export function verifyAdminPin(enteredPin: string): boolean {
   }
 }
 
+import { getUserAuthSession } from '@/lib/user-auth';
+
 /**
- * Foydalanuvchi hozirda admin sifatida tizimga kirganligini tekshirish
+ * Foydalanuvchi hozirda admin sifatida tizimga kirganligini tekshirish.
+ * Agar oddiy foydalanuvchi/mutaxassis sifatida kirgan bo'lsa, admin huquqi berilmaydi.
  */
 export async function isUserAdmin(): Promise<boolean> {
   try {
+    const userSession = await getUserAuthSession();
+    // 1. Agar foydalanuvchi tizimga kirgan bo'lsa va uning roli ADMIN bo'lsa, u Admin!
+    if (userSession && userSession.role === 'ADMIN') {
+      return true;
+    }
+
+    // 2. Agar foydalanuvchi tizimga kirgan bo'lsa va uning roli ADMIN bo'lmasa, u mutlaqo ADMIN EMAS!
+    if (userSession && userSession.role !== 'ADMIN') {
+      return false;
+    }
+
+    // 3. Foydalanuvchi kirmagan bo'lsa, PIN orqali admin sessiya tokenini tekshirish
     const cookieStore = await cookies();
     const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
     return verifySessionToken(token);
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.digest === 'DYNAMIC_SERVER_USAGE') throw err;
     console.error('isUserAdmin error:', err);
     return false;
   }
 }
+
 
 /**
  * Xavfsiz shifrlangan sessiya tokenini cookie'ga yozish

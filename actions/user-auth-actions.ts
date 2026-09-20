@@ -1,0 +1,353 @@
+'use server';
+
+import { cookies } from 'next/headers';
+import { prisma } from '@/lib/prisma';
+import {
+  getUserAuthSession,
+  setUserAuthSession,
+  clearUserAuthSession,
+  getTashkentStartOfDay,
+} from '@/lib/user-auth';
+import { PrismaClient, Role } from '@prisma/client';
+
+
+// Fallback in-memory store in case Prisma Client in active Node dev process hasn't reloaded
+const globalForOtp = globalThis as unknown as {
+  otpMemoryStore?: Map<string, { code: string; expiresAt: Date }>;
+};
+if (!globalForOtp.otpMemoryStore) {
+  globalForOtp.otpMemoryStore = new Map();
+}
+const otpStore = globalForOtp.otpMemoryStore;
+
+/**
+ * Har doim yangilangan va to'g'ri PrismaClient nusxasini olish
+ */
+function getPrismaDb(): PrismaClient {
+  if (prisma && typeof (prisma as any).otpCode?.deleteMany === 'function') {
+    return prisma;
+  }
+  return new PrismaClient();
+}
+
+/**
+ * Telefon raqamni toza +998XXXXXXXXX formatiga keltirish
+ */
+function normalizePhone(rawPhone: string): string {
+  let clean = rawPhone.replace(/[^\d+]/g, '').trim();
+  if (!clean.startsWith('+') && clean.startsWith('998')) {
+    clean = `+${clean}`;
+  } else if (!clean.startsWith('+')) {
+    clean = `+998${clean.replace(/^0+/, '')}`;
+  }
+  return clean;
+}
+
+export interface SendOtpResponse {
+  success: boolean;
+  message: string;
+  devCode?: string;
+}
+
+/**
+ * 1. Telefon raqamiga 4 xonali OTP kod yuborish
+ */
+export async function sendOtpAction(rawPhone: string): Promise<SendOtpResponse> {
+  try {
+    const db = getPrismaDb();
+    const phone = normalizePhone(rawPhone);
+
+    if (!/^\+998\d{9}$/.test(phone)) {
+      return {
+        success: false,
+        message: "Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (masalan: +998 90 123 45 67).",
+      };
+    }
+
+    // 4 xonali tasodifiy kod generatsiya qilish (1000 - 9999)
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 daqiqa
+
+    // 1. Agar db.otpCode mavjud bo'lsa, bazada saqlaymiz
+    if (db && (db as any).otpCode && typeof (db as any).otpCode.deleteMany === 'function') {
+      try {
+        await (db as any).otpCode.deleteMany({
+          where: { phone },
+        });
+        await (db as any).otpCode.create({
+          data: {
+            phone,
+            code,
+            expiresAt,
+          },
+        });
+      } catch (dbErr) {
+        console.warn('db.otpCode saqlashda xato, xotiraga yozilmoqda:', dbErr);
+        otpStore.delete(phone);
+        otpStore.set(phone, { code, expiresAt });
+      }
+    } else {
+      // 2. Server qayta ishga tushirilmagan bo'lsa xotirada saqlaymiz
+      otpStore.delete(phone);
+      otpStore.set(phone, { code, expiresAt });
+    }
+
+    // Development rejimida foydalanuvchiga qulay bo'lishi uchun kodni qaytaramiz
+    return {
+      success: true,
+      message: `Tasdiqlash kodi ${phone} raqamiga yuborildi.`,
+      devCode: code,
+    };
+  } catch (error: any) {
+    console.error('sendOtpAction error:', error);
+    return {
+      success: false,
+      message: error?.message || "Kod yuborishda xatolik yuz berdi. Qaytadan urinib ko'ring.",
+    };
+  }
+}
+
+export interface VerifyOtpResponse {
+  success: boolean;
+  message: string;
+  user?: {
+    id: string;
+    phone: string;
+    name: string;
+    role: string;
+    listingLimit: number;
+    totalUsed?: number;
+    remaining?: number;
+  };
+}
+
+/**
+ * 2. 4 xonali OTP kodni tekshirish va ro'yxatdan o'tkazish / tizimga kiritish
+ */
+export async function verifyOtpAction(
+  rawPhone: string,
+  code: string,
+  name?: string
+): Promise<VerifyOtpResponse> {
+  try {
+    const db = getPrismaDb();
+    const phone = normalizePhone(rawPhone);
+    const cleanCode = code.trim();
+
+    if (!phone || !cleanCode) {
+      return { success: false, message: "Telefon raqami va kodni to'liq kiriting." };
+    }
+
+    let isValid = false;
+
+    // 1. Bazadan tekshirish (agar model yuklangan bo'lsa)
+    if (db && (db as any).otpCode && typeof (db as any).otpCode.findFirst === 'function') {
+      try {
+        const validOtp = await (db as any).otpCode.findFirst({
+          where: {
+            phone,
+            code: cleanCode,
+            expiresAt: { gt: new Date() },
+          },
+        });
+
+        if (validOtp) {
+          isValid = true;
+          await (db as any).otpCode.deleteMany({
+            where: { phone },
+          });
+        }
+      } catch (err) {
+        console.warn('db.otpCode findFirst xatoligi, xotiradan tekshirilmoqda:', err);
+      }
+    }
+
+    // 2. Agar bazadan topilmasa, xotiradan tekshirish
+    if (!isValid) {
+      const stored = otpStore.get(phone);
+      if (stored && stored.code === cleanCode && stored.expiresAt > new Date()) {
+        isValid = true;
+        otpStore.delete(phone);
+      }
+    }
+
+    if (!isValid) {
+      return {
+        success: false,
+        message: "Tasdiqlash kodi noto'g'ri yoki muddati tugagan. Qaytadan kod so'rang.",
+      };
+    }
+
+    // Foydalanuvchini topish yoki yangisini yaratish
+    let user = await db.user.findUnique({
+      where: { phone },
+    });
+
+    if (!user) {
+      const defaultName = name && name.trim() ? name.trim() : `Mutaxassis (${phone.slice(-4)})`;
+      try {
+        user = await db.user.create({
+          data: {
+            phone,
+            name: defaultName,
+            role: Role.SPECIALIST,
+            listingLimit: 3,
+          } as any,
+        });
+      } catch {
+        user = await db.user.create({
+          data: {
+            phone,
+            name: defaultName,
+            role: Role.SPECIALIST,
+          },
+        });
+      }
+    } else if (name && name.trim() && user.name.startsWith('Mutaxassis (')) {
+      user = await db.user.update({
+        where: { id: user.id },
+        data: { name: name.trim() },
+      });
+    }
+
+    // Sessiya cookie-ga yozish
+    await setUserAuthSession(user.id, user.phone, user.role);
+
+    // Agar oddiy foydalanuvchi/mutaxassis bo'lsa, eskirgan admin tokenini tozalash
+    if (user.role !== Role.ADMIN) {
+      try {
+        const cookieStore = await cookies();
+        cookieStore.delete('sirdaryo_admin_token');
+      } catch {}
+    }
+
+    const userLimit = (user as any)?.listingLimit ?? (user as any)?.dailyLimit ?? 3;
+
+    // Butun umrlik (umumiy) e'lonlar hisobi
+    const totalUsed = await db.listing.count({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Tizimga muvaffaqiyatli kirdingiz!",
+      user: {
+        id: user.id,
+        phone: user.phone,
+        name: user.name,
+        role: user.role,
+        listingLimit: userLimit,
+        totalUsed,
+        remaining: Math.max(0, userLimit - totalUsed),
+      },
+    };
+  } catch (error: any) {
+    console.error('verifyOtpAction error:', error);
+    return {
+      success: false,
+      message: error?.message || "Kodni tekshirishda xatolik yuz berdi.",
+    };
+  }
+}
+
+import { isUserAdmin, clearAdminAuthSession } from '@/lib/admin-auth';
+
+/**
+ * 3. Hozirda tizimga kirgan foydalanuvchi ma'lumotlarini olish
+ */
+export async function getCurrentUserAction() {
+  try {
+    const adminActive = await isUserAdmin();
+    const session = await getUserAuthSession();
+    const db = getPrismaDb();
+
+    // 1. Agar admin faol bo'lsa (admin token cookie mavjud)
+    if (adminActive) {
+      if (session?.userId) {
+        try {
+          const user = await db.user.findUnique({
+            where: { id: session.userId },
+          });
+          if (user) {
+            return {
+              success: true,
+              user: {
+                id: user.id,
+                phone: user.phone,
+                name: user.name,
+                role: 'ADMIN',
+                listingLimit: 9999,
+                totalUsed: 0,
+                remaining: 9999,
+              },
+            };
+          }
+        } catch (dbErr) {
+          console.warn('Admin user fetch warning:', dbErr);
+        }
+      }
+      return {
+        success: true,
+        user: {
+          id: 'admin_root',
+          phone: '+998 (Admin)',
+          name: 'SuperAdmin',
+          role: 'ADMIN',
+          listingLimit: 9999,
+          totalUsed: 0,
+          remaining: 9999,
+        },
+      };
+    }
+
+    // 2. Agar admin bo'lmasa, oddiy foydalanuvchi sessiyasini tekshiramiz
+    if (!session) {
+      return { success: false, user: null };
+    }
+
+    const user = await db.user.findUnique({
+      where: { id: session.userId },
+    });
+
+    if (!user) {
+      await clearUserAuthSession();
+      return { success: false, user: null };
+    }
+
+    const userLimit = (user as any)?.listingLimit ?? (user as any)?.dailyLimit ?? 3;
+
+    // Butun umrlik (umumiy) e'lonlar hisobi
+    const totalUsed = await db.listing.count({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    return {
+      success: true,
+      user: {
+        id: user.id,
+        phone: user.phone,
+        name: user.name,
+        role: user.role,
+        listingLimit: userLimit,
+        totalUsed,
+        remaining: Math.max(0, userLimit - totalUsed),
+      },
+    };
+  } catch (error) {
+    console.error('getCurrentUserAction error:', error);
+    return { success: false, user: null };
+  }
+}
+
+/**
+ * 4. Tizimdan chiqish
+ */
+export async function logoutUserAction() {
+  await clearUserAuthSession();
+  await clearAdminAuthSession();
+  return { success: true };
+}

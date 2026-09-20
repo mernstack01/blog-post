@@ -8,7 +8,7 @@ export default function NewListingHeader() {
   const { lang, t } = useLanguage();
 
   return (
-    <>
+    <div key={lang}>
       {/* Orqaga qaytish havolasi */}
       <div className="mb-6">
         <Link
@@ -50,6 +50,6 @@ export default function NewListingHeader() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
