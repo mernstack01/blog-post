@@ -85,7 +85,7 @@ export default function ListingDetailClient({ listing }: ListingDetailClientProp
   const locationName = getLocationLocalizedName(listing.location, lang);
 
   return (
-    <div className="space-y-6 pb-24 md:pb-8">
+    <div className="space-y-6 pb-36 md:pb-8">
       {/* Kutilayotgan e'lon xabari */}
       {isPending && (
         <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 text-sm flex items-center justify-between shadow-xs animate-in fade-in slide-in-from-top-3 duration-300">
@@ -395,7 +395,7 @@ export default function ListingDetailClient({ listing }: ListingDetailClientProp
       </div>
 
       {/* SMARTFONLAR UCHUN MAXSUS STICKY ALOQA PANELI (Pastki qotib turuvchi tezkor panel) */}
-      <aside aria-label="Tezkor aloqa paneli" className="fixed bottom-16 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-[#e6e0da] dark:border-slate-800 p-2.5 px-4 flex items-center gap-2.5 md:hidden shadow-2xl">
+      <aside aria-label="Tezkor aloqa paneli" className="fixed bottom-[calc(3.75rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-[#e6e0da] dark:border-slate-800 p-2.5 px-4 flex items-center gap-2.5 md:hidden shadow-2xl">
         <a
           href={phoneHref}
           className="flex-1 py-3 px-4 rounded-2xl bg-emerald-600 active:bg-emerald-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-600/25 active:scale-95 transition-all touch-manipulation"

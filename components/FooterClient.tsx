@@ -35,7 +35,7 @@ export default function FooterClient({
   const { user } = useAuth();
 
   return (
-    <footer key={lang} className="bg-white dark:bg-[#0f172a] border-t border-[#e6e0da] dark:border-slate-800 text-[#67625d] dark:text-slate-400 pt-12 pb-8 mt-auto transition-colors">
+    <footer key={lang} className="bg-white dark:bg-[#0f172a] border-t border-[#e6e0da] dark:border-slate-800 text-[#67625d] dark:text-slate-400 pt-12 pb-24 md:pb-8 mt-auto transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
           

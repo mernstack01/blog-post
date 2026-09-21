@@ -128,7 +128,7 @@ export default function AuthGateModal({ onSuccess, onClose }: AuthGateModalProps
   };
 
   return (
-    <div className="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-10 shadow-xl max-w-lg mx-auto my-6 text-center animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+    <div className="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 sm:p-10 shadow-xl max-w-lg mx-auto my-auto text-center animate-in fade-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh]">
       
       {/* Yopish tugmasi (agar modal sifatida ochilgan bo'lsa) */}
       {onClose && (

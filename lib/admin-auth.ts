@@ -68,21 +68,22 @@ export function verifyAdminPin(enteredPin: string): boolean {
 }
 
 import { getUserAuthSession } from '@/lib/user-auth';
+import { isSuperAdminPhone } from '@/lib/constants';
 
 /**
  * Foydalanuvchi hozirda admin sifatida tizimga kirganligini tekshirish.
- * Agar oddiy foydalanuvchi/mutaxassis sifatida kirgan bo'lsa, admin huquqi berilmaydi.
+ * Agar foydalanuvchi Super Admin (+998973314717) yoki roli ADMIN bo'lsa, admin huquqi beriladi.
  */
 export async function isUserAdmin(): Promise<boolean> {
   try {
     const userSession = await getUserAuthSession();
-    // 1. Agar foydalanuvchi tizimga kirgan bo'lsa va uning roli ADMIN bo'lsa, u Admin!
-    if (userSession && userSession.role === 'ADMIN') {
+    // 1. Agar foydalanuvchi tizimga kirgan bo'lsa va uning roli ADMIN yoki Super Admin bo'lsa:
+    if (userSession && (userSession.role === 'ADMIN' || isSuperAdminPhone(userSession.phone))) {
       return true;
     }
 
-    // 2. Agar foydalanuvchi tizimga kirgan bo'lsa va uning roli ADMIN bo'lmasa, u mutlaqo ADMIN EMAS!
-    if (userSession && userSession.role !== 'ADMIN') {
+    // 2. Agar foydalanuvchi tizimga kirgan bo'lsa va uning roli ADMIN bo'lmasa hamda Super Admin bo'lmasa:
+    if (userSession && userSession.role !== 'ADMIN' && !isSuperAdminPhone(userSession.phone)) {
       return false;
     }
 

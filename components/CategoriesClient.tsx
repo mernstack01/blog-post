@@ -106,7 +106,7 @@ export default function CategoriesClient({ categories }: CategoriesClientProps) 
   };
 
   return (
-    <div key={lang} className="min-h-screen bg-[#fffdfa] dark:bg-[#0f172a] py-10 sm:py-14 transition-colors">
+    <div key={lang} className="min-h-screen bg-[#fffdfa] dark:bg-[#0f172a] pt-6 pb-28 sm:py-14 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Orqaga havola */}

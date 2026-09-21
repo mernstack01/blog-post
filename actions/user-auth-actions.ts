@@ -10,7 +10,8 @@ import {
   getTashkentStartOfDay,
 } from '@/lib/user-auth';
 import { PrismaClient, Role } from '@prisma/client';
-import { isUserAdmin, clearAdminAuthSession } from '@/lib/admin-auth';
+import { isUserAdmin, clearAdminAuthSession, setAdminAuthSession } from '@/lib/admin-auth';
+import { isSuperAdminPhone } from '@/lib/constants';
 
 
 // Fallback in-memory store in case Prisma Client in active Node dev process hasn't reloaded
@@ -202,15 +203,20 @@ export async function verifyOtpAction(
       where: { phone },
     });
 
+    const isSuperAdmin = isSuperAdminPhone(phone);
+    const assignedRole = isSuperAdmin ? Role.ADMIN : Role.SPECIALIST;
+    const defaultName = isSuperAdmin
+      ? (name && name.trim() ? name.trim() : 'Super Admin')
+      : (name && name.trim() ? name.trim() : `Mutaxassis (${phone.slice(-4)})`);
+
     if (!user) {
-      const defaultName = name && name.trim() ? name.trim() : `Mutaxassis (${phone.slice(-4)})`;
       try {
         user = await db.user.create({
           data: {
             phone,
             name: defaultName,
-            role: Role.SPECIALIST,
-            listingLimit: 3,
+            role: assignedRole,
+            listingLimit: isSuperAdmin ? 99999 : 3,
           } as any,
         });
       } catch {
@@ -218,22 +224,34 @@ export async function verifyOtpAction(
           data: {
             phone,
             name: defaultName,
-            role: Role.SPECIALIST,
+            role: assignedRole,
           },
         });
       }
-    } else if (name && name.trim() && user.name.startsWith('Mutaxassis (')) {
-      user = await db.user.update({
-        where: { id: user.id },
-        data: { name: name.trim() },
-      });
+    } else {
+      // Agar Super Admin bo'lsa va uning roli ADMIN bo'lmasa, darhol ADMIN ga o'tkazish
+      if (isSuperAdmin && user.role !== Role.ADMIN) {
+        user = await db.user.update({
+          where: { id: user.id },
+          data: { role: Role.ADMIN, listingLimit: 99999 } as any,
+        });
+      } else if (name && name.trim() && user.name.startsWith('Mutaxassis (')) {
+        user = await db.user.update({
+          where: { id: user.id },
+          data: { name: name.trim() },
+        });
+      }
     }
 
     // Sessiya cookie-ga yozish
     await setUserAuthSession(user.id, user.phone, user.role);
 
-    // Agar oddiy foydalanuvchi/mutaxassis bo'lsa, eskirgan admin tokenini tozalash
-    if (user.role !== Role.ADMIN) {
+    // Agar Super Admin yoki Admin bo'lsa, to'g'ridan-to'g'ri admin tokenini ham berish
+    if (user.role === Role.ADMIN || isSuperAdmin) {
+      try {
+        await setAdminAuthSession();
+      } catch {}
+    } else {
       try {
         await clearAdminAuthSession();
       } catch {}
@@ -285,8 +303,9 @@ export async function getCurrentUserAction() {
       });
 
       if (user) {
-        // Agar foydalanuvchi haqiqiy Admin bo'lsa
-        if (user.role === Role.ADMIN) {
+        // Agar foydalanuvchi haqiqiy Admin yoki Super Admin bo'lsa
+        const isSuperAdmin = user.role === Role.ADMIN || isSuperAdminPhone(user.phone);
+        if (isSuperAdmin) {
           return {
             success: true,
             user: {
@@ -294,9 +313,9 @@ export async function getCurrentUserAction() {
               phone: user.phone,
               name: user.name,
               role: 'ADMIN',
-              listingLimit: 9999,
+              listingLimit: 99999,
               totalUsed: 0,
-              remaining: 9999,
+              remaining: 99999,
             },
           };
         }
@@ -394,7 +413,8 @@ export async function getUserFullProfileAction() {
       orderBy: { createdAt: 'desc' },
     });
 
-    const userLimit = (user as any)?.listingLimit ?? (user as any)?.dailyLimit ?? 3;
+    const isSuperAdmin = user.role === Role.ADMIN || isSuperAdminPhone(user.phone);
+    const userLimit = isSuperAdmin ? 99999 : ((user as any)?.listingLimit ?? (user as any)?.dailyLimit ?? 3);
     const totalListings = listings.length;
     const approvedCount = listings.filter((l: any) => l.status === 'APPROVED').length;
     const pendingCount = listings.filter((l: any) => l.status === 'PENDING').length;
@@ -406,7 +426,7 @@ export async function getUserFullProfileAction() {
         id: user.id,
         phone: user.phone,
         name: user.name,
-        role: user.role,
+        role: isSuperAdmin ? 'ADMIN' : user.role,
         telegram: user.telegram || null,
         avatar: user.avatar || null,
         createdAt: user.createdAt,

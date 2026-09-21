@@ -535,7 +535,7 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
 
       {/* Yaratish / Tahrirlash Modali */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
           <div className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-3xl border border-[#e6e0da] dark:border-zinc-800 shadow-2xl p-6 sm:p-7 relative overflow-y-auto max-h-[90vh]">
             <div className="flex items-center justify-between pb-4 border-b border-[#f2eee9] dark:border-zinc-800">
               <h2 className="text-lg sm:text-xl font-extrabold text-[#282624] dark:text-zinc-100">

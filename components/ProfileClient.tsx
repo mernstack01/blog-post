@@ -254,7 +254,7 @@ export default function ProfileClient({ initialData, isAuthenticated }: ProfileC
   const usagePercent = Math.min(100, Math.round((totalUsed / listingLimit) * 100));
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-28 sm:py-12">
       
       {/* 1. Asosiy Profil Banneri & Foydalanuvchi Kartasi */}
       <div className="relative overflow-hidden rounded-3xl bg-card border border-border dark:border-white/10 p-6 sm:p-8 shadow-sm mb-8 transition-colors">
@@ -751,7 +751,7 @@ export default function ProfileClient({ initialData, isAuthenticated }: ProfileC
               </div>
             </div>
 
-            <div className="pt-4 flex items-center gap-3">
+            <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <button
                 type="submit"
                 disabled={saving || !editName.trim()}

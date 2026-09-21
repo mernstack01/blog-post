@@ -21,7 +21,7 @@ export default async function NewListingPage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-[#fffdfa] dark:bg-[#0f172a] py-8 sm:py-12 transition-colors">
+    <div className="min-h-screen bg-[#fffdfa] dark:bg-[#0f172a] pt-6 pb-28 sm:py-12 transition-colors">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <NewListingHeader />
         <NewListingForm

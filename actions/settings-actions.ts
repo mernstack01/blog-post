@@ -14,7 +14,7 @@ export interface SystemSettingsData {
 }
 
 const DEFAULT_SETTINGS = {
-  contactPhone: "+998 90 123 45 67",
+  contactPhone: "+998 97 331 47 17",
   telegramUsername: "topbaza_admin",
   supportEmail: "info@topbaza.uz",
   siteTitle: "TopBaza.uz",

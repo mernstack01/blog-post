@@ -109,10 +109,10 @@ export function AuthProvider({
       {/* Global Kirish / Ro'yxatdan o'tish Modali */}
       {isAuthModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-[150] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto"
           onClick={closeAuthModal}
         >
-          <div className="w-full max-w-lg relative" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-lg relative my-auto" onClick={(e) => e.stopPropagation()}>
             <AuthGateModal
               onSuccess={(u) => login(u)}
               onClose={closeAuthModal}

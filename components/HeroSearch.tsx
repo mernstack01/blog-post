@@ -119,9 +119,9 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
           </button>
         </form>
 
-        {/* Ommabop qidiruv teglari */}
-        <div className="mt-4 sm:mt-5 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1 text-foreground font-bold">
+        {/* Ommabop qidiruv teglari (Mobil qurilmalarda gorizontal sirpanuvchi, kattaroq ekranda markazlashgan) */}
+        <div className="mt-4 sm:mt-5 flex items-center justify-start sm:justify-center gap-1.5 sm:gap-2 text-xs text-muted-foreground overflow-x-auto no-scrollbar py-1 px-1 max-w-full touch-pan-x sm:flex-wrap">
+          <span className="flex items-center gap-1 text-foreground font-bold shrink-0">
             <Sparkles className="w-3 h-3 text-amber-500" />
             {t.hero.popularSearch}
           </span>
@@ -132,7 +132,7 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
                 key={tagItem.uz}
                 onClick={() => handleTagClick(tagLabel)}
                 type="button"
-                className="px-2.5 py-1 rounded-lg bg-secondary text-secondary-foreground border border-border dark:border-white/10 hover:bg-muted hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-400 dark:hover:text-blue-400 text-xs font-medium transition-colors cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-secondary text-secondary-foreground border border-border dark:border-white/10 hover:bg-muted hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-400 dark:hover:text-blue-400 text-xs font-medium transition-colors cursor-pointer shrink-0 whitespace-nowrap active:scale-95 touch-manipulation"
               >
                 {tagLabel}
               </button>

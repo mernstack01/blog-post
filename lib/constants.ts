@@ -38,3 +38,13 @@ export const CATEGORY_ICONS: Record<string, string> = {
   GraduationCap: 'GraduationCap',
   Home: 'Home',
 };
+
+// Super Admin konfiguratsiyasi
+export const SUPER_ADMIN_PHONE = process.env.SUPER_ADMIN_PHONE || '+998973314717';
+
+export function isSuperAdminPhone(rawPhone?: string | null): boolean {
+  if (!rawPhone) return false;
+  const clean = rawPhone.replace(/[^\d]/g, '');
+  return clean === '998973314717' || clean.endsWith('973314717');
+}
+

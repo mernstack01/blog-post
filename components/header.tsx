@@ -114,7 +114,10 @@ export function Header() {
               <div className="relative">
                 <button
                   type="button"
-                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  onClick={() => {
+                    setProfileDropdownOpen(!profileDropdownOpen);
+                    if (mobileMenuOpen) setMobileMenuOpen(false);
+                  }}
                   className="inline-flex items-center gap-2 p-1 sm:px-2.5 sm:py-1.5 rounded-2xl bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200/80 dark:border-blue-800/80 transition-all cursor-pointer text-left"
                   title={lang === 'ru' ? "Профиль пользователя" : "Foydalanuvchi profili"}
                 >
@@ -132,14 +135,17 @@ export function Header() {
                   <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform hidden sm:block ${profileDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                {/* Dropdown menyu */}
+                {/* Dropdown menyu (Mobil ekranlarda o'ngdan 12px, ekranning chap chetidan chiqib ketmaydi) */}
                 {profileDropdownOpen && (
                   <>
                     <div
-                      className="fixed inset-0 z-40"
+                      className="fixed inset-0 z-40 bg-black/25 sm:bg-transparent backdrop-blur-[1px] sm:backdrop-blur-none"
                       onClick={() => setProfileDropdownOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="fixed top-[3.75rem] right-3 w-72 max-w-[calc(100vw-1.5rem)] sm:absolute sm:top-full sm:right-0 sm:left-auto sm:mt-2 sm:w-64 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150"
+                    >
                       <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
                         <div className="flex items-center gap-2">
                           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">
@@ -246,7 +252,10 @@ export function Header() {
             {/* Mobil menyu ochish tugmasi */}
             <button
               type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => {
+                setMobileMenuOpen(!mobileMenuOpen);
+                if (profileDropdownOpen) setProfileDropdownOpen(false);
+              }}
               className="md:hidden p-2 rounded-2xl bg-[#f1f5f9] dark:bg-slate-800 text-[#1e293b] dark:text-white border border-[#e2e8f0] dark:border-slate-700 active:scale-95 transition-all cursor-pointer"
               aria-label="Menyuni ochish"
             >
