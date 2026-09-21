@@ -21,13 +21,19 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams.toString());
     
-    if (query.trim()) params.set('q', query.trim());
-    if (location && location !== 'Barcha hududlar') params.set('location', location);
-    
-    const cat = searchParams.get('category');
-    if (cat && cat !== 'all') params.set('category', cat);
+    if (query.trim()) {
+      params.set('q', query.trim());
+    } else {
+      params.delete('q');
+    }
+
+    if (location && location !== 'Barcha hududlar') {
+      params.set('location', location);
+    } else {
+      params.delete('location');
+    }
 
     router.push(`/?${params.toString()}`);
   };
@@ -40,7 +46,7 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
   };
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-blue-50/40 via-[#fffdfa] to-[#fffdfa] dark:from-slate-900/50 dark:via-[#0f172a] dark:to-[#0f172a] py-8 sm:py-14 border-b border-[#e2e8f0] dark:border-slate-800 transition-colors">
+    <div className="relative overflow-hidden bg-gradient-to-b from-blue-50/40 via-background to-background dark:from-slate-900/50 dark:via-background dark:to-background py-8 sm:py-14 border-b border-border dark:border-white/10 transition-colors">
       {/* Orqa fon dekoratsiyasi */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full overflow-hidden pointer-events-none -z-10">
         <div className="absolute -top-24 left-1/4 w-72 h-72 bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-3xl" />
@@ -50,41 +56,41 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         
         {/* Nishon */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f1f5f9] dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 text-[#1e293b] dark:text-slate-200 text-xs font-semibold mb-4 shadow-2xs">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary border border-border dark:border-white/10 text-foreground text-xs font-semibold mb-4 shadow-2xs">
           <span className="live-indicator" />
           <span>{t.hero.title1} {t.hero.titleHighlight}</span>
         </div>
 
         {/* H1 Sarlavha */}
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-[#1e293b] dark:text-white tracking-tight leading-tight mb-3">
+        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-tight mb-3">
           {t.hero.title1} <br className="hidden sm:block" />
           <span className="text-blue-600 dark:text-blue-400">
             {t.hero.titleHighlight}
           </span>
         </h1>
 
-        <p className="max-w-xl mx-auto text-xs sm:text-base text-[#64748b] dark:text-slate-400 mb-6 sm:mb-8 leading-relaxed">
+        <p className="max-w-xl mx-auto text-xs sm:text-base text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
           {t.hero.subtitle}
         </p>
 
         {/* Qidiruv Paneli */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white dark:bg-slate-800/90 p-2 sm:p-2.5 rounded-2xl sm:rounded-full shadow-lg shadow-slate-900/5 border border-[#e2e8f0] dark:border-slate-700 flex flex-col sm:flex-row items-center gap-2 max-w-3xl mx-auto focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all"
+          className="bg-card text-card-foreground p-2 sm:p-2.5 rounded-2xl sm:rounded-full shadow-lg shadow-slate-900/5 border border-border dark:border-white/15 flex flex-col sm:flex-row items-center gap-2 max-w-3xl mx-auto focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all"
         >
           {/* Kalit so'z inputi */}
           <div className="relative flex-1 w-full flex items-center">
-            <Search className="absolute left-3.5 w-4 h-4 text-slate-400 dark:text-slate-300 pointer-events-none" />
+            <Search className="absolute left-3.5 w-4 h-4 text-muted-foreground pointer-events-none" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.hero.searchPlaceholder}
-              className="w-full pl-10 pr-3 py-2.5 sm:py-2 bg-transparent text-xs sm:text-sm text-[#1e293b] dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-300 focus:outline-none"
+              className="w-full pl-10 pr-3 py-2.5 sm:py-2 bg-transparent text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             />
           </div>
 
-          <div className="hidden sm:block w-px h-6 bg-[#e2e8f0] dark:bg-slate-700" />
+          <div className="hidden sm:block w-px h-6 bg-border dark:bg-white/10" />
 
           {/* Hududni tanlash */}
           <div className="relative w-full sm:w-52 flex items-center">
@@ -92,7 +98,7 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
             <select
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="w-full pl-9 pr-6 py-2.5 sm:py-2 bg-[#f1f5f9] dark:bg-slate-800 sm:bg-transparent rounded-xl sm:rounded-none text-xs sm:text-sm font-semibold text-[#1e293b] dark:text-white focus:outline-none cursor-pointer appearance-none"
+              className="w-full pl-9 pr-6 py-2.5 sm:py-2 bg-secondary sm:bg-transparent rounded-xl sm:rounded-none text-xs sm:text-sm font-semibold text-foreground focus:outline-none cursor-pointer appearance-none"
             >
               <option value="Barcha hududlar">{t.locations.all}</option>
               {SIRDARYO_LOCATIONS.filter(l => l !== 'Barcha hududlar').map((loc) => (
@@ -114,8 +120,8 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
         </form>
 
         {/* Ommabop qidiruv teglari */}
-        <div className="mt-4 sm:mt-5 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs text-[#64748b] dark:text-slate-400">
-          <span className="flex items-center gap-1 text-[#1e293b] dark:text-slate-200 font-bold">
+        <div className="mt-4 sm:mt-5 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1 text-foreground font-bold">
             <Sparkles className="w-3 h-3 text-amber-500" />
             {t.hero.popularSearch}
           </span>
@@ -126,7 +132,7 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
                 key={tagItem.uz}
                 onClick={() => handleTagClick(tagLabel)}
                 type="button"
-                className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-400 dark:hover:text-blue-400 text-xs font-medium transition-colors cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-secondary text-secondary-foreground border border-border dark:border-white/10 hover:bg-muted hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-400 dark:hover:text-blue-400 text-xs font-medium transition-colors cursor-pointer"
               >
                 {tagLabel}
               </button>

@@ -27,13 +27,13 @@ export default function Loading() {
             
             {/* Markazdagi brend nishoni */}
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/30">
-              <span className="text-xs font-black tracking-tight">X</span>
+              <span className="text-xs font-black tracking-tight">T</span>
             </div>
           </div>
 
           {/* Brend nomi va yuklanish matni */}
           <h3 className="text-base sm:text-lg font-black text-[#282624] dark:text-zinc-100 tracking-tight mb-1.5">
-            XayrliIsh<span className="text-blue-600 dark:text-blue-400">.uz</span>
+            TopBaza<span className="text-blue-600 dark:text-blue-400">.uz</span>
           </h3>
 
           <p className="text-xs font-semibold text-[#67625d] dark:text-zinc-400 flex items-center gap-1.5" suppressHydrationWarning>

@@ -37,7 +37,7 @@ export function LanguageProvider({
           if (queryLang !== lang) {
             setLangState(queryLang);
           }
-          localStorage.setItem('xayrli_lang', queryLang);
+          localStorage.setItem('topbaza_lang', queryLang);
           document.cookie = `NEXT_LOCALE=${queryLang}; path=/; max-age=31536000; SameSite=Lax`;
           document.documentElement.lang = queryLang;
           return;
@@ -58,7 +58,7 @@ export function LanguageProvider({
       }
 
       // 3. localStorage
-      const savedLang = localStorage.getItem('xayrli_lang') as Language | null;
+      const savedLang = localStorage.getItem('topbaza_lang') as Language | null;
       if (savedLang === 'uz' || savedLang === 'ru') {
         if (savedLang !== lang) {
           setLangState(savedLang);
@@ -66,6 +66,20 @@ export function LanguageProvider({
         document.documentElement.lang = savedLang;
       }
     } catch {}
+
+    const handlePopState = () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const queryLang = params.get('lang') as Language | null;
+        if (queryLang === 'uz' || queryLang === 'ru') {
+          setLangState(queryLang);
+          document.documentElement.lang = queryLang;
+        }
+      } catch {}
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   // Iframe yoki tashqi oynadan keluvchi xabarlar (postMessage) orqali tilni sinxronlash
@@ -88,16 +102,14 @@ export function LanguageProvider({
   const setLang = (newLang: Language) => {
     setLangState(newLang);
     try {
-      localStorage.setItem('xayrli_lang', newLang);
+      localStorage.setItem('topbaza_lang', newLang);
       document.cookie = `NEXT_LOCALE=${newLang}; path=/; max-age=31536000; SameSite=Lax`;
       document.documentElement.lang = newLang;
 
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href);
-        if (url.searchParams.has('lang')) {
-          url.searchParams.set('lang', newLang);
-          window.history.replaceState({}, '', url.toString());
-        }
+        url.searchParams.set('lang', newLang);
+        window.history.replaceState({}, '', url.toString());
       }
     } catch {}
   };

@@ -264,7 +264,7 @@ export default function AdminDashboardClient({
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-[#282624] dark:text-zinc-100 tracking-tight mt-1">
-            XayrliIsh.uz Boshqaruv Markazi
+            TopBaza.uz Boshqaruv Markazi
           </h1>
         </div>
 

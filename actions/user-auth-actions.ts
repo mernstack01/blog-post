@@ -1,6 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import {
   getUserAuthSession,
@@ -9,6 +10,7 @@ import {
   getTashkentStartOfDay,
 } from '@/lib/user-auth';
 import { PrismaClient, Role } from '@prisma/client';
+import { isUserAdmin, clearAdminAuthSession } from '@/lib/admin-auth';
 
 
 // Fallback in-memory store in case Prisma Client in active Node dev process hasn't reloaded
@@ -47,6 +49,8 @@ export interface SendOtpResponse {
   success: boolean;
   message: string;
   devCode?: string;
+  isRegistered?: boolean;
+  userName?: string;
 }
 
 /**
@@ -62,6 +66,17 @@ export async function sendOtpAction(rawPhone: string): Promise<SendOtpResponse> 
         success: false,
         message: "Iltimos, to'g'ri O'zbekiston telefon raqamini kiriting (masalan: +998 90 123 45 67).",
       };
+    }
+
+    // Foydalanuvchi allaqachon ro'yxatdan o'tganligini tekshirish
+    let existingUser: { id: string; name: string } | null = null;
+    try {
+      existingUser = await db.user.findUnique({
+        where: { phone },
+        select: { id: true, name: true },
+      });
+    } catch (checkErr) {
+      console.warn('Mavjud userni tekshirishda ogohlantirish:', checkErr);
     }
 
     // 4 xonali tasodifiy kod generatsiya qilish (1000 - 9999)
@@ -95,8 +110,12 @@ export async function sendOtpAction(rawPhone: string): Promise<SendOtpResponse> 
     // Development rejimida foydalanuvchiga qulay bo'lishi uchun kodni qaytaramiz
     return {
       success: true,
-      message: `Tasdiqlash kodi ${phone} raqamiga yuborildi.`,
+      message: existingUser
+        ? `Xush kelibsiz! Tasdiqlash kodi ${phone} raqamiga yuborildi.`
+        : `Tasdiqlash kodi ${phone} raqamiga yuborildi.`,
       devCode: code,
+      isRegistered: Boolean(existingUser),
+      userName: existingUser?.name,
     };
   } catch (error: any) {
     console.error('sendOtpAction error:', error);
@@ -216,8 +235,7 @@ export async function verifyOtpAction(
     // Agar oddiy foydalanuvchi/mutaxassis bo'lsa, eskirgan admin tokenini tozalash
     if (user.role !== Role.ADMIN) {
       try {
-        const cookieStore = await cookies();
-        cookieStore.delete('sirdaryo_admin_token');
+        await clearAdminAuthSession();
       } catch {}
     }
 
@@ -252,42 +270,62 @@ export async function verifyOtpAction(
   }
 }
 
-import { isUserAdmin, clearAdminAuthSession } from '@/lib/admin-auth';
-
 /**
  * 3. Hozirda tizimga kirgan foydalanuvchi ma'lumotlarini olish
  */
 export async function getCurrentUserAction() {
   try {
-    const adminActive = await isUserAdmin();
     const session = await getUserAuthSession();
     const db = getPrismaDb();
 
-    // 1. Agar admin faol bo'lsa (admin token cookie mavjud)
-    if (adminActive) {
-      if (session?.userId) {
-        try {
-          const user = await db.user.findUnique({
-            where: { id: session.userId },
-          });
-          if (user) {
-            return {
-              success: true,
-              user: {
-                id: user.id,
-                phone: user.phone,
-                name: user.name,
-                role: 'ADMIN',
-                listingLimit: 9999,
-                totalUsed: 0,
-                remaining: 9999,
-              },
-            };
-          }
-        } catch (dbErr) {
-          console.warn('Admin user fetch warning:', dbErr);
+    // 1. Agar foydalanuvchi sessiyasi mavjud bo'lsa
+    if (session?.userId) {
+      const user = await db.user.findUnique({
+        where: { id: session.userId },
+      });
+
+      if (user) {
+        // Agar foydalanuvchi haqiqiy Admin bo'lsa
+        if (user.role === Role.ADMIN) {
+          return {
+            success: true,
+            user: {
+              id: user.id,
+              phone: user.phone,
+              name: user.name,
+              role: 'ADMIN',
+              listingLimit: 9999,
+              totalUsed: 0,
+              remaining: 9999,
+            },
+          };
         }
+
+        // Oddiy foydalanuvchi / Mutaxassis
+        const userLimit = (user as any)?.listingLimit ?? (user as any)?.dailyLimit ?? 3;
+        const totalUsed = await db.listing.count({
+          where: { userId: user.id },
+        });
+
+        return {
+          success: true,
+          user: {
+            id: user.id,
+            phone: user.phone,
+            name: user.name,
+            role: user.role,
+            listingLimit: userLimit,
+            totalUsed,
+            remaining: Math.max(0, userLimit - totalUsed),
+          },
+        };
       }
+      return { success: false, user: null };
+    }
+
+    // 2. Agar foydalanuvchi sessiyasi bo'lmasa, faqat PIN orqali admin kirganligini tekshiramiz
+    const adminActive = await isUserAdmin();
+    if (adminActive) {
       return {
         success: true,
         user: {
@@ -302,41 +340,7 @@ export async function getCurrentUserAction() {
       };
     }
 
-    // 2. Agar admin bo'lmasa, oddiy foydalanuvchi sessiyasini tekshiramiz
-    if (!session) {
-      return { success: false, user: null };
-    }
-
-    const user = await db.user.findUnique({
-      where: { id: session.userId },
-    });
-
-    if (!user) {
-      await clearUserAuthSession();
-      return { success: false, user: null };
-    }
-
-    const userLimit = (user as any)?.listingLimit ?? (user as any)?.dailyLimit ?? 3;
-
-    // Butun umrlik (umumiy) e'lonlar hisobi
-    const totalUsed = await db.listing.count({
-      where: {
-        userId: user.id,
-      },
-    });
-
-    return {
-      success: true,
-      user: {
-        id: user.id,
-        phone: user.phone,
-        name: user.name,
-        role: user.role,
-        listingLimit: userLimit,
-        totalUsed,
-        remaining: Math.max(0, userLimit - totalUsed),
-      },
-    };
+    return { success: false, user: null };
   } catch (error) {
     console.error('getCurrentUserAction error:', error);
     return { success: false, user: null };
@@ -350,4 +354,130 @@ export async function logoutUserAction() {
   await clearUserAuthSession();
   await clearAdminAuthSession();
   return { success: true };
+}
+
+/**
+ * 5. Foydalanuvchining to'liq profil ma'lumotlarini olish (Profile sahifasi uchun)
+ */
+export async function getUserFullProfileAction() {
+  try {
+    const session = await getUserAuthSession();
+    if (!session?.userId) {
+      return { success: false, message: "Avtorizatsiyadan o'tilmagan", user: null, stats: null, listings: [] };
+    }
+
+    const db = getPrismaDb();
+    const user = await db.user.findUnique({
+      where: { id: session.userId },
+    });
+
+    if (!user) {
+      await clearUserAuthSession();
+      return { success: false, message: "Foydalanuvchi topilmadi", user: null, stats: null, listings: [] };
+    }
+
+    const listings = await db.listing.findMany({
+      where: {
+        OR: [
+          { userId: user.id },
+          { phone: user.phone },
+        ],
+      },
+      include: {
+        category: {
+          select: { id: true, name: true, slug: true, icon: true },
+        },
+        subCategory: {
+          select: { id: true, name: true, slug: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const userLimit = (user as any)?.listingLimit ?? (user as any)?.dailyLimit ?? 3;
+    const totalListings = listings.length;
+    const approvedCount = listings.filter((l: any) => l.status === 'APPROVED').length;
+    const pendingCount = listings.filter((l: any) => l.status === 'PENDING').length;
+    const totalViews = listings.reduce((sum: number, l: any) => sum + (l.view_count || 0), 0);
+
+    return {
+      success: true,
+      user: {
+        id: user.id,
+        phone: user.phone,
+        name: user.name,
+        role: user.role,
+        telegram: user.telegram || null,
+        avatar: user.avatar || null,
+        createdAt: user.createdAt,
+      },
+      stats: {
+        listingLimit: userLimit,
+        totalUsed: totalListings,
+        remaining: Math.max(0, userLimit - totalListings),
+        approvedCount,
+        pendingCount,
+        totalViews,
+      },
+      listings: JSON.parse(JSON.stringify(listings)),
+    };
+  } catch (error: any) {
+    console.error('getUserFullProfileAction error:', error);
+    return { success: false, message: error?.message || "Profil ma'lumotlarini yuklashda xatolik", user: null, stats: null, listings: [] };
+  }
+}
+
+/**
+ * 6. Foydalanuvchi profili ma'lumotlarini yangilash (Ism, Telegram, Avatar)
+ */
+export async function updateUserProfileAction(data: {
+  name: string;
+  telegram?: string | null;
+  avatar?: string | null;
+}) {
+  try {
+    const session = await getUserAuthSession();
+    if (!session?.userId) {
+      return { success: false, message: "Avtorizatsiyadan o'tilmagan" };
+    }
+
+    const cleanName = data.name.trim();
+    if (!cleanName || cleanName.length < 2) {
+      return { success: false, message: "Ism kamida 2 ta harfdan iborat bo'lishi kerak" };
+    }
+
+    let cleanTelegram = data.telegram ? data.telegram.trim().replace(/^@/, '') : null;
+
+    const db = getPrismaDb();
+    const updated = await db.user.update({
+      where: { id: session.userId },
+      data: {
+        name: cleanName,
+        telegram: cleanTelegram || null,
+        ...(data.avatar !== undefined && { avatar: data.avatar || null }),
+      },
+    });
+
+    try {
+      revalidatePath('/profile');
+      revalidatePath('/my-listings');
+      revalidatePath('/');
+    } catch {}
+
+    return {
+      success: true,
+      message: "Profilingiz muvaffaqiyatli yangilandi!",
+      user: {
+        id: updated.id,
+        phone: updated.phone,
+        name: updated.name,
+        role: updated.role,
+        telegram: updated.telegram,
+        avatar: updated.avatar,
+      },
+    };
+  } catch (error: any) {
+    console.error('updateUserProfileAction error:', error);
+    return { success: false, message: error?.message || "Profilni yangilashda xatolik yuz berdi" };
+  }
 }

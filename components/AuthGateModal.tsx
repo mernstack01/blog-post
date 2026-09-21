@@ -37,6 +37,8 @@ export default function AuthGateModal({ onSuccess, onClose }: AuthGateModalProps
   const [name, setName] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [devCode, setDevCode] = useState<string | null>(null);
+  const [isRegistered, setIsRegistered] = useState<boolean | null>(null);
+  const [registeredUserName, setRegisteredUserName] = useState<string | null>(null);
 
   // Admin holati
   const [adminPin, setAdminPin] = useState('');
@@ -64,6 +66,8 @@ export default function AuthGateModal({ onSuccess, onClose }: AuthGateModalProps
       const res = await sendOtpAction(phone);
       if (res.success) {
         setDevCode(res.devCode || null);
+        setIsRegistered(Boolean(res.isRegistered));
+        setRegisteredUserName(res.userName || null);
         setStep('OTP');
       } else {
         setError(res.message);
@@ -82,7 +86,8 @@ export default function AuthGateModal({ onSuccess, onClose }: AuthGateModalProps
     setLoading(true);
 
     try {
-      const res = await verifyOtpAction(phone, otpCode, name);
+      // Agar mavjud user bo'lsa, nomini qayta yuborish shart emas
+      const res = await verifyOtpAction(phone, otpCode, isRegistered ? undefined : name);
       if (res.success && res.user) {
         onSuccess(res.user);
       } else {
@@ -273,8 +278,10 @@ export default function AuthGateModal({ onSuccess, onClose }: AuthGateModalProps
 
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
             {step === 'PHONE'
-              ? (lang === 'ru' ? 'Вход для подачи объявления' : "E'lon berish uchun kirish")
-              : (lang === 'ru' ? 'Подтверждение номера' : "Raqamni tasdiqlash")}
+              ? (lang === 'ru' ? 'Вход / Регистрация' : "Kirish / Ro'yxatdan o'tish")
+              : isRegistered
+              ? (lang === 'ru' ? 'С возвращением!' : 'Xush kelibsiz!')
+              : (lang === 'ru' ? 'Регистрация нового пользователя' : "Yangi hisob yaratish")}
           </h2>
 
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
@@ -282,9 +289,13 @@ export default function AuthGateModal({ onSuccess, onClose }: AuthGateModalProps
               ? (lang === 'ru'
                   ? 'Введите ваш номер телефона. Мы отправим 4-значный код подтверждения.'
                   : "Telefon raqamingizni kiriting. Sizga 4 xonali tasdiqlash kodi taqdim etiladi.")
+              : isRegistered
+              ? (lang === 'ru'
+                  ? `Здравствуйте, ${registeredUserName || 'пользователь'}! Введите 4-значный код для входа в систему:`
+                  : `Assalomu alaykum, ${registeredUserName || 'foydalanuvchi'}! Tizimga kirish uchun 4 xonali kodni kiriting:`)
               : (lang === 'ru'
-                  ? `Мы отправили код на номер ${phone}. Введите его ниже.`
-                  : `${phone} raqamiga yuborilgan 4 xonali kodni kiriting.`)}
+                  ? `Мы отправили код на номер ${phone}. Введите его и укажите ваше имя:`
+                  : `${phone} raqamiga yuborilgan kodni kiriting va ismingizni ko'rsating:`)}
           </p>
 
           {/* Development Rejimidagi Maxsus Kod Bildirishnomasi */}
@@ -384,26 +395,33 @@ export default function AuthGateModal({ onSuccess, onClose }: AuthGateModalProps
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  {lang === 'ru' ? 'Ваше имя или название (необязательно)' : "Ismingiz yoki korxona nomi (ixtiyoriy)"}
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
-                  <input
-                    type="text"
-                    value={name}
-                    disabled={loading}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder={lang === 'ru' ? 'Например: Уста Али' : "Masalan: Usta Ali"}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:opacity-60"
-                  />
+              {/* Faqat YANGI foydalanuvchidan ism so'raladi. Ro'yxatdan o'tgan foydalanuvchidan ISMI SO'RALMAYDI! */}
+              {!isRegistered && (
+                <div className="animate-in fade-in duration-200">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    {lang === 'ru' ? 'Ваше имя или название' : "Ismingiz yoki korxona nomi"} <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={name}
+                      disabled={loading}
+                      required
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder={lang === 'ru' ? 'Например: Уста Али' : "Masalan: Usta Ali"}
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:opacity-60"
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+                    {lang === 'ru' ? 'Будет отображаться в ваших объявлениях' : "E'lonlaringizda ushbu nom ko'rsatiladi"}
+                  </p>
                 </div>
-              </div>
+              )}
 
               <button
                 type="submit"
-                disabled={loading || otpCode.length < 4}
+                disabled={loading || otpCode.length < 4 || (!isRegistered && !name.trim())}
                 className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-95 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading ? (
@@ -411,10 +429,15 @@ export default function AuthGateModal({ onSuccess, onClose }: AuthGateModalProps
                     <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                     <span>{lang === 'ru' ? 'Проверка...' : 'Tasdiqlanmoqda...'}</span>
                   </div>
+                ) : isRegistered ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{lang === 'ru' ? 'Войти в систему' : "Tizimga kirish"}</span>
+                  </>
                 ) : (
                   <>
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>{lang === 'ru' ? 'Подтвердить и продолжить' : "Tasdiqlash va Davom etish"}</span>
+                    <span>{lang === 'ru' ? 'Зарегистрироваться и войти' : "Ro'yxatdan o'tish va Kirish"}</span>
                   </>
                 )}
               </button>

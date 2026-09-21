@@ -36,13 +36,13 @@ async function generateTZRoadmapPDF() {
 
   // Logo / Katta Sarlavha
   doc.moveDown(1);
-  doc.fillColor(colors.primary).fontSize(24).font('Helvetica-Bold').text('XayrliIsh.uz', 45, 45);
-  doc.fillColor(colors.textMuted).fontSize(10).font('Helvetica').text('Sirdaryo viloyati ustalari va maishiy xizmatlar reyting portali', 45, 75);
+  doc.fillColor(colors.primary).fontSize(24).font('Helvetica-Bold').text('TopBaza.uz', 45, 45);
+  doc.fillColor(colors.textMuted).fontSize(10).font('Helvetica').text('Sirdaryo viloyati mutaxassislari, maskonlari va xizmatlar reyting portali', 45, 75);
 
   // Badge
   doc.roundedRect(400, 45, 150, 24, 6).fill(colors.primaryLight);
   doc.rect(400, 45, 150, 24).stroke(colors.primary);
-  doc.fillColor(colors.primaryDark).fontSize(9).font('Helvetica-Bold').text('RASMIY TEXNIK TOPShIRIQ', 408, 52, { width: 134, align: 'center' });
+  doc.fillColor(colors.primaryDark).fontSize(9).font('Helvetica-Bold').text('RASMIY TEXNIK TOPSHIRIQ', 408, 52, { width: 134, align: 'center' });
 
   doc.moveDown(2);
   doc.strokeColor(colors.borderColor).lineWidth(1).moveTo(45, 95).lineTo(550, 95).stroke();
@@ -60,7 +60,7 @@ async function generateTZRoadmapPDF() {
   doc.moveDown(0.4);
 
   const passportTable = [
-    ['Loyiha nomi:', 'XayrliIsh.uz (Sirdaryo Ustalari va Xizmatlari)'],
+    ['Loyiha nomi:', 'TopBaza.uz (Sirdaryo va O\'zbekiston Xizmatlari)'],
     ['Asosiy vazifasi:', 'Aholi uchun sifatli, tekshirilgan va xolis baholangan ustalarni topish; ustalarga adolatli reyting va homiylik imkoniyatini taqdim etish.'],
     ['Asosiy hudud:', 'Sirdaryo viloyati (Guliston, Yangiyer, Shirin va barcha 8 ta tuman)'],
     ['Til muhiti:', 'O\'zbek tili (Uz), Rus tili (Ru), Ingliz tili (En)'],
@@ -116,7 +116,7 @@ async function generateTZRoadmapPDF() {
   const cardElements = [
     '1. O\'rin nishoni: #1 OLTIN USTA, #2 KUMUSH, #3 BRONZA va #4-#10 rasmiy o\'rinlar.',
     '2. Kategoriya belgisi: Ustaninig aniq sohasi (Santexnika, Elektrik, Avto master, Remont va h.k.).',
-    '3. Reyting va Ball: Jami yig\'ilgan Xayrli Ball (0-100) va mijoz/xodim yulduzchalari.',
+    '3. Reyting va Ball: Jami yig\'ilgan TopBaza Ball (0-100) va mijoz/xodim yulduzchalari.',
     '4. VIP Homiylik nishoni: Oltin toj shaklida homiy ustalar uchun ajralib turuvchi belgi.',
     '5. Imtiyozli Usta nishoni: Zumrad qalqon belgisi (nogironligi bor yoki faxriy ustalar uchun).',
     '6. Veb-sayt / Manzil tugmasi: Ustaninig tashqi portfolioga to\'g\'ridan-to\'g\'ri yo\'naltiruvchi havola.',
@@ -222,7 +222,7 @@ async function generateTZRoadmapPDF() {
 
   doc.y = 45;
   doc.fillColor(colors.primary).fontSize(15).font('Helvetica-Bold').text('6. RIVOJLANTIRISH YO\'L XARITASI (PROJECT ROADMAP)');
-  doc.fillColor(colors.textMuted).fontSize(9).font('Helvetica').text('XayrliIsh.uz platformasining amalga oshirilgan va rejalashtirilgan strategik bosqichlari');
+  doc.fillColor(colors.textMuted).fontSize(9).font('Helvetica').text('TopBaza.uz platformasining amalga oshirilgan va rejalashtirilgan strategik bosqichlari');
   doc.moveDown(0.8);
 
   const roadmapPhases = [
@@ -262,7 +262,7 @@ async function generateTZRoadmapPDF() {
         'Kartochkalarda #1 Oltin Usta, #2 Kumush, #3 Bronza nishonlari.',
         'VIP Homiylik (zarhal toj) va Imtiyozli Usta (zumrad qalqon) badjlari.',
         'Ustanining veb-sayti va manziliga to\'g\'ridan-to\'g\'ri havola tugmasi.',
-        'Header: XayrliIsh.uz brendi, Uz | Ru | En tillar paneli.',
+        'Header: TopBaza.uz brendi, Uz | Ru | En tillar paneli.',
       ],
     },
     {
@@ -331,7 +331,7 @@ async function generateTZRoadmapPDF() {
   doc.moveDown(0.5);
   doc.roundedRect(45, doc.y, 505, 30, 4).fill(colors.primaryLight);
   doc.fillColor(colors.primaryDark).fontSize(8.5).font('Helvetica-Bold').text(
-    'Hujjat XayrliIsh.uz boshqaruv guruhi tomonidan tasdiqlangan. Loyiha ko\'rsatilgan mezonlarga qat\'iy mos holda rivojlantiriladi.',
+    'Hujjat TopBaza.uz boshqaruv guruhi tomonidan tasdiqlangan. Loyiha ko\'rsatilgan mezonlarga qat\'iy mos holda rivojlantiriladi.',
     55, doc.y + 10, { width: 485, align: 'center' }
   );
 
@@ -341,7 +341,7 @@ async function generateTZRoadmapPDF() {
     doc.switchToPage(i);
     doc.strokeColor(colors.borderColor).lineWidth(0.5).moveTo(45, 800).lineTo(550, 800).stroke();
     doc.fillColor(colors.textMuted).fontSize(8).font('Helvetica').text(
-      'XayrliIsh.uz — Texnik Topshiriq va Rivojlantirish Yo\'l Xaritasi (Roadmap)',
+      'TopBaza.uz — Texnik Topshiriq va Rivojlantirish Yo\'l Xaritasi (Roadmap)',
       45, 808
     );
     doc.fillColor(colors.textMuted).fontSize(8).font('Helvetica-Bold').text(

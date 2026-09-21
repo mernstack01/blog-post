@@ -125,7 +125,10 @@ export async function clearAdminAuthSession(): Promise<void> {
   try {
     const cookieStore = await cookies();
     cookieStore.delete(ADMIN_COOKIE_NAME);
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.message?.includes('Cookies can only be modified') || err?.digest === 'DYNAMIC_SERVER_USAGE') {
+      return;
+    }
     console.error('clearAdminAuthSession error:', err);
   }
 }

@@ -178,6 +178,14 @@ export default function MyListingsClient({
             </div>
 
             <Link
+              href="/profile"
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 transition-all active:scale-95"
+            >
+              <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>{lang === 'ru' ? "Мой профиль" : "Mening profilim"}</span>
+            </Link>
+
+            <Link
               href="/new-listing"
               className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/25 active:scale-95 transition-all"
             >

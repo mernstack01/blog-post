@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { adminUpdateListingFullAction, AdminUpdateListingInput } from '@/actions/admin-actions';
 import { SIRDARYO_LOCATIONS } from '@/lib/constants';
 import {
@@ -21,8 +21,14 @@ import {
   Crown,
   Star,
   RefreshCw,
+  UploadCloud,
+  Trash2,
+  Plus,
+  Crop as CropIcon,
 } from 'lucide-react';
 import InstagramIcon from '@/components/icons/InstagramIcon';
+import SafeImage from '@/components/SafeImage';
+import ImageCropperModal from '@/components/ImageCropperModal';
 
 interface AdminEditListingModalProps {
   listing: any;
@@ -49,6 +55,7 @@ export default function AdminEditListingModal({
     price: listing.price || '',
     experience: listing.experience || '',
     description: listing.description || '',
+    images: listing.images || [],
     categoryId: listing.categoryId || (categories[0]?.id || ''),
     subCategoryId: listing.subCategoryId || '',
     status: listing.status || 'APPROVED',
@@ -59,6 +66,82 @@ export default function AdminEditListingModal({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Rasm qirqish holatlari
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [cropEditingIndex, setCropEditingIndex] = useState<number | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const currentImages = formData.images || [];
+    if (currentImages.length >= 5) {
+      alert("Maksimal 5 tagacha rasm yuklash mumkin");
+      return;
+    }
+
+    setCropEditingIndex(null);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result as string);
+      setCropperOpen(true);
+    };
+    reader.readAsDataURL(file);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCropExisting = (imgUrl: string, index: number) => {
+    setCropImageSrc(imgUrl);
+    setCropEditingIndex(index);
+    setCropperOpen(true);
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    setIsUploadingImage(true);
+    try {
+      const uploadData = new FormData();
+      uploadData.append('file', croppedBlob, 'admin-listing.webp');
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadData,
+      });
+
+      const data = await res.json();
+      if (data.success && data.url) {
+        setFormData((prev) => {
+          const currentImages = [...(prev.images || [])];
+          if (cropEditingIndex !== null) {
+            currentImages[cropEditingIndex] = data.url;
+          } else {
+            currentImages.push(data.url);
+          }
+          return { ...prev, images: currentImages };
+        });
+      } else {
+        alert(data.message || "Rasm yuklashda xatolik yuz berdi");
+      }
+    } catch {
+      alert("Serverga yuklashda xatolik yuz berdi");
+    } finally {
+      setIsUploadingImage(false);
+      setCropEditingIndex(null);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: (prev.images || []).filter((_, i) => i !== index),
+    }));
+  };
 
   const selectedCategory = categories.find((c) => c.id === formData.categoryId);
 
@@ -387,7 +470,78 @@ export default function AdminEditListingModal({
             </div>
           </div>
 
-          {/* 6. Tavsif */}
+          {/* 6. E'lon Rasmlari (4:3 Qirqish bilan) */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-bold text-[#282624] dark:text-zinc-300">
+                E'lon rasmlari (Maksimal 5 ta, 4:3 formatda)
+              </label>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingImage || (formData.images || []).length >= 5}
+                className="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-xs font-bold border border-blue-200 dark:border-blue-900 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Yangi rasm qo'shish</span>
+              </button>
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageFileSelect}
+              disabled={isUploadingImage}
+            />
+
+            {(formData.images || []).length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                {(formData.images || []).map((imgUrl, idx) => (
+                  <div
+                    key={imgUrl + idx}
+                    className="relative rounded-xl overflow-hidden border border-[#e6e0da] dark:border-zinc-700 group bg-slate-100 dark:bg-zinc-800"
+                  >
+                    <SafeImage
+                      src={imgUrl}
+                      alt={`Listing photo ${idx + 1}`}
+                      className="w-full h-20 object-cover"
+                    />
+                    {idx === 0 && (
+                      <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-blue-600 text-white text-[9px] font-bold">
+                        Asosiy
+                      </span>
+                    )}
+                    <div className="absolute top-1 right-1 flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleCropExisting(imgUrl, idx)}
+                        className="w-5 h-5 rounded-full bg-black/60 hover:bg-black/85 text-white flex items-center justify-center text-xs transition-transform hover:scale-110 cursor-pointer"
+                        title="Qayta qirqish"
+                      >
+                        <CropIcon className="w-3 h-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeImage(idx)}
+                        className="w-5 h-5 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center text-xs transition-transform hover:scale-110 cursor-pointer"
+                        title="O'chirish"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground italic">
+                Ushbu e'londa hozircha rasm mavjud emas.
+              </p>
+            )}
+          </div>
+
+          {/* 7. Tavsif */}
           <div>
             <label className="block text-xs font-bold text-[#282624] dark:text-zinc-300 mb-1">
               Batafsil tavsif *
@@ -427,6 +581,24 @@ export default function AdminEditListingModal({
         </form>
 
       </div>
+
+      {/* 4:3 E'lon Rasm Qirqish Modali */}
+      <ImageCropperModal
+        isOpen={cropperOpen}
+        imageSrc={cropImageSrc}
+        aspectRatio={4 / 3}
+        cropShape="rect"
+        outputWidth={800}
+        outputHeight={600}
+        title="Admin: E'lon rasmini qirqish (4:3)"
+        onCropComplete={handleCropComplete}
+        onClose={() => {
+          setCropperOpen(false);
+          setCropImageSrc(null);
+          setCropEditingIndex(null);
+        }}
+        lang="uz"
+      />
     </div>
   );
 }

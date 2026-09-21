@@ -90,7 +90,7 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
   const activeCategoryObj = categories.find((c) => c.slug === currentCategory);
 
   return (
-    <div className="w-full bg-[#fffdfa] dark:bg-[#0f172a] border-b border-[#e2e8f0] dark:border-slate-800 py-3 shadow-2xs transition-colors">
+    <div className="w-full bg-background border-b border-border dark:border-white/10 py-3 shadow-2xs transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Asosiy kategoriyalar (Pills) */}
@@ -101,8 +101,8 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
             type="button"
             className={`flex items-center gap-2 px-4 py-2 min-h-[38px] rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer active:scale-95 touch-manipulation shrink-0 ${
               currentCategory === 'all'
-                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
-                : 'bg-[#f1f5f9] dark:bg-slate-800 text-[#64748b] dark:text-slate-300 hover:bg-[#e2e8f0] dark:hover:bg-slate-700 hover:text-[#1e293b] dark:hover:text-white'
+                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30 font-bold'
+                : 'bg-secondary text-secondary-foreground border border-border/60 dark:border-white/10 hover:bg-muted hover:text-foreground'
             }`}
           >
             <LayoutGrid className="w-4 h-4" />
@@ -119,8 +119,8 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
                 type="button"
                 className={`flex items-center gap-2 px-4 py-2 min-h-[38px] rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer active:scale-95 touch-manipulation shrink-0 ${
                   isSelected
-                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
-                    : 'bg-[#f1f5f9] dark:bg-slate-800 text-[#64748b] dark:text-slate-300 hover:bg-[#e2e8f0] dark:hover:bg-slate-700 hover:text-[#1e293b] dark:hover:text-white'
+                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30 font-bold'
+                    : 'bg-secondary text-secondary-foreground border border-border/60 dark:border-white/10 hover:bg-muted hover:text-foreground'
                 }`}
               >
                 {getIcon(cat.icon, isSelected)}
@@ -132,18 +132,18 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
 
         {/* Ichki sub-kategoriyalar */}
         {activeCategoryObj && activeCategoryObj.subCategories && activeCategoryObj.subCategories.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-[#e2e8f0] dark:border-slate-800 flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-1 touch-pan-x">
-            <span className="text-[11px] font-bold text-[#64748b] dark:text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-0.5">
+          <div className="mt-3 pt-3 border-t border-border dark:border-white/10 flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-1 touch-pan-x">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider shrink-0 flex items-center gap-0.5">
               <span>{lang === 'ru' ? 'Направление:' : "Yo'nalish:"}</span>
-              <ChevronRight className="w-3 h-3 text-[#64748b] dark:text-slate-400" />
+              <ChevronRight className="w-3 h-3 text-muted-foreground" />
             </span>
 
             <button
               onClick={() => handleSubCategorySelect('all')}
               className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer active:scale-95 touch-manipulation shrink-0 ${
                 currentSubCategory === 'all'
-                  ? 'bg-slate-900 dark:bg-blue-600 text-white font-bold'
-                  : 'bg-[#f1f5f9] dark:bg-slate-800 text-[#64748b] dark:text-slate-300 hover:bg-[#e2e8f0] dark:hover:bg-slate-700'
+                  ? 'bg-primary text-primary-foreground font-bold shadow-2xs'
+                  : 'bg-secondary text-secondary-foreground border border-border/40 dark:border-white/10 hover:bg-muted'
               }`}
             >
               {lang === 'ru' ? 'Все направления' : "Barcha yo'nalishlar"}
@@ -157,8 +157,8 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
                   onClick={() => handleSubCategorySelect(sub.slug)}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer active:scale-95 touch-manipulation shrink-0 ${
                     isSubSelected
-                      ? 'bg-slate-900 dark:bg-blue-600 text-white font-bold shadow-2xs'
-                      : 'bg-[#f1f5f9] dark:bg-slate-800 text-[#64748b] dark:text-slate-300 hover:bg-[#e2e8f0] dark:hover:bg-slate-700'
+                      ? 'bg-primary text-primary-foreground font-bold shadow-2xs'
+                      : 'bg-secondary text-secondary-foreground border border-border/40 dark:border-white/10 hover:bg-muted'
                   }`}
                 >
                   {getSubCategoryLocalizedName(sub.slug, lang) || sub.name}

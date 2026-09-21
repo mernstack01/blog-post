@@ -3,7 +3,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Home, Layers, Plus, Sparkles } from 'lucide-react';
+import { Home, Layers, Plus, Sparkles, User } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 function BottomNavContent() {
@@ -42,13 +42,19 @@ function BottomNavContent() {
       icon: Layers,
       isActive: pathname.startsWith('/categories'),
     },
+    {
+      label: t.bottomNav.profile || (lang === 'ru' ? 'Профиль' : 'Profil'),
+      href: '/profile',
+      icon: User,
+      isActive: pathname === '/profile',
+    },
   ];
 
   return (
     <nav
       key={lang}
       aria-label="Mobil pastki navigatsiya"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-[#fffdfa]/95 dark:bg-[#0f172a]/95 backdrop-blur-xl border-t border-[#e2e8f0] dark:border-slate-800 shadow-[0_-4px_25px_rgba(15,23,42,0.08)] px-2 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] transition-colors"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-background/95 backdrop-blur-xl border-t border-border dark:border-white/15 shadow-[0_-4px_25px_rgba(15,23,42,0.08)] px-2 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] transition-colors"
     >
       <div className="flex items-center justify-around max-w-lg mx-auto">
         {navItems.map((item) => {
@@ -62,7 +68,7 @@ function BottomNavContent() {
                 className="flex flex-col items-center group -mt-5"
                 title={item.label}
               >
-                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/35 active:scale-90 transition-transform border-2 border-[#fffdfa] dark:border-slate-900">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/35 active:scale-90 transition-transform border-2 border-background">
                   <Icon className="w-6 h-6 stroke-[2.5]" />
                 </div>
                 <span suppressHydrationWarning className="text-[10px] font-extrabold text-blue-600 dark:text-blue-400 mt-0.5 tracking-tight">
@@ -81,7 +87,7 @@ function BottomNavContent() {
                   ? item.isTop10
                     ? 'text-amber-600 dark:text-amber-400 font-extrabold'
                     : 'text-blue-600 dark:text-blue-400 font-bold'
-                  : 'text-[#64748b] dark:text-slate-400 hover:text-[#1e293b] dark:hover:text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <div className="relative">

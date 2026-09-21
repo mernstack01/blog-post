@@ -1,13 +1,13 @@
 import { cookies } from 'next/headers';
 import crypto from 'crypto';
 
-const USER_COOKIE_NAME = 'xayrli_user_token';
+const USER_COOKIE_NAME = 'topbaza_user_token';
 
 function getUserSecret(): string {
   return (
     process.env.USER_SESSION_SECRET ||
     process.env.ADMIN_SESSION_SECRET ||
-    'xayrli_user_auth_secure_secret_key_2026'
+    'topbaza_user_auth_secure_secret_key_2026'
   );
 }
 
@@ -80,7 +80,9 @@ export function verifyUserToken(token?: string): UserSessionPayload | null {
 export async function getUserAuthSession(): Promise<UserSessionPayload | null> {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get(USER_COOKIE_NAME)?.value;
+    const token =
+      cookieStore.get(USER_COOKIE_NAME)?.value ||
+      cookieStore.get('xayrli_user_token')?.value;
     return verifyUserToken(token);
   } catch (err: any) {
     if (err?.digest === 'DYNAMIC_SERVER_USAGE') throw err;
@@ -121,7 +123,11 @@ export async function clearUserAuthSession(): Promise<void> {
   try {
     const cookieStore = await cookies();
     cookieStore.delete(USER_COOKIE_NAME);
-  } catch (err) {
+    cookieStore.delete('xayrli_user_token');
+  } catch (err: any) {
+    if (err?.message?.includes('Cookies can only be modified') || err?.digest === 'DYNAMIC_SERVER_USAGE') {
+      return;
+    }
     console.error('clearUserAuthSession error:', err);
   }
 }

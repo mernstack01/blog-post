@@ -14,6 +14,7 @@ import {
   User,
   LogOut,
   ChevronDown,
+  ChevronRight,
   FileText,
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -31,7 +32,7 @@ export function Header() {
   const currentMode = searchParams.get('mode');
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#fffdfa]/95 dark:bg-[#0f172a]/95 backdrop-blur-md border-b border-[#e2e8f0] dark:border-slate-800 transition-colors">
+    <header className="sticky top-0 z-40 w-full bg-background/95 backdrop-blur-md border-b border-border dark:border-white/10 transition-colors">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
           
@@ -43,13 +44,13 @@ export function Header() {
               </div>
               <div className="flex flex-col">
                 <span className="text-base sm:text-lg font-black tracking-tight text-[#1e293b] dark:text-white flex items-center">
-                  XayrliIsh<span className="text-blue-600 dark:text-blue-400">.uz</span>
+                  TopBaza<span className="text-blue-600 dark:text-blue-400">.uz</span>
                 </span>
               </div>
             </Link>
 
             {/* Jonli hudud nishoni (Desktop) */}
-            <div className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f1f5f9] dark:bg-slate-800 border border-[#e2e8f0] dark:border-slate-700 text-xs font-medium text-[#64748b] dark:text-slate-400">
+            <div className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary border border-border dark:border-white/10 text-xs font-medium text-muted-foreground">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span suppressHydrationWarning>{t.nav.regions}</span>
             </div>
@@ -162,6 +163,14 @@ export function Header() {
                       </div>
 
                       <div className="py-2 space-y-1">
+                        <Link
+                          href="/profile"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                          <span>{lang === 'ru' ? 'Мой профиль' : "Mening profilim"}</span>
+                        </Link>
                         <Link
                           href="/my-listings"
                           onClick={() => setProfileDropdownOpen(false)}
@@ -321,17 +330,30 @@ export function Header() {
               <span suppressHydrationWarning>{t.nav.catalog}</span>
             </Link>
             {user && (
-              <Link
-                href="/my-listings"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-semibold text-[#1e293b] dark:text-white hover:bg-[#f1f5f9] dark:hover:bg-slate-800"
-              >
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <span>{lang === 'ru' ? 'Мои объявления' : "Mening e'lonlarim"}</span>
-                </div>
-                <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{user.totalUsed ?? 0} {lang === 'ru' ? 'объявл.' : 'ta'}</span>
-              </Link>
+              <>
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-semibold text-[#1e293b] dark:text-white hover:bg-[#f1f5f9] dark:hover:bg-slate-800"
+                >
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <span>{lang === 'ru' ? 'Мой профиль' : "Mening profilim"}</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                </Link>
+                <Link
+                  href="/my-listings"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-semibold text-[#1e293b] dark:text-white hover:bg-[#f1f5f9] dark:hover:bg-slate-800"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <span>{lang === 'ru' ? 'Мои объявления' : "Mening e'lonlarim"}</span>
+                  </div>
+                  <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{user.totalUsed ?? 0} {lang === 'ru' ? 'объявл.' : 'ta'}</span>
+                </Link>
+              </>
             )}
             {user?.role === 'ADMIN' && (
               <Link

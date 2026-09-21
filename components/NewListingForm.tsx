@@ -27,9 +27,11 @@ import {
   Trash2,
   Plus,
   Check,
+  Crop as CropIcon,
 } from 'lucide-react';
 import InstagramIcon from '@/components/icons/InstagramIcon';
 import SafeImage from '@/components/SafeImage';
+import ImageCropperModal from '@/components/ImageCropperModal';
 import { useLanguage } from '@/context/LanguageContext';
 import {
   getCategoryLocalizedName,
@@ -99,65 +101,130 @@ export default function NewListingForm({ categories, initialUser, isAdmin }: New
     selectedPresetImage: PRESET_IMAGES[0].url,
   });
 
-  // Rasm yuklash holati
+  // Rasm yuklash va qirqish holatlari
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [activeImageTab, setActiveImageTab] = useState<'upload' | 'preset' | 'url'>('upload');
 
+  // E'lon uchun 4:3 Cropper modal holatlari
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [cropEditingIndex, setCropEditingIndex] = useState<number | null>(null);
+  const pendingFilesRef = useRef<File[]>([]);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  // Fayl tanlanganda avtomatik yuklash
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Fayl tanlanganda Cropper ochish
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     setUploadError(null);
 
     if (uploadedImages.length + files.length > 5) {
-      setUploadError(lang === 'ru' ? "Вы можете загрузить не более 5 фотографий." : "Maksimal 5 tagacha rasm yuklashingiz mumkin.");
+      setUploadError(
+        lang === 'ru'
+          ? "Вы можете загрузить не более 5 фотографий."
+          : "Maksimal 5 tagacha rasm yuklashingiz mumkin."
+      );
       return;
     }
 
+    const fileList = Array.from(files).filter((f) => f.type.startsWith('image/'));
+    if (fileList.length === 0) {
+      setUploadError(
+        lang === 'ru'
+          ? "Принимаются только изображения (JPG, PNG, WebP)."
+          : "Faqat rasm fayllari (JPG, PNG, WebP) qabul qilinadi."
+      );
+      return;
+    }
+
+    const firstFile = fileList[0];
+    pendingFilesRef.current = fileList.slice(1);
+    setCropEditingIndex(null);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result as string);
+      setCropperOpen(true);
+    };
+    reader.readAsDataURL(firstFile);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Mavjud rasmni qayta qirqish
+  const handleCropExisting = (imgUrl: string, index: number) => {
+    setCropImageSrc(imgUrl);
+    setCropEditingIndex(index);
+    setCropperOpen(true);
+  };
+
+  // Qirqish yakunlangach serverga yuklash
+  const handleListingCropComplete = async (croppedBlob: Blob) => {
     setIsUploading(true);
+    setUploadError(null);
+
     try {
-      const newUrls: string[] = [];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (!file.type.startsWith('image/')) {
-          setUploadError(lang === 'ru' ? "Принимаются только изображения (JPG, PNG, WebP)." : "Faqat rasm fayllari (JPG, PNG, WebP) qabul qilinadi.");
-          continue;
-        }
+      const uploadData = new FormData();
+      uploadData.append('file', croppedBlob, 'listing.webp');
 
-        const uploadData = new FormData();
-        uploadData.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadData,
+      });
 
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          body: uploadData,
-        });
-
-        const data = await res.json();
-        if (data.success && data.url) {
-          newUrls.push(data.url);
+      const data = await res.json();
+      if (data.success && data.url) {
+        if (cropEditingIndex !== null) {
+          setUploadedImages((prev) => {
+            const updated = [...prev];
+            updated[cropEditingIndex] = data.url;
+            return updated;
+          });
+          setCropEditingIndex(null);
         } else {
-          setUploadError(data.message || (lang === 'ru' ? "Ошибка при загрузке фото." : "Rasm yuklashda xatolik yuz berdi."));
+          setUploadedImages((prev) => [...prev, data.url]);
+          setFormData((prev) => ({ ...prev, imageUrl: '' }));
         }
+      } else {
+        setUploadError(
+          data.message ||
+            (lang === 'ru' ? "Ошибка при загрузке фото." : "Rasm yuklashda xatolik yuz berdi.")
+        );
       }
-
-      if (newUrls.length > 0) {
-        setUploadedImages((prev) => [...prev, ...newUrls]);
-        setFormData((prev) => ({ ...prev, imageUrl: '' }));
-      }
-    } catch (err: any) {
-      setUploadError(lang === 'ru' ? "Произошла ошибка при загрузке фото на сервер." : "Rasmni serverga yuklashda xatolik yuz berdi.");
+    } catch {
+      setUploadError(
+        lang === 'ru'
+          ? "Произошла ошибка при загрузке фото на сервер."
+          : "Rasmni serverga yuklashda xatolik yuz berdi."
+      );
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+
+      // Agar navbatda yana fayllar bo'lsa, navbatdagisini qirqishga uzatamiz
+      if (pendingFilesRef.current.length > 0) {
+        const nextFile = pendingFilesRef.current.shift()!;
+        const reader = new FileReader();
+        reader.onload = () => {
+          setCropImageSrc(reader.result as string);
+          setCropperOpen(true);
+        };
+        reader.readAsDataURL(nextFile);
       }
     }
+  };
+
+  const handleCloseCropper = () => {
+    setCropperOpen(false);
+    setCropImageSrc(null);
+    setCropEditingIndex(null);
+    pendingFilesRef.current = [];
   };
 
   const removeUploadedImage = (index: number) => {
@@ -283,7 +350,7 @@ export default function NewListingForm({ categories, initialUser, isAdmin }: New
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form key={lang} onSubmit={handleSubmit} className="space-y-8">
       {/* Foydalanuvchi Profili va Kunlik Limit Banneri */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-[#e6e0da] dark:border-slate-800 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -797,14 +864,24 @@ export default function NewListingForm({ categories, initialUser, isAdmin }: New
                             {lang === 'ru' ? 'Главная' : 'Asosiy'}
                           </span>
                         )}
-                        <button
-                          type="button"
-                          onClick={() => removeUploadedImage(index)}
-                          className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md transition-transform hover:scale-110 cursor-pointer"
-                          title={lang === 'ru' ? 'Удалить' : "O'chirish"}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
+                        <div className="absolute top-1.5 right-1.5 flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleCropExisting(imgUrl, index)}
+                            className="w-6 h-6 rounded-full bg-black/60 hover:bg-black/85 text-white flex items-center justify-center shadow-md transition-transform hover:scale-110 cursor-pointer"
+                            title={lang === 'ru' ? 'Обрезать заново' : 'Qayta qirqish'}
+                          >
+                            <CropIcon className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeUploadedImage(index)}
+                            className="w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md transition-transform hover:scale-110 cursor-pointer"
+                            title={lang === 'ru' ? 'Удалить' : "O'chirish"}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -960,6 +1037,23 @@ export default function NewListingForm({ categories, initialUser, isAdmin }: New
           </div>
         </div>
       )}
+      {/* E'lon Rasmini Qirqish Modali (4:3 To'g'ri To'rtburchak Ramka) */}
+      <ImageCropperModal
+        isOpen={cropperOpen}
+        imageSrc={cropImageSrc}
+        aspectRatio={4 / 3}
+        cropShape="rect"
+        outputWidth={800}
+        outputHeight={600}
+        title={
+          lang === 'ru'
+            ? 'Обрезка фото для объявления (4:3)'
+            : "E'lon rasmini qirqish (4:3)"
+        }
+        onCropComplete={handleListingCropComplete}
+        onClose={handleCloseCropper}
+        lang={lang}
+      />
     </form>
   );
 }

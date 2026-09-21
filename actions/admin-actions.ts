@@ -76,33 +76,25 @@ export async function adminLoginAction(pin: string) {
       resetAttempts(rateLimitKey);
       await setAdminAuthSession();
 
-      // Agar hozirda biror foydalanuvchi tizimga kirgan bo'lsa, uning hisobini ADMIN roliga yangilash, aks holda default SuperAdmin sessiyasi o'rnatish
+      // Admin PIN orqali kirilganda xavfsiz SuperAdmin sessiyasi o'rnatiladi.
+      // Mavjud oddiy foydalanuvchilarning bazadagi roliga mutlaqo tegilmaydi!
       try {
-        const userSession = await getUserAuthSession();
-        if (userSession?.userId) {
-          await prisma.user.update({
-            where: { id: userSession.userId },
-            data: { role: Role.ADMIN },
+        let adminUser = await prisma.user.findFirst({
+          where: { role: Role.ADMIN, phone: '+998000000000' },
+        });
+        if (!adminUser) {
+          adminUser = await prisma.user.create({
+            data: {
+              phone: '+998000000000',
+              name: 'SuperAdmin',
+              role: Role.ADMIN,
+              listingLimit: 9999,
+            } as any,
           });
-          await setUserAuthSession(userSession.userId, userSession.phone, Role.ADMIN);
-        } else {
-          let adminUser = await prisma.user.findFirst({
-            where: { role: Role.ADMIN },
-          });
-          if (!adminUser) {
-            adminUser = await prisma.user.create({
-              data: {
-                phone: '+998000000000',
-                name: 'SuperAdmin',
-                role: Role.ADMIN,
-                listingLimit: 9999,
-              } as any,
-            });
-          }
-          await setUserAuthSession(adminUser.id, adminUser.phone, Role.ADMIN);
         }
+        await setUserAuthSession(adminUser.id, adminUser.phone, Role.ADMIN);
       } catch (userErr) {
-        console.warn('Foydalanuvchi rolini ADMIN ga yangilashda ogohlantirish:', userErr);
+        console.warn('SuperAdmin sessiyasini o\'rnatishda ogohlantirish:', userErr);
       }
 
       return { success: true };
@@ -510,6 +502,7 @@ export interface AdminUpdateListingInput {
   name?: string;
   phone?: string;
   description?: string;
+  images?: string[];
   instagram?: string | null;
   telegram?: string | null;
   websiteUrl?: string | null;
@@ -564,6 +557,7 @@ export async function adminUpdateListingFullAction(id: string, data: AdminUpdate
         ...(data.name !== undefined && { name: data.name.trim() }),
         ...(data.phone !== undefined && { phone: data.phone.trim() }),
         ...(data.description !== undefined && { description: data.description.trim() }),
+        ...(data.images !== undefined && { images: data.images }),
         ...(data.instagram !== undefined && { instagram: data.instagram ? data.instagram.trim() : null }),
         ...(data.telegram !== undefined && { telegram: data.telegram ? data.telegram.trim() : null }),
         ...(data.websiteUrl !== undefined && { websiteUrl: data.websiteUrl ? data.websiteUrl.trim() : null }),

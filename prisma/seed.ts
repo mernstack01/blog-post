@@ -1,6 +1,6 @@
 import { PrismaClient, ListingStatus } from '@prisma/client';
 
-const prisma = new PrismaClient();
+const prisma: any = new PrismaClient();
 
 async function main() {
   console.log('Seeding MongoDB with rich Sirdaryo services...');
@@ -18,9 +18,9 @@ async function main() {
   await prisma.systemSetting.create({
     data: {
       contactPhone: "+998 90 123 45 67",
-      telegramUsername: "xayrliish_admin",
-      supportEmail: "info@xayrliish.uz",
-      siteTitle: "XayrliIsh.uz",
+      telegramUsername: "topbaza_admin",
+      supportEmail: "info@topbaza.uz",
+      siteTitle: "TopBaza.uz",
     },
   });
 
@@ -586,7 +586,7 @@ async function main() {
         ...listing,
         regionId: sirdaryoRegion.id,
         districtId: dist ? dist.id : undefined,
-      },
+      } as any,
     });
   }
 

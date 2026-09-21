@@ -25,12 +25,14 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://blog-post-iota-three
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Sirdaryo Mega-Baza - Kadrlar, Maskonlar va Xizmatlar Portali",
-    template: "%s | Sirdaryo Mega-Baza",
+    default: "TopBaza.uz - Sirdaryo va O'zbekiston Kadrlar, Maskonlar va Xizmatlar Portali",
+    template: "%s | TopBaza.uz",
   },
   description:
-    "Sirdaryo viloyati va O'zbekiston bo'yicha barcha soha kadrlari, mutaxassislar, o'quv markazlari, kafe-restoranlar, tibbiyot va xizmatlarining yagona ma'lumotlar bazasi.",
+    "TopBaza.uz - Sirdaryo viloyati va O'zbekiston bo'yicha barcha soha kadrlari, mutaxassislar, o'quv markazlari, kafe-restoranlar, tibbiyot va xizmatlarining yagona ma'lumotlar bazasi.",
   keywords: [
+    'TopBaza',
+    'TopBaza.uz',
     'Sirdaryo kadrlar',
     'Sirdaryo mutaxassislar',
     'Guliston o\'quv markazlari',
@@ -41,27 +43,27 @@ export const metadata: Metadata = {
     'Sirdaryo gid',
     'Guliston xizmatlar',
   ],
-  authors: [{ name: 'Sirdaryo Mega-Baza' }],
-  creator: 'Sirdaryo Mega-Baza',
+  authors: [{ name: 'TopBaza.uz' }],
+  creator: 'TopBaza.uz',
   openGraph: {
     type: 'website',
     locale: 'uz_UZ',
     url: baseUrl,
-    siteName: 'Sirdaryo Mega-Baza',
-    title: 'Sirdaryo Mega-Baza - Kadrlar, Maskonlar va Xizmatlar Portali',
+    siteName: 'TopBaza.uz',
+    title: 'TopBaza.uz - Sirdaryo va O\'zbekiston Kadrlar, Maskonlar va Xizmatlar Portali',
     description: "Sirdaryo viloyatining barcha mutaxassislari, kadrlar, ziyorat va dam olish maskanlari, o'quv markazlari hamda xizmatlar bazasi.",
     images: [
       {
         url: 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=1200&auto=format&fit=crop&q=80',
         width: 1200,
         height: 630,
-        alt: 'Sirdaryo Xizmatlari',
+        alt: 'TopBaza.uz Xizmatlari',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sirdaryo Xizmatlari',
+    title: 'TopBaza.uz',
     description: "Guliston va Sirdaryo viloyatining barcha xizmatlari va ustalari bir joyda.",
     images: ['https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=1200&auto=format&fit=crop&q=80'],
   },

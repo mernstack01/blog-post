@@ -39,7 +39,7 @@ export default function Navbar() {
               </div>
               <div className="flex flex-col">
                 <span className="text-base sm:text-lg font-extrabold tracking-tight text-[#1e293b] flex items-center gap-1">
-                  XayrliIsh<span className="text-blue-600 font-black">.uz</span>
+                  TopBaza<span className="text-blue-600 font-black">.uz</span>
                 </span>
                 <span className="text-[10px] text-[#64748b] font-medium hidden sm:block -mt-1">
                   {t.hero.titleHighlight}

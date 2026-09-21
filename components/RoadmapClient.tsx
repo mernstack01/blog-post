@@ -293,7 +293,7 @@ export default function RoadmapClient() {
             </div>
             <div>
               <span className="text-[#67625d] block">{lang === 'ru' ? "Проект:" : "Loyiha:"}</span>
-              <span className="font-bold text-[#282624]">XayrliIsh.uz (Prod v2.0)</span>
+              <span className="font-bold text-[#282624]">TopBaza.uz (Prod v2.0)</span>
             </div>
             <div>
               <span className="text-[#67625d] block">{lang === 'ru' ? "Модель рейтинга:" : "Reyting modeli:"}</span>
@@ -436,8 +436,8 @@ export default function RoadmapClient() {
               </h2>
               <p className="text-xs sm:text-sm text-[#67625d] mt-0.5">
                 {lang === 'ru'
-                  ? "Реализованные этапы платформы XayrliIsh.uz и дальнейший план развития"
-                  : "XayrliIsh.uz platformasining amalga oshirilgan bosqichlari va kelgusi rejasi"}
+                  ? "Реализованные этапы платформы TopBaza.uz и дальнейший план развития"
+                  : "TopBaza.uz platformasining amalga oshirilgan bosqichlari va kelgusi rejasi"}
               </p>
             </div>
 
@@ -547,7 +547,7 @@ export default function RoadmapClient() {
             <iframe
               src={`${pdfUrl}#toolbar=1`}
               className="w-full h-full border-none"
-              title="XayrliIsh.uz Texnik Topshiriq va Yo'l Xaritasi PDF"
+              title="TopBaza.uz Texnik Topshiriq va Yo'l Xaritasi PDF"
             />
           </div>
         </div>

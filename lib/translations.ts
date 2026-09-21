@@ -178,6 +178,7 @@ export const translations = {
       post: "E'lon berish",
       catalog: "Katalog",
       roadmap: "Yo'l xaritasi",
+      profile: "Profil",
     },
 
     // Pastki Qism (Footer)
@@ -200,7 +201,7 @@ export const translations = {
     roadmap: {
       badge: "Rasmiy Hujjat & Yo'l Xaritasi",
       title: "Texnik Topshiriq (TZ) va Rivojlantirish Yo'l Xaritasi",
-      subtitle: "XayrliIsh.uz platformasining 'Top 10' peshqadam ustalari reytingi, ko'p omillik baholash formulasi hamda bosqichma-bosqich rivojlanish rejasi.",
+      subtitle: "TopBaza.uz platformasining 'Top 10' peshqadam ustalari reytingi, ko'p omillik baholash formulasi hamda bosqichma-bosqich rivojlanish rejasi.",
       downloadPdf: "PDF Hujjatni Yuklab Olish",
       openPdf: "PDF ni Yangi Oynada Ochish",
       formulaTitle: "Adolatli Ko'p Omillik Reyting Formulasi (100 Ballik Tizim)",
@@ -223,8 +224,8 @@ export const translations = {
 
     // Statistika Bo'limi
     stats: {
-      whyTitle: "Nega aynan XayrliIsh.uz?",
-      whySubtitle: "Aholiga qulaylik yaratish maqsadida yaratilgan ochiq va shaffof ustalar portali. Barcha raqamlar real vaqtda yangilanadi.",
+      whyTitle: "Nega aynan TopBaza.uz?",
+      whySubtitle: "Aholiga qulaylik yaratish maqsadida yaratilgan ochiq va shaffof kadrlar va xizmatlar portali. Barcha raqamlar real vaqtda yangilanadi.",
       districtsLabel: "Shahar va Tumanlar",
       districtsDesc: "Guliston, Yangiyer, Shirin va barcha tumanlar",
       specialistsLabel: "Faol Mutaxassislar",
@@ -236,6 +237,41 @@ export const translations = {
       verifiedVal: "Tekshirilgan",
       verifiedDesc: "Hujjat va telefon raqami tasdiqlangan",
       countUnit: "ta",
+    },
+
+    // Profil Sahifasi
+    profilePage: {
+      title: "Foydalanuvchi Profili",
+      subtitle: "Shaxsiy hisobingiz ma'lumotlari, e'lonlar statistikasi va sozlamalar",
+      specialistBadge: "Tasdiqlangan Mutaxassis",
+      adminBadge: "Bosh Administrator",
+      userBadge: "Foydalanuvchi",
+      phone: "Telefon raqami",
+      verified: "Tasdiqlangan",
+      memberSince: "A'zolik sanasi",
+      telegram: "Telegram",
+      notSet: "Kiritilmagan",
+      statsTitle: "E'lonlar va Faollik Statistikasi",
+      totalListings: "Jami e'lonlar",
+      remainingLimit: "Qolgan limit",
+      approvedListings: "Tasdiqlangan",
+      pendingListings: "Kutilayotgan",
+      totalViews: "Ko'rishlar soni",
+      editProfile: "Profilni tahrirlash",
+      fullName: "Ism yoki Korxona nomi",
+      telegramPlaceholder: "masalan: username (belgisiz)",
+      avatarUrl: "Avatar rasm URL",
+      saveChanges: "O'zgarishlarni saqlash",
+      saving: "Saqlanmoqda...",
+      myListingsTab: "Mening e'lonlarim",
+      postNewListing: "Yangi e'lon berish",
+      viewAllListings: "Barcha e'lonlarni boshqarish",
+      logout: "Tizimdan chiqish",
+      adminPanel: "Admin paneliga o'tish",
+      authRequired: "Profilni ko'rish uchun tizimga kiring",
+      loginButton: "Tizimga kirish",
+      noListingsYet: "Siz hali e'lon joylashtirmadingiz",
+      postFirstListing: "Birinchi e'loningizni joylashtiring",
     },
   },
 
@@ -416,6 +452,7 @@ export const translations = {
       post: "Подать",
       catalog: "Каталог",
       roadmap: "Дорожная карта",
+      profile: "Профиль",
     },
 
     // Подвал (Footer)
@@ -438,7 +475,7 @@ export const translations = {
     roadmap: {
       badge: "Официальный Документ и Дорожная Карта",
       title: "Техническое Задание (ТЗ) и Дорожная Карта Развития",
-      subtitle: "Официальный рейтинг 'Топ 10' ведущих мастеров XayrliIsh.uz, многофакторная формула оценки и план поэтапного масштабирования.",
+      subtitle: "Официальный рейтинг 'Топ 10' ведущих мастеров TopBaza.uz, многофакторная формула оценки и план поэтапного масштабирования.",
       downloadPdf: "Скачать Документ PDF",
       openPdf: "Открыть PDF в Новой Вкладке",
       formulaTitle: "Справедливая Многофакторная Формула Рейтинга (100-Балльная Система)",
@@ -461,8 +498,8 @@ export const translations = {
 
     // Блок Статистики
     stats: {
-      whyTitle: "Почему именно XayrliIsh.uz?",
-      whySubtitle: "Открытый и прозрачный портал специалистов для удобства жителей. Все данные обновляются в реальном времени.",
+      whyTitle: "Почему именно TopBaza.uz?",
+      whySubtitle: "Открытый и прозрачный портал специалистов и кадров для удобства жителей. Все данные обновляются в реальном времени.",
       districtsLabel: "Города и районы",
       districtsDesc: "Гулистан, Янгиер, Ширин и все районы",
       specialistsLabel: "Активные специалисты",
@@ -475,6 +512,41 @@ export const translations = {
       verifiedDesc: "Документы и контактные данные подтверждены",
       countUnit: "ед.",
     },
+
+    // Страница Профиля
+    profilePage: {
+      title: "Профиль пользователя",
+      subtitle: "Данные вашего личного кабинета, статистика объявлений и настройки",
+      specialistBadge: "Проверенный специалист",
+      adminBadge: "Главный администратор",
+      userBadge: "Пользователь",
+      phone: "Номер телефона",
+      verified: "Подтвержден",
+      memberSince: "Дата регистрации",
+      telegram: "Telegram",
+      notSet: "Не указан",
+      statsTitle: "Статистика объявлений и активности",
+      totalListings: "Всего объявлений",
+      remainingLimit: "Оставшийся лимит",
+      approvedListings: "Одобрено",
+      pendingListings: "На модерации",
+      totalViews: "Всего просмотров",
+      editProfile: "Редактировать профиль",
+      fullName: "Имя или Название",
+      telegramPlaceholder: "например: username (без @)",
+      avatarUrl: "URL аватара",
+      saveChanges: "Сохранить изменения",
+      saving: "Сохранение...",
+      myListingsTab: "Мои объявления",
+      postNewListing: "Подать объявление",
+      viewAllListings: "Управление всеми объявлениями",
+      logout: "Выйти из системы",
+      adminPanel: "Панель администратора",
+      authRequired: "Для просмотра профиля войдите в систему",
+      loginButton: "Войти в систему",
+      noListingsYet: "Вы еще не размещали объявлений",
+      postFirstListing: "Разместить первое объявление",
+    },
   },
 };
 
@@ -483,6 +555,7 @@ export const categorySlugMap: Record<string, { uz: string; ru: string }> = {
   'santexnika': { uz: 'Santexnika', ru: 'Сантехника' },
   'santexnik': { uz: 'Santexnika', ru: 'Сантехника' },
   'elektrik': { uz: 'Elektrik', ru: 'Электрика' },
+  'elektr': { uz: 'Elektrik', ru: 'Электрика' },
   'remont': { uz: 'Remont va qurilish', ru: 'Ремонт и стройка' },
   'avto': { uz: "Avto va Yuk tashish", ru: 'Авто и Грузоперевозки' },
   'yuk-tashish': { uz: 'Yuk tashish', ru: 'Грузоперевозки' },
@@ -492,13 +565,23 @@ export const categorySlugMap: Record<string, { uz: string; ru: string }> = {
   'gozallik': { uz: "Go'zallik va Salomatlik", ru: 'Красота и Здоровье' },
   'talim': { uz: "Ta'lim va Repetitorlik", ru: 'Образование и Репетиторы' },
   'temirchilik': { uz: 'Temirchilik', ru: 'Кузнечное дело' },
+  'oquv markazi': { uz: "O'quv markazi", ru: 'Учебный центр' },
+  'restoran': { uz: 'Restoran & Kafe', ru: 'Ресторан и Кафе' },
+  'kafe': { uz: 'Restoran & Kafe', ru: 'Ресторан и Кафе' },
+  'shifokor': { uz: 'Shifokor', ru: 'Врач' },
+  'repetitor': { uz: 'Repetitor', ru: 'Репетитор' },
+  'dasturchi': { uz: 'Dasturchi', ru: 'Программист' },
+  'mehmonxona': { uz: 'Mehmonxona', ru: 'Гостиница' },
 };
 
 export const subCategorySlugMap: Record<string, { uz: string; ru: string }> = {
   'santexnik': { uz: 'Santexnika xizmatlari', ru: 'Сантехнические услуги' },
+  'santexnika': { uz: 'Santexnika xizmatlari', ru: 'Сантехнические услуги' },
   'elektrik': { uz: 'Elektr montaj', ru: 'Электромонтаж' },
+  'elektr': { uz: 'Elektr montaj', ru: 'Электромонтаж' },
   'yevro-tamir': { uz: "Yevro ta'mir va pardoz", ru: 'Евроремонт и отделка' },
   'kafelchi': { uz: 'Kafel va bruschatka', ru: 'Кафель и брусчатка' },
+  'kafel': { uz: 'Kafel va bruschatka', ru: 'Кафель и брусчатка' },
   'svarka': { uz: 'Payvandlash (Svarka)', ru: 'Сварочные работы (Сварка)' },
   'yuk-tashish': { uz: 'Yuk tashish (Labo, Damas, Gazel)', ru: 'Грузоперевозки (Лабо, Дамас, Газель)' },
   'avto-diagnostika': { uz: 'Avto elektr va diagnostika', ru: 'Автоэлектрика и диагностика' },
@@ -513,6 +596,12 @@ export const subCategorySlugMap: Record<string, { uz: string; ru: string }> = {
   'vizaj': { uz: "To'y va Kecha pardozlari", ru: 'Свадебный и вечерний макияж' },
   'ingliz-tili': { uz: 'Ingliz tili (IELTS / CEFR)', ru: 'Английский язык (IELTS / CEFR)' },
   'matematika': { uz: 'Matematika va Fizika', ru: 'Математика и Физика' },
+  'oquv markazi': { uz: "O'quv markazi", ru: 'Учебный центр' },
+  'restoran': { uz: 'Restoran va Kafe', ru: 'Ресторан и Кафе' },
+  'shifokor': { uz: 'Shifokor', ru: 'Врач' },
+  'repetitor': { uz: 'Repetitor', ru: 'Репетитор' },
+  'dasturchi': { uz: 'Dasturchi', ru: 'Программист' },
+  'mehmonxona': { uz: 'Mehmonxona', ru: 'Гостиница' },
 };
 
 export const categoryDescMap: Record<string, { uz: string; ru: string }> = {
@@ -542,11 +631,16 @@ export const categoryDescMap: Record<string, { uz: string; ru: string }> = {
   },
 };
 
+function normalizeKey(str: string): string {
+  return str.toLowerCase().trim().replace(/['`‘’ʻʼ]/g, '').replace(/[-_]/g, ' ');
+}
+
 export function getCategoryLocalizedName(nameOrSlug: string, lang: Language = 'uz'): string {
   if (!nameOrSlug) return '';
-  const lower = nameOrSlug.toLowerCase().trim();
+  const normalized = normalizeKey(nameOrSlug);
   for (const [key, val] of Object.entries(categorySlugMap)) {
-    if (lower === key || lower.includes(key)) {
+    const normKey = normalizeKey(key);
+    if (normalized === normKey || normalized.includes(normKey) || normKey.includes(normalized)) {
       return val[lang];
     }
   }
@@ -562,9 +656,10 @@ export function getCategoryLocalizedDesc(slug: string, defaultDesc?: string | nu
 
 export function getSubCategoryLocalizedName(slugOrName: string, lang: Language = 'uz'): string {
   if (!slugOrName) return '';
-  const lower = slugOrName.toLowerCase().trim();
+  const normalized = normalizeKey(slugOrName);
   for (const [key, val] of Object.entries(subCategorySlugMap)) {
-    if (lower === key || lower.includes(key)) {
+    const normKey = normalizeKey(key);
+    if (normalized === normKey || normalized.includes(normKey) || normKey.includes(normalized)) {
       return val[lang];
     }
   }
@@ -579,4 +674,5 @@ export function getLocationLocalizedName(location: string, lang: Language = 'uz'
   const locs = translations[lang].locations as Record<string, string>;
   return locs[location] || location;
 }
+
 

@@ -21,7 +21,7 @@ import InstagramIcon from '@/components/icons/InstagramIcon';
 import { ListingWithRelations } from '@/actions/listing-actions';
 import SafeImage from '@/components/SafeImage';
 import { useLanguage } from '@/context/LanguageContext';
-import { getCategoryLocalizedName, getLocationLocalizedName } from '@/lib/translations';
+import { getCategoryLocalizedName, getSubCategoryLocalizedName, getLocationLocalizedName } from '@/lib/translations';
 
 interface ListingCardProps {
   listing: ListingWithRelations;
@@ -71,17 +71,17 @@ export default function ListingCard({ listing }: ListingCardProps) {
     ? 'border-amber-600/60 ring-1 ring-amber-600/20 shadow-md'
     : listing.paidTier === 'VIP_GOLD'
     ? 'border-amber-300 shadow-md shadow-amber-500/5'
-    : 'border-[#e2e8f0] dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 shadow-xs hover:shadow-xl hover:shadow-blue-500/10';
+    : 'border-border dark:border-white/10 hover:border-blue-500 dark:hover:border-blue-500 shadow-xs hover:shadow-xl hover:shadow-blue-500/10';
 
   const categoryName = listing.subCategory
-    ? getCategoryLocalizedName(listing.subCategory.name, lang)
-    : getCategoryLocalizedName(listing.category.name, lang);
+    ? (getSubCategoryLocalizedName(listing.subCategory.slug, lang) || getSubCategoryLocalizedName(listing.subCategory.name, lang) || getCategoryLocalizedName(listing.subCategory.name, lang))
+    : (getCategoryLocalizedName(listing.category.slug, lang) || getCategoryLocalizedName(listing.category.name, lang));
 
   const locationName = getLocationLocalizedName(listing.location, lang);
 
   return (
     <div
-      className={`group bg-white dark:bg-slate-900 rounded-3xl border ${cardBorderClass} transition-all duration-200 flex flex-col overflow-hidden relative`}
+      className={`group bg-card text-card-foreground rounded-3xl border ${cardBorderClass} transition-all duration-200 flex flex-col overflow-hidden relative`}
     >
       {/* 1. Rasm va Yuqori Nishonlar */}
       <div className="relative w-full h-48 sm:h-52 bg-[#f1f5f9] dark:bg-slate-800 overflow-hidden">
@@ -194,7 +194,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
               </span>
             )}
 
-            {/* Xayrli Ball / Jami Ball */}
+            {/* TopBaza Ball / Jami Ball */}
             {typeof listing.totalScore === 'number' && listing.totalScore > 0 && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 ml-auto border border-slate-200 dark:border-slate-700">
                 <span>{t.card.scoreLabel}</span>
