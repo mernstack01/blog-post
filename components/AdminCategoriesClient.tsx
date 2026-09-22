@@ -19,10 +19,8 @@ import {
   AlertCircle,
   LogOut,
   Layers,
-  ArrowUpDown,
   Check,
   X,
-  Sparkles,
   Wrench,
   Car,
   Tv,
@@ -35,7 +33,6 @@ import {
   Camera,
   Scissors,
   Home,
-  ShieldAlert,
   Loader2,
 } from 'lucide-react';
 
@@ -273,17 +270,17 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
   return (
     <div className="space-y-6">
       {/* Sarlavha va Navigatsiya */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-zinc-900 p-4 sm:p-6 rounded-3xl border border-[#e6e0da] dark:border-zinc-800 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card text-card-foreground p-4 sm:p-6 rounded-3xl border border-border shadow-xs">
         <div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-300/40">
               SuperAdmin
             </span>
-            <span className="text-xs text-[#67625d] dark:text-zinc-400 font-medium">
+            <span className="text-xs text-muted-foreground font-medium">
               Kategoriyalar Boshqaruvi
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-[#282624] dark:text-zinc-100 tracking-tight mt-1">
+          <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight mt-1">
             Kategoriyalar va Xizmatlar
           </h1>
         </div>
@@ -292,38 +289,38 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/admin"
-            className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-[#67625d] dark:text-zinc-400 hover:text-[#282624] dark:hover:text-zinc-100 hover:bg-[#f6f3ef] dark:hover:bg-zinc-800 transition-colors"
+            className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
           >
             E'lonlar
           </Link>
           <Link
             href="/admin/categories"
-            className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50"
+            className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-primary/10 text-primary border border-primary/20 shrink-0"
           >
             Kategoriyalar
           </Link>
           <Link
             href="/admin/settings"
-            className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-[#67625d] dark:text-zinc-400 hover:text-[#282624] dark:hover:text-zinc-100 hover:bg-[#f6f3ef] dark:hover:bg-zinc-800 transition-colors"
+            className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
           >
             Sozlamalar
           </Link>
 
           <button
             onClick={openCreateModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/25 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs sm:text-sm shadow-md shadow-primary/20 transition-all cursor-pointer shrink-0"
           >
-            <PlusCircle className="w-4 h-4 stroke-[2.5]" />
+            <PlusCircle className="w-4 h-4 stroke-[2.5] shrink-0" />
             <span>Yangi Kategoriya</span>
           </button>
 
           <button
             onClick={handleLogout}
             type="button"
-            className="p-2 rounded-xl bg-[#f6f3ef] dark:bg-zinc-800 hover:bg-red-50 dark:hover:bg-red-950/40 text-[#67625d] dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
+            className="p-2 rounded-xl bg-secondary hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors cursor-pointer shrink-0"
             title="Chiqish"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4 shrink-0" />
           </button>
         </div>
       </div>
@@ -333,14 +330,14 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
         <div
           className={`p-3.5 rounded-2xl border text-xs sm:text-sm flex items-center gap-2 animate-in fade-in duration-200 ${
             message.type === 'success'
-              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
-              : 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800 text-red-800 dark:text-red-300'
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300'
+              : 'bg-destructive/10 border-destructive/20 text-destructive'
           }`}
         >
           {message.type === 'success' ? (
             <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           ) : (
-            <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
+            <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
           )}
           <span>{message.text}</span>
         </div>
@@ -348,58 +345,58 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
 
       {/* Statistika Kartalari */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-        <div className="bg-white dark:bg-zinc-900 p-4 sm:p-5 rounded-2xl border border-[#e6e0da] dark:border-zinc-800 shadow-2xs">
-          <span className="text-[11px] font-bold text-[#67625d] dark:text-zinc-400 uppercase tracking-wider block">
+        <div className="bg-card text-card-foreground p-4 sm:p-5 rounded-2xl border border-border shadow-2xs">
+          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block">
             Jami Kategoriyalar
           </span>
-          <span className="text-2xl sm:text-3xl font-black text-[#282624] dark:text-zinc-100 tracking-tight mt-1 block">
+          <span className="text-2xl sm:text-3xl font-black text-foreground tracking-tight mt-1 block">
             {categories.length}
           </span>
-          <span className="text-[11px] text-[#67625d] dark:text-zinc-400 mt-1 block">
+          <span className="text-[11px] text-muted-foreground mt-1 block">
             Barcha soha yo'nalishlari
           </span>
         </div>
 
-        <div className="bg-white dark:bg-zinc-900 p-4 sm:p-5 rounded-2xl border border-[#e6e0da] dark:border-zinc-800 shadow-2xs">
+        <div className="bg-card text-card-foreground p-4 sm:p-5 rounded-2xl border border-border shadow-2xs">
           <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">
             Faol Kategoriyalar
           </span>
           <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight mt-1 block">
             {activeCount}
           </span>
-          <span className="text-[11px] text-[#67625d] dark:text-zinc-400 mt-1 block">
+          <span className="text-[11px] text-muted-foreground mt-1 block">
             Bosh sahifada ko'rinmoqda
           </span>
         </div>
 
-        <div className="bg-white dark:bg-zinc-900 p-4 sm:p-5 rounded-2xl border border-[#e6e0da] dark:border-zinc-800 shadow-2xs">
-          <span className="text-[11px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider block">
+        <div className="bg-card text-card-foreground p-4 sm:p-5 rounded-2xl border border-border shadow-2xs">
+          <span className="text-[11px] font-bold text-primary uppercase tracking-wider block">
             Biriktirilgan E'lonlar
           </span>
-          <span className="text-2xl sm:text-3xl font-black text-blue-600 dark:text-blue-400 tracking-tight mt-1 block">
+          <span className="text-2xl sm:text-3xl font-black text-primary tracking-tight mt-1 block">
             {totalListings}
           </span>
-          <span className="text-[11px] text-[#67625d] dark:text-zinc-400 mt-1 block">
+          <span className="text-[11px] text-muted-foreground mt-1 block">
             Ustalar va xizmatlar soni
           </span>
         </div>
       </div>
 
       {/* Qidiruv qatori */}
-      <div className="bg-white dark:bg-zinc-900 p-3.5 sm:p-4 rounded-3xl border border-[#e6e0da] dark:border-zinc-800 shadow-xs">
+      <div className="bg-card text-card-foreground p-3.5 sm:p-4 rounded-3xl border border-border shadow-xs">
         <div className="relative">
-          <Search className="absolute left-3.5 top-3 w-4 h-4 text-[#67625d] dark:text-zinc-400 pointer-events-none" />
+          <Search className="absolute left-3.5 top-3 w-4 h-4 text-muted-foreground pointer-events-none shrink-0" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Kategoriya nomi (O'zbekcha, Ruscha yoki slug) bo'yicha qidiruv..."
-            className="w-full pl-10 pr-16 py-2.5 rounded-xl border border-[#e6e0da] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs sm:text-sm text-[#282624] dark:text-zinc-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full pl-10 pr-16 py-2.5 rounded-xl border border-border bg-secondary/40 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-2.5 text-xs text-[#67625d] dark:text-zinc-400 hover:text-[#282624] px-1.5 py-0.5 rounded-md hover:bg-[#f6f3ef] dark:hover:bg-zinc-700"
+              className="absolute right-3 top-2.5 text-xs text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded-md hover:bg-muted"
             >
               Tozalash
             </button>
@@ -408,11 +405,11 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
       </div>
 
       {/* Kategoriyalar Jadvali */}
-      <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-[#e6e0da] dark:border-zinc-800 shadow-xs overflow-hidden">
+      <div className="bg-card text-card-foreground rounded-3xl border border-border shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="mobile-category-table w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-[#e6e0da] dark:border-zinc-800 bg-[#fbf9f6] dark:bg-zinc-800/60 text-[11px] font-bold text-[#67625d] dark:text-zinc-400 uppercase tracking-wider">
+              <tr className="border-b border-border bg-muted/40 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 <th className="py-3.5 px-4 sm:px-6">Tartib</th>
                 <th className="py-3.5 px-4">Ikonka & Nomi</th>
                 <th className="py-3.5 px-4">Ruscha Nomi</th>
@@ -422,11 +419,11 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
                 <th className="py-3.5 px-4 sm:px-6 text-right">Amallar</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f2eee9] dark:divide-zinc-800 text-xs sm:text-sm">
+            <tbody className="divide-y divide-border text-xs sm:text-sm">
               {filteredCategories.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-[#67625d] dark:text-zinc-400">
-                    <Layers className="w-8 h-8 mx-auto mb-2 text-[#b0a9a1] dark:text-zinc-600" />
+                  <td colSpan={7} className="py-12 text-center text-muted-foreground">
+                    <Layers className="w-8 h-8 mx-auto mb-2 opacity-40" />
                     Hech qanday kategoriya topilmadi
                   </td>
                 </tr>
@@ -434,27 +431,27 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
                 filteredCategories.map((cat) => (
                   <tr
                     key={cat.id}
-                    className="hover:bg-[#faf7f3] dark:hover:bg-zinc-800/40 transition-colors group"
+                    className="hover:bg-muted/40 transition-colors group"
                   >
                     {/* Tartib raqami */}
-                    <td className="py-3.5 px-4 sm:px-6 font-bold text-[#67625d] dark:text-zinc-400">
+                    <td data-label="Tartib" className="py-3.5 px-4 sm:px-6 font-bold text-muted-foreground">
                       #{cat.order}
                     </td>
 
                     {/* Ikonka & O'zbekcha Nomi */}
-                    <td className="py-3.5 px-4">
+                    <td data-label="Ikonka & Nomi" className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                          <CategoryIcon iconName={cat.icon} className="w-5 h-5" />
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                          <CategoryIcon iconName={cat.icon} className="w-5 h-5 shrink-0" />
                         </div>
                         <div>
-                          <div className="font-bold text-[#282624] dark:text-zinc-100 flex items-center gap-1.5">
+                          <div className="font-bold text-foreground flex items-center gap-1.5">
                             <span>{cat.nameUz}</span>
-                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold">
+                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-primary/10 text-primary font-bold">
                               UZ
                             </span>
                           </div>
-                          <div className="text-[11px] text-[#67625d] dark:text-zinc-400">
+                          <div className="text-[11px] text-muted-foreground">
                             Ikonka: <code className="font-mono text-[10px]">{cat.icon || 'Layers'}</code>
                           </div>
                         </div>
@@ -462,66 +459,66 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
                     </td>
 
                     {/* Ruscha Nomi */}
-                    <td className="py-3.5 px-4">
-                      <div className="font-medium text-[#282624] dark:text-zinc-200 flex items-center gap-1.5">
+                    <td data-label="Ruscha Nomi" className="py-3.5 px-4">
+                      <div className="font-medium text-foreground flex items-center gap-1.5">
                         <span>{cat.nameRu}</span>
-                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 font-bold">
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-destructive/10 text-destructive font-bold">
                           RU
                         </span>
                       </div>
                     </td>
 
                     {/* Slug */}
-                    <td className="py-3.5 px-4 font-mono text-[11px] text-[#67625d] dark:text-zinc-400">
+                    <td data-label="Slug" className="py-3.5 px-4 font-mono text-[11px] text-muted-foreground">
                       /{cat.slug}
                     </td>
 
                     {/* E'lonlar soni */}
-                    <td className="py-3.5 px-4 text-center">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-[#f6f3ef] dark:bg-zinc-800 text-[#282624] dark:text-zinc-200">
+                    <td data-label="E’lonlar" className="py-3.5 px-4 text-center">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-secondary text-secondary-foreground">
                         {cat.listingsCount}
                       </span>
                     </td>
 
-                    {/* Holati (Status Toggle) */}
-                    <td className="py-3.5 px-4 text-center">
+                    {/* Holati */}
+                    <td data-label="Holati" className="py-3.5 px-4 text-center">
                       <button
                         onClick={() => handleToggleActive(cat)}
                         disabled={loadingId === cat.id}
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shrink-0 ${
                           cat.isActive
-                            ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
-                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700'
+                            ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800'
+                            : 'bg-muted text-muted-foreground border border-border'
                         }`}
                       >
                         {loadingId === cat.id ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
+                          <Loader2 className="w-3 h-3 animate-spin shrink-0" />
                         ) : cat.isActive ? (
-                          <Check className="w-3 h-3 stroke-[3]" />
+                          <Check className="w-3 h-3 stroke-[3] shrink-0" />
                         ) : (
-                          <X className="w-3 h-3 stroke-[3]" />
+                          <X className="w-3 h-3 stroke-[3] shrink-0" />
                         )}
                         <span>{cat.isActive ? 'Faol' : 'Nofaol'}</span>
                       </button>
                     </td>
 
                     {/* Amallar */}
-                    <td className="py-3.5 px-4 sm:px-6 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
+                    <td data-label="Amallar" className="py-3.5 px-4 sm:px-6 text-right">
+                      <div className="flex items-center justify-end gap-1.5 shrink-0">
                         <button
                           onClick={() => openEditModal(cat)}
-                          className="p-2 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/50 text-[#67625d] hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors"
+                          className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0"
                           title="Tahrirlash"
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <Edit2 className="w-4 h-4 shrink-0" />
                         </button>
                         <button
                           onClick={() => handleDelete(cat)}
                           disabled={loadingId === cat.id || cat.listingsCount > 0}
-                          className="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/50 text-[#67625d] hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-2 rounded-xl hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shrink-0"
                           title={cat.listingsCount > 0 ? "E'lonlar mavjud bo'lgani sababli o'chirib bo'lmaydi" : "O'chirish"}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4 shrink-0" />
                         </button>
                       </div>
                     </td>
@@ -536,23 +533,23 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
       {/* Yaratish / Tahrirlash Modali */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-3xl border border-[#e6e0da] dark:border-zinc-800 shadow-2xl p-6 sm:p-7 relative overflow-y-auto max-h-[90vh]">
-            <div className="flex items-center justify-between pb-4 border-b border-[#f2eee9] dark:border-zinc-800">
-              <h2 className="text-lg sm:text-xl font-extrabold text-[#282624] dark:text-zinc-100">
+          <div className="bg-card text-card-foreground w-full max-w-lg rounded-3xl border border-border shadow-2xl p-6 sm:p-7 relative overflow-y-auto max-h-[calc(100dvh-2rem)] overscroll-contain">
+            <div className="flex items-center justify-between pb-4 border-b border-border">
+              <h2 className="text-lg sm:text-xl font-extrabold text-foreground">
                 {editingCategory ? "Kategoriyani Tahrirlash" : "Yangi Kategoriya Qo'shish"}
               </h2>
               <button
                 onClick={closeModal}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 shrink-0" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="mt-5 space-y-4">
               {/* O'zbekcha Nomi */}
               <div>
-                <label className="block text-xs font-bold text-[#67625d] dark:text-zinc-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
                   Kategoriya Nomi (O'zbekcha) *
                 </label>
                 <input
@@ -561,13 +558,13 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
                   value={formData.nameUz}
                   onChange={(e) => setFormData({ ...formData, nameUz: e.target.value })}
                   placeholder="Masalan: Ustalar va Ta'mir"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e6e0da] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm text-[#282624] dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary"
                 />
               </div>
 
               {/* Ruscha Nomi */}
               <div>
-                <label className="block text-xs font-bold text-[#67625d] dark:text-zinc-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
                   Kategoriya Nomi (Ruscha) *
                 </label>
                 <input
@@ -576,13 +573,13 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
                   value={formData.nameRu}
                   onChange={(e) => setFormData({ ...formData, nameRu: e.target.value })}
                   placeholder="Например: Мастера и Ремонт"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e6e0da] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm text-[#282624] dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary"
                 />
               </div>
 
               {/* Slug */}
               <div>
-                <label className="block text-xs font-bold text-[#67625d] dark:text-zinc-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
                   URL Slug (Ixtiyoriy)
                 </label>
                 <input
@@ -590,16 +587,16 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   placeholder="ustalar (bo'sh qoldirilsa avtomatik generatsiya qilinadi)"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e6e0da] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm font-mono text-[#282624] dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary"
                 />
               </div>
 
               {/* Ikonka Tanlash */}
               <div>
-                <label className="block text-xs font-bold text-[#67625d] dark:text-zinc-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
                   Ikonka Tanlang
                 </label>
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 p-2 rounded-2xl border border-[#e6e0da] dark:border-zinc-700 bg-[#faf8f5] dark:bg-zinc-800/50 max-h-36 overflow-y-auto">
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 p-2 rounded-2xl border border-border bg-muted/30 max-h-36 overflow-y-auto">
                   {ICON_OPTIONS.map((opt) => {
                     const IconComp = opt.icon;
                     const isSelected = formData.icon.toLowerCase() === opt.name.toLowerCase();
@@ -608,14 +605,14 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
                         key={opt.name}
                         type="button"
                         onClick={() => setFormData({ ...formData, icon: opt.name })}
-                        className={`flex flex-col items-center gap-1 p-2 rounded-xl text-center transition-all ${
+                        className={`flex flex-col items-center gap-1 p-2 rounded-xl text-center transition-all shrink-0 cursor-pointer ${
                           isSelected
-                            ? 'bg-blue-600 text-white shadow-sm'
-                            : 'bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-blue-50 dark:hover:bg-zinc-600'
+                            ? 'bg-primary text-primary-foreground shadow-sm'
+                            : 'bg-card text-foreground hover:bg-muted'
                         }`}
                         title={opt.label}
                       >
-                        <IconComp className="w-5 h-5" />
+                        <IconComp className="w-5 h-5 shrink-0" />
                         <span className="text-[9px] truncate w-full font-medium">{opt.name}</span>
                       </button>
                     );
@@ -626,26 +623,26 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
               {/* Tartib raqami va Faol status */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#67625d] dark:text-zinc-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
                     Tartib Raqami
                   </label>
                   <input
                     type="number"
                     value={formData.order}
                     onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#e6e0da] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm text-[#282624] dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary"
                   />
                 </div>
 
                 <div className="flex flex-col justify-end">
-                  <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-[#e6e0da] dark:border-zinc-700 bg-[#faf8f5] dark:bg-zinc-800/50 cursor-pointer">
+                  <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-border bg-secondary/30 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.isActive}
                       onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                      className="w-4 h-4 text-primary rounded focus:ring-ring"
                     />
-                    <span className="text-xs font-bold text-[#282624] dark:text-zinc-200">
+                    <span className="text-xs font-bold text-foreground">
                       Faol holatda
                     </span>
                   </label>
@@ -653,20 +650,20 @@ export default function AdminCategoriesClient({ initialCategories }: AdminCatego
               </div>
 
               {/* Tugmalar */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#f2eee9] dark:border-zinc-800">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-muted-foreground hover:bg-muted transition-colors shrink-0 cursor-pointer"
                 >
                   Bekor qilish
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/25 transition-all flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 active:scale-95 text-primary-foreground font-bold text-xs sm:text-sm shadow-md shadow-primary/20 transition-all flex items-center gap-2 shrink-0 cursor-pointer"
                 >
-                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
                   <span>{editingCategory ? "Saqlash" : "Yaratish"}</span>
                 </button>
               </div>

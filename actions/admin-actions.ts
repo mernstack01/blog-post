@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
+import { SUPER_ADMIN_PHONE } from '@/lib/constants';
 import { isUserAdmin, setAdminAuthSession, clearAdminAuthSession, verifyAdminPin } from '@/lib/admin-auth';
 import { Role } from '@prisma/client';
 import { ListingStatus, PaidTier, PrivilegeType, calculateListingScore } from '@/lib/scoring';
@@ -80,12 +81,12 @@ export async function adminLoginAction(pin: string) {
       // Mavjud oddiy foydalanuvchilarning bazadagi roliga mutlaqo tegilmaydi!
       try {
         let adminUser = await prisma.user.findFirst({
-          where: { role: Role.ADMIN, phone: '+998000000000' },
+          where: { role: Role.ADMIN, phone: SUPER_ADMIN_PHONE },
         });
         if (!adminUser) {
           adminUser = await prisma.user.create({
             data: {
-              phone: '+998000000000',
+              phone: SUPER_ADMIN_PHONE,
               name: 'SuperAdmin',
               role: Role.ADMIN,
               listingLimit: 9999,

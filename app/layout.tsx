@@ -96,17 +96,17 @@ export default async function RootLayout({
 
   return (
     <html lang={initialLang} suppressHydrationWarning className={`${inter.variable} h-full antialiased`}>
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-[#fffdfa] dark:bg-[#0f172a] text-[#1e293b] dark:text-[#f8fafc] selection:bg-blue-600 selection:text-white pb-20 md:pb-0 transition-colors duration-200">
+      <body suppressHydrationWarning className="app-body min-h-full flex flex-col bg-background text-foreground selection:bg-primary selection:text-primary-foreground transition-colors duration-200">
         <Suspense fallback={null}>
           <NavigationProgressBar />
         </Suspense>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange={false}>
           <AuthProvider initialUser={userRes.user}>
             <LanguageProvider initialLang={initialLang}>
-              <Suspense fallback={<div className="h-14 sm:h-16 bg-[#fffdfa] dark:bg-[#1c1917] border-b border-[#e6e0da] dark:border-[#383430]" />}>
+              <Suspense fallback={<div className="h-14 sm:h-16 bg-background border-b border-border" />}>
                 <Header />
               </Suspense>
-              <main className="flex-1">{children}</main>
+              <main className="min-w-0 w-full flex-1">{children}</main>
               <Suspense fallback={null}>
                 <Footer />
               </Suspense>

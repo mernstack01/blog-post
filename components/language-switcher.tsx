@@ -11,29 +11,38 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = React.useTransition();
 
   const handleSelectLanguage = (newLang: Language) => {
+    if (newLang === lang) return;
     setLanguage(newLang);
-    try {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set('lang', newLang);
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-      router.refresh();
-    } catch {}
+    startTransition(() => {
+      try {
+        const params = new URLSearchParams(searchParams?.toString() || '');
+        params.set('lang', newLang);
+        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+        router.refresh();
+      } catch (err) {
+        console.error('LanguageSwitcher error:', err);
+      }
+    });
   };
 
   return (
     <div
-      className={`inline-flex items-center p-0.5 rounded-2xl bg-secondary border border-border dark:border-white/10 shadow-2xs ${className}`}
+      className={`inline-flex items-center p-0.5 rounded-2xl bg-secondary border border-border shadow-2xs shrink-0 transition-opacity ${className} ${
+        isPending ? 'opacity-70 pointer-events-none' : ''
+      }`}
       role="group"
       aria-label="Tilni tanlash / Выбор языка"
     >
       <button
         type="button"
         onClick={() => handleSelectLanguage('uz')}
-        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 touch-manipulation ${
+        disabled={isPending}
+        className={`flex items-center justify-center min-h-10 min-w-11 gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 touch-manipulation shrink-0 ${
           lang === 'uz'
-            ? 'bg-card text-blue-600 dark:text-blue-400 shadow-xs ring-1 ring-black/5 dark:ring-white/10'
+            ? 'bg-card text-primary shadow-xs ring-1 ring-border'
             : 'text-muted-foreground hover:text-foreground'
         }`}
         title="O'zbek tili"
@@ -45,9 +54,10 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
       <button
         type="button"
         onClick={() => handleSelectLanguage('ru')}
-        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 touch-manipulation ${
+        disabled={isPending}
+        className={`flex items-center justify-center min-h-10 min-w-11 gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 touch-manipulation shrink-0 ${
           lang === 'ru'
-            ? 'bg-card text-blue-600 dark:text-blue-400 shadow-xs ring-1 ring-black/5 dark:ring-white/10'
+            ? 'bg-card text-primary shadow-xs ring-1 ring-border'
             : 'text-muted-foreground hover:text-foreground'
         }`}
         title="Русский язык"
@@ -60,4 +70,3 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
 }
 
 export default LanguageSwitcher;
-

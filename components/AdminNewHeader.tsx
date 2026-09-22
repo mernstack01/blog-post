@@ -13,9 +13,9 @@ export default function AdminNewHeader() {
       <div className="mb-6 flex items-center justify-between">
         <Link
           href="/admin"
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#67625d] dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 shrink-0" />
           <span>{t.admin.backToAdmin}</span>
         </Link>
 

@@ -46,25 +46,25 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
   };
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-blue-50/40 via-background to-background dark:from-slate-900/50 dark:via-background dark:to-background py-8 sm:py-14 border-b border-border dark:border-white/10 transition-colors">
+    <div className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background py-8 sm:py-14 border-b border-border transition-colors">
       {/* Orqa fon dekoratsiyasi */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full overflow-hidden pointer-events-none -z-10">
-        <div className="absolute -top-24 left-1/4 w-72 h-72 bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-12 right-1/4 w-72 h-72 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-3xl" />
+        <div className="absolute -top-24 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute top-12 right-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         
         {/* Nishon */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary border border-border dark:border-white/10 text-foreground text-xs font-semibold mb-4 shadow-2xs">
-          <span className="live-indicator" />
-          <span>{t.hero.title1} {t.hero.titleHighlight}</span>
+        <div className="inline-flex max-w-full items-center gap-1.5 px-3 py-1 rounded-full bg-secondary border border-border text-foreground text-xs font-semibold mb-4 shadow-2xs">
+          <span className="live-indicator shrink-0" />
+          <span className="truncate">{t.hero.title1} {t.hero.titleHighlight}</span>
         </div>
 
         {/* H1 Sarlavha */}
         <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-tight mb-3">
           {t.hero.title1} <br className="hidden sm:block" />
-          <span className="text-blue-600 dark:text-blue-400">
+          <span className="text-primary">
             {t.hero.titleHighlight}
           </span>
         </h1>
@@ -76,11 +76,11 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
         {/* Qidiruv Paneli */}
         <form
           onSubmit={handleSubmit}
-          className="bg-card text-card-foreground p-2 sm:p-2.5 rounded-2xl sm:rounded-full shadow-lg shadow-slate-900/5 border border-border dark:border-white/15 flex flex-col sm:flex-row items-center gap-2 max-w-3xl mx-auto focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all"
+          className="bg-card text-card-foreground p-2 sm:p-2.5 rounded-2xl sm:rounded-full shadow-lg shadow-black/5 border border-border flex flex-col sm:flex-row items-center gap-2 max-w-3xl mx-auto focus-within:border-primary focus-within:ring-2 focus-within:ring-ring transition-all"
         >
           {/* Kalit so'z inputi */}
-          <div className="relative flex-1 w-full flex items-center">
-            <Search className="absolute left-3.5 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <div className="relative min-w-0 flex-1 w-full flex items-center">
+            <Search className="absolute left-3.5 w-4 h-4 text-muted-foreground pointer-events-none shrink-0" />
             <input
               type="text"
               value={query}
@@ -90,11 +90,11 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
             />
           </div>
 
-          <div className="hidden sm:block w-px h-6 bg-border dark:bg-white/10" />
+          <div className="hidden sm:block w-px h-6 bg-border shrink-0" />
 
           {/* Hududni tanlash */}
-          <div className="relative w-full sm:w-52 flex items-center">
-            <MapPin className="absolute left-3 w-4 h-4 text-blue-600 dark:text-blue-400 pointer-events-none" />
+          <div className="relative w-full sm:w-52 flex items-center shrink-0">
+            <MapPin className="absolute left-3 w-4 h-4 text-primary pointer-events-none shrink-0" />
             <select
               value={location}
               onChange={(e) => setLocation(e.target.value)}
@@ -112,17 +112,17 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
           {/* Qidirish tugmasi */}
           <button
             type="submit"
-            className="w-full sm:w-auto px-6 py-2.5 sm:py-2 rounded-xl sm:rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full sm:w-auto px-6 py-2.5 sm:py-2 rounded-xl sm:rounded-full bg-primary hover:bg-primary/90 active:scale-95 text-primary-foreground text-xs sm:text-sm font-bold shadow-md shadow-primary/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
           >
             <span>{t.hero.searchBtn}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3.5 h-3.5 shrink-0" />
           </button>
         </form>
 
-        {/* Ommabop qidiruv teglari (Mobil qurilmalarda gorizontal sirpanuvchi, kattaroq ekranda markazlashgan) */}
-        <div className="mt-4 sm:mt-5 flex items-center justify-start sm:justify-center gap-1.5 sm:gap-2 text-xs text-muted-foreground overflow-x-auto no-scrollbar py-1 px-1 max-w-full touch-pan-x sm:flex-wrap">
+        {/* Ommabop qidiruv teglari */}
+        <div className="mt-4 sm:mt-5 flex items-center justify-start sm:justify-center gap-1.5 sm:gap-2 text-xs text-muted-foreground flex-wrap py-1 px-1 max-w-full">
           <span className="flex items-center gap-1 text-foreground font-bold shrink-0">
-            <Sparkles className="w-3 h-3 text-amber-500" />
+            <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
             {t.hero.popularSearch}
           </span>
           {POPULAR_SEARCH_TAGS_MAP.map((tagItem) => {
@@ -132,7 +132,7 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
                 key={tagItem.uz}
                 onClick={() => handleTagClick(tagLabel)}
                 type="button"
-                className="px-2.5 py-1 rounded-lg bg-secondary text-secondary-foreground border border-border dark:border-white/10 hover:bg-muted hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-400 dark:hover:text-blue-400 text-xs font-medium transition-colors cursor-pointer shrink-0 whitespace-nowrap active:scale-95 touch-manipulation"
+                className="px-2.5 py-1 rounded-lg bg-secondary text-secondary-foreground border border-border hover:bg-muted hover:border-primary hover:text-primary text-xs font-medium transition-colors cursor-pointer shrink-0 whitespace-normal active:scale-95 touch-manipulation"
               >
                 {tagLabel}
               </button>

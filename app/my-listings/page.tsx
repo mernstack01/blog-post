@@ -17,7 +17,7 @@ export default async function MyListingsPage() {
   const isAuthenticated = Boolean(userStats);
 
   return (
-    <div className="min-h-screen bg-[#fffdfa] dark:bg-[#0f172a] transition-colors">
+    <div className="min-h-screen bg-background text-foreground transition-colors">
       <MyListingsClient
         initialListings={listings}
         userStats={userStats}

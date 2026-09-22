@@ -53,46 +53,46 @@ export default async function ListingPage({ params }: ListingPageProps) {
     .slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-[#fffdfa] dark:bg-[#0f172a] py-8 sm:py-12 transition-colors">
+    <div className="min-h-screen bg-background text-foreground py-8 sm:py-12 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Navigatsiya va Orqaga */}
         <div className="mb-6 flex items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#67625d] dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 shrink-0" />
             <span>Bosh sahifaga qaytish</span>
           </Link>
 
-          <span className="text-xs text-slate-400 dark:text-slate-500">
+          <span className="text-xs text-muted-foreground">
             {listing.category.name} / {listing.location}
           </span>
         </div>
 
         {/* E'lon tafsilotlari (Client komponent) */}
-        <Suspense fallback={<div className="h-96 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 animate-pulse" />}>
+        <Suspense fallback={<div className="h-96 bg-card text-card-foreground rounded-3xl border border-border animate-pulse" />}>
           <ListingDetailClient listing={listing} />
         </Suspense>
 
         {/* O'xshash xizmatlar tavsiyasi */}
         {relatedListings.length > 0 && (
-          <div className="mt-14 pt-10 border-t border-slate-200 dark:border-slate-800">
+          <div className="mt-14 pt-10 border-t border-border">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary shrink-0" />
                   <span>O'xshash boshqa xizmatlar</span>
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                   "{listing.category.name}" toifasidagi boshqa takliflar
                 </p>
               </div>
 
               <Link
                 href={`/?category=${listing.category.slug}`}
-                className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                className="text-xs sm:text-sm font-semibold text-primary hover:underline shrink-0"
               >
                 Barchasini ko'rish →
               </Link>

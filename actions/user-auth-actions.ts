@@ -11,7 +11,7 @@ import {
 } from '@/lib/user-auth';
 import { PrismaClient, Role } from '@prisma/client';
 import { isUserAdmin, clearAdminAuthSession, setAdminAuthSession } from '@/lib/admin-auth';
-import { isSuperAdminPhone } from '@/lib/constants';
+import { isSuperAdminPhone, SUPER_ADMIN_PHONE } from '@/lib/constants';
 
 
 // Fallback in-memory store in case Prisma Client in active Node dev process hasn't reloaded
@@ -310,7 +310,7 @@ export async function getCurrentUserAction() {
             success: true,
             user: {
               id: user.id,
-              phone: user.phone,
+              phone: user.role === Role.ADMIN && user.phone === '+998000000000' ? SUPER_ADMIN_PHONE : user.phone,
               name: user.name,
               role: 'ADMIN',
               listingLimit: 99999,
@@ -349,7 +349,7 @@ export async function getCurrentUserAction() {
         success: true,
         user: {
           id: 'admin_root',
-          phone: '+998 (Admin)',
+          phone: SUPER_ADMIN_PHONE,
           name: 'SuperAdmin',
           role: 'ADMIN',
           listingLimit: 9999,

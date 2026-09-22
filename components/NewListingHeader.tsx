@@ -13,9 +13,9 @@ export default function NewListingHeader() {
       <div className="mb-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#67625d] hover:text-blue-600 dark:hover:text-blue-400 transition-colors active:scale-95"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors active:scale-95 shrink-0"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 shrink-0" />
           <span>{t.detail.backHome}</span>
         </Link>
       </div>

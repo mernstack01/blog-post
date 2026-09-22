@@ -244,7 +244,7 @@ export default function ImageCropperModal({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-card text-card-foreground border border-border dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[96vh]">
+      <div className="relative w-full max-w-lg bg-card text-card-foreground border border-border dark:border-white/10 rounded-3xl shadow-2xl overflow-y-auto overscroll-contain flex flex-col max-h-[calc(100dvh-1.5rem)]">
         {/* Modal Bosh qismi (Header) */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border dark:border-white/10">
           <div className="flex items-center gap-2.5">
@@ -288,7 +288,7 @@ export default function ImageCropperModal({
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           onWheel={handleWheel}
-          className="relative w-full h-80 sm:h-96 bg-slate-950 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none"
+          className="relative w-full shrink-0 h-80 sm:h-96 bg-slate-950 flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none"
         >
           {/* Harakatlanuvchi Rasm */}
           <div
@@ -383,7 +383,7 @@ export default function ImageCropperModal({
               step="0.05"
               value={zoom}
               onChange={(e) => setZoom(parseFloat(e.target.value))}
-              className="flex-1 accent-blue-600 h-2 bg-secondary rounded-lg appearance-none cursor-pointer"
+              className="flex-1 accent-primary h-2 bg-secondary rounded-lg appearance-none cursor-pointer"
             />
 
             <button
@@ -427,7 +427,7 @@ export default function ImageCropperModal({
               type="button"
               onClick={onClose}
               disabled={isProcessing}
-              className="px-4 py-2.5 rounded-xl bg-secondary text-secondary-foreground hover:bg-muted font-bold text-xs transition-colors cursor-pointer disabled:opacity-50"
+              className="px-4 py-2.5 rounded-xl bg-secondary text-secondary-foreground hover:bg-muted font-bold text-xs transition-colors cursor-pointer disabled:opacity-50 shrink-0"
             >
               {lang === 'ru' ? 'Отмена' : 'Bekor qilish'}
             </button>
@@ -436,16 +436,16 @@ export default function ImageCropperModal({
               type="button"
               onClick={handleCrop}
               disabled={isProcessing}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-lg shadow-blue-500/25 active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-75"
+              className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs shadow-lg active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-75 shrink-0"
             >
               {isProcessing ? (
                 <>
-                  <div className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  <div className="w-3.5 h-3.5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin shrink-0" />
                   <span>{lang === 'ru' ? 'Обработка...' : 'Qirqilmoqda...'}</span>
                 </>
               ) : (
                 <>
-                  <Check className="w-4 h-4" />
+                  <Check className="w-4 h-4 shrink-0" />
                   <span>
                     {lang === 'ru' ? 'Применить и сохранить' : 'Qirqish va Saqlash'}
                   </span>
