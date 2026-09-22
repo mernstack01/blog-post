@@ -157,7 +157,7 @@
     "profile": "Profil"
   },
   "footer": {
-    "about": "Guliston shahri va unga tutash barcha tumanlar aholisi uchun eng qulay mahalliy ustalar, avtomobil va maishiy xizmatlar portali.",
+    "about": "Kerakli xizmatni toping va e'lon egasi bilan bevosita bog'laning.",
     "districtsTitle": "Viloyat shahar va tumanlari",
     "forUsers": "Foydalanuvchilar uchun",
     "postFree": "+ Yangi e'lon berish (bepul)",
@@ -192,18 +192,19 @@
     "viewAllInSection": "Bo'limdagi barcha mutaxassislarni ko'rish"
   },
   "stats": {
-    "whyTitle": "Nega aynan TopBaza.uz?",
-    "whySubtitle": "Aholiga qulaylik yaratish maqsadida yaratilgan ochiq va shaffof kadrlar va xizmatlar portali. Barcha raqamlar real vaqtda yangilanadi.",
+    "unavailable": "Ma'lumot yo'q",
+    "whyTitle": "Platforma statistikasi",
+    "whySubtitle": "Butun platforma bo'yicha jami ko'rsatkichlar. Qidiruv va kategoriya filtrlari bu raqamlarga ta'sir qilmaydi.",
     "districtsLabel": "Shahar va Tumanlar",
     "districtsDesc": "Guliston, Yangiyer, Shirin va barcha tumanlar",
-    "specialistsLabel": "Faol Mutaxassislar",
-    "specialistsDesc": "Platformada ro'yxatdan o'tgan haqiqiy ustalar",
-    "commissionLabel": "Bepul Aloqa",
-    "commissionVal": "0% Komissiya",
-    "commissionDesc": "Usta bilan to'g'ridan-to'g'ri bog'lanish",
-    "verifiedLabel": "Tasdiqlangan Profillar",
+    "specialistsLabel": "Faol e'lonlar",
+    "specialistsDesc": "Saytda chop etishga ruxsat berilgan jami e'lonlar",
+    "commissionLabel": "Aloqa komissiyasi",
+    "commissionVal": "0%",
+    "commissionDesc": "Bevosita bog'lanish uchun komissiya olinmaydi",
+    "verifiedLabel": "Tasdiq belgili e'lonlar",
     "verifiedVal": "Tekshirilgan",
-    "verifiedDesc": "Hujjat va telefon raqami tasdiqlangan",
+    "verifiedDesc": "Admin tasdiq belgisini bergan faol e'lonlar",
     "countUnit": "ta"
   },
   "profilePage": {

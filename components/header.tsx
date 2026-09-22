@@ -31,6 +31,7 @@ export function Header() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const currentMode = searchParams.get('mode');
+  const remainingListings = user?.remaining ?? Math.max(0, (user?.listingLimit ?? 3) - (user?.totalUsed ?? 0));
   const displayPhone = user?.phone.replace(/^(\+998)(\d{2})(\d{3})(\d{2})(\d{2})$/, '$1 $2 $3 $4 $5');
 
   return (
@@ -131,7 +132,7 @@ export function Header() {
                       {user.name}
                     </span>
                     <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold leading-none">
-                      {user.totalUsed ?? 0}/{user.listingLimit ?? 3} {lang === 'ru' ? 'объявл.' : "e'lon"}
+                      {lang === 'ru' ? 'Осталось:' : 'Qolgan:'} {remainingListings}
                     </span>
                   </div>
                   <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform hidden sm:block ${profileDropdownOpen ? 'rotate-180' : ''}`} />
@@ -163,9 +164,9 @@ export function Header() {
                           </div>
                         </div>
                         <div className="mt-2.5 p-2 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground font-medium">{lang === 'ru' ? 'Лимит объявлений:' : "E'lon limitingiz:"}</span>
+                          <span className="text-muted-foreground font-medium">{lang === 'ru' ? 'Можно разместить:' : "Yana e'lon berish mumkin:"}</span>
                           <span className="font-extrabold text-primary">
-                            {user.totalUsed ?? 0} / {user.listingLimit ?? 3} {lang === 'ru' ? 'объявл.' : 'ta'}
+                            {remainingListings} {lang === 'ru' ? 'объявл.' : 'ta'}
                           </span>
                         </div>
                       </div>
@@ -297,7 +298,7 @@ export function Header() {
                     </div>
                   </div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary shrink-0">
-                    {user.totalUsed ?? 0}/{user.listingLimit ?? 3} {lang === 'ru' ? 'объявл.' : "ta e'lon"}
+                    {lang === 'ru' ? 'Осталось:' : 'Qolgan:'} {remainingListings}
                   </span>
                 </div>
                 <button

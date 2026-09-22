@@ -70,6 +70,8 @@ async function main() {
       isActive: true,
       description: "Santexnik, elektrik, pardozlash, yevro ta'mir ustalari",
       subCategories: [
+        { name: "G'isht va Blok terish", slug: "gisht-terish", description: "Uylar va korxonalar uchun fundament va devor tiklash" },
+        { name: "Tom yopish ustalari", slug: "tom-yopish", description: "Tunika, cherepitsa va profnastil bilan qoplash" },
         { name: "Santexnika xizmatlari", slug: "santexnik", description: "Quvurlar, kranlar, dush va ariston o'rnatish" },
         { name: "Elektr montaj", slug: "elektrik", description: "Uylar va ofislar uchun xavfsiz elektr tarmog'i" },
         { name: "Yevro ta'mir va pardoz", slug: "yevro-tamir", description: "Shpaklyovka, oboy, gipsokarton va bo'yoq ishlari" },
@@ -109,17 +111,18 @@ async function main() {
       ]
     },
     {
-      nameUz: "Qurilish va Mahsulotlar",
-      nameRu: "Строительство и Материалы",
-      name: "Qurilish va Mahsulotlar",
+      nameUz: "Qurilish mahsulotlari",
+      nameRu: "Строительные материалы",
+      name: "Qurilish mahsulotlari",
       slug: "qurilish",
       icon: "Hammer",
       order: 4,
       isActive: true,
-      description: "Uy qurish, poydevor, g'isht terish va tom yopish",
+      description: "G'isht, sement, laminat va boshqa qurilish mahsulotlari",
       subCategories: [
-        { name: "G'isht va Blok terish", slug: "gisht-terish", description: "Uylar va korxonalar uchun fundament va devor tiklash" },
-        { name: "Tom yopish ustalari", slug: "tom-yopish", description: "Tunika, cherepitsa va profnastil bilan qoplash" },
+        { name: "G'isht", slug: "gisht", description: "Qurilish uchun g'isht" },
+        { name: "Sement", slug: "sement", description: "Qurilish uchun sement" },
+        { name: "Laminat", slug: "laminat", description: "Pol uchun laminat" },
       ]
     },
     {
@@ -459,7 +462,7 @@ async function main() {
       isVerified: true,
       status: ListingStatus.APPROVED,
       view_count: 245,
-      categoryId: createdCategories["qurilish"].id,
+      categoryId: createdCategories["ustalar"].id,
       subCategoryId: createdSubCategories["tom-yopish"].id,
     },
     // Qo'shimcha tumanlar uchun xizmatlar:
@@ -478,7 +481,7 @@ async function main() {
       isVerified: true,
       status: ListingStatus.APPROVED,
       view_count: 310,
-      categoryId: createdCategories["qurilish"].id,
+      categoryId: createdCategories["ustalar"].id,
       subCategoryId: createdSubCategories["gisht-terish"].id,
     },
     {

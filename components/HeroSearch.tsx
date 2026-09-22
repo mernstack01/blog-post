@@ -56,11 +56,7 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         
         {/* Nishon */}
-        <div className="inline-flex max-w-full items-center gap-1.5 px-3 py-1 rounded-full bg-secondary border border-border text-foreground text-xs font-semibold mb-4 shadow-2xs">
-          <span className="live-indicator shrink-0" />
-          <span className="truncate">{t.hero.title1} {t.hero.titleHighlight}</span>
-        </div>
-
+ 
         {/* H1 Sarlavha */}
         <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-tight mb-3">
           {t.hero.title1} <br className="hidden sm:block" />
@@ -69,9 +65,6 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
           </span>
         </h1>
 
-        <p className="max-w-xl mx-auto text-xs sm:text-base text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
-          {t.hero.subtitle}
-        </p>
 
         {/* Qidiruv Paneli */}
         <form
@@ -120,25 +113,6 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
         </form>
 
         {/* Ommabop qidiruv teglari */}
-        <div className="mt-4 sm:mt-5 flex items-center justify-start sm:justify-center gap-1.5 sm:gap-2 text-xs text-muted-foreground flex-wrap py-1 px-1 max-w-full">
-          <span className="flex items-center gap-1 text-foreground font-bold shrink-0">
-            <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
-            {t.hero.popularSearch}
-          </span>
-          {POPULAR_SEARCH_TAGS_MAP.map((tagItem) => {
-            const tagLabel = tagItem[lang] || tagItem.uz;
-            return (
-              <button
-                key={tagItem.uz}
-                onClick={() => handleTagClick(tagLabel)}
-                type="button"
-                className="px-2.5 py-1 rounded-lg bg-secondary text-secondary-foreground border border-border hover:bg-muted hover:border-primary hover:text-primary text-xs font-medium transition-colors cursor-pointer shrink-0 whitespace-normal active:scale-95 touch-manipulation"
-              >
-                {tagLabel}
-              </button>
-            );
-          })}
-        </div>
 
       </div>
     </div>

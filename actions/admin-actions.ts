@@ -205,7 +205,7 @@ export async function getAdminListingsAction(statusFilter?: string) {
     where,
     orderBy: { createdAt: 'desc' },
     include: {
-      category: { select: { id: true, name: true, slug: true } },
+      category: { select: { id: true, name: true, nameUz: true, nameRu: true, slug: true } as any },
       subCategory: { select: { id: true, name: true, slug: true } },
     },
   });
@@ -579,7 +579,7 @@ export async function adminUpdateListingFullAction(id: string, data: AdminUpdate
         totalScore: newScore,
       } as any,
       include: {
-        category: { select: { id: true, name: true, slug: true } },
+        category: { select: { id: true, name: true, nameUz: true, nameRu: true, slug: true } as any },
         subCategory: { select: { id: true, name: true, slug: true } },
       },
     });

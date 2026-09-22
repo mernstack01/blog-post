@@ -75,8 +75,13 @@ export default function ListingCard({ listing }: ListingCardProps) {
     : 'border-border hover:border-primary shadow-xs hover:shadow-xl hover:shadow-primary/10';
 
   const categoryName = listing.subCategory
-    ? (getSubCategoryLocalizedName(listing.subCategory.slug, lang) || getSubCategoryLocalizedName(listing.subCategory.name, lang) || getCategoryLocalizedName(listing.subCategory.name, lang))
-    : (getCategoryLocalizedName(listing.category.slug, lang) || getCategoryLocalizedName(listing.category.name, lang));
+    ? (getSubCategoryLocalizedName(listing.subCategory.slug, lang) || getSubCategoryLocalizedName(listing.subCategory.name, lang) || listing.subCategory.name)
+    : (
+        (lang === 'ru' ? (listing.category as any)?.nameRu : (listing.category as any)?.nameUz) ||
+        getCategoryLocalizedName(listing.category.slug, lang) ||
+        getCategoryLocalizedName(listing.category.name, lang) ||
+        listing.category.name
+      );
 
   const locationName = getLocationLocalizedName(listing.location, lang);
 

@@ -385,10 +385,10 @@ export default function NewListingForm({ categories, initialUser, isAdmin }: New
             <div className="flex items-center gap-2 bg-secondary px-3.5 py-2 rounded-2xl border border-border text-xs shrink-0">
               <div>
                 <span className="text-muted-foreground block text-[10px] font-bold uppercase tracking-wider">
-                  {lang === 'ru' ? 'Лимит объявлений:' : "E'lon berish limiti:"}
+                  {lang === 'ru' ? 'Использовано:' : 'Ishlatilgan:'}
                 </span>
                 <span className="font-extrabold text-foreground">
-                  {totalUsed} / {currentLimit} {lang === 'ru' ? 'объявлений' : "ta e'lon"}
+                  {totalUsed} / {currentLimit} {lang === 'ru' ? 'объявлений' : "ta e'lon"}<br />{lang === 'ru' ? 'Осталось:' : 'Qolgan:'} {Math.max(0, currentUser?.remaining ?? (currentLimit - totalUsed))}
                 </span>
               </div>
               <div className="h-6 w-px bg-border mx-1" />

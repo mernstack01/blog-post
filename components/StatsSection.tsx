@@ -3,13 +3,13 @@ import { ListingStatus } from '@prisma/client';
 import StatsSectionClient from '@/components/StatsSectionClient';
 
 export default async function StatsSection() {
-  let districtsCount = 10;
-  let approvedListingsCount = 0;
-  let verifiedCount = 0;
+  let districtsCount: number | null = null;
+  let approvedListingsCount: number | null = null;
+  let verifiedCount: number | null = null;
 
   try {
     const [districts, listings, verified] = await Promise.all([
-      (prisma as any).district?.count ? (prisma as any).district.count() : Promise.resolve(10),
+      prisma.district.count(),
       prisma.listing.count({ where: { status: ListingStatus.APPROVED } }),
       prisma.listing.count({
         where: {
@@ -18,7 +18,7 @@ export default async function StatsSection() {
         },
       }),
     ]);
-    districtsCount = districts || 10;
+    districtsCount = districts;
     approvedListingsCount = listings;
     verifiedCount = verified;
   } catch (error) {

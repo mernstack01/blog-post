@@ -25,7 +25,7 @@ import InstagramIcon from '@/components/icons/InstagramIcon';
 import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { useLanguage } from '@/context/LanguageContext';
-import { getCategoryLocalizedName, getLocationLocalizedName } from '@/lib/translations';
+import { getCategoryLocalizedName, getSubCategoryLocalizedName, getLocationLocalizedName } from '@/lib/translations';
 
 interface ListingDetailClientProps {
   listing: ListingWithRelations;
@@ -78,9 +78,14 @@ export default function ListingDetailClient({ listing }: ListingDetailClientProp
       : `https://instagram.com/${listing.instagram.replace('@', '')}`
     : null;
 
-  const categoryName = listing.subCategory
-    ? getCategoryLocalizedName(listing.subCategory.name, lang)
-    : getCategoryLocalizedName(listing.category.name, lang);
+  const categoryName = (lang === 'ru' ? (listing.category as any)?.nameRu : (listing.category as any)?.nameUz)
+    || getCategoryLocalizedName(listing.category.slug, lang)
+    || getCategoryLocalizedName(listing.category.name, lang)
+    || listing.category.name;
+
+  const subCategoryName = listing.subCategory
+    ? (getSubCategoryLocalizedName(listing.subCategory.slug, lang) || getSubCategoryLocalizedName(listing.subCategory.name, lang) || listing.subCategory.name)
+    : null;
 
   const locationName = getLocationLocalizedName(listing.location, lang);
 
@@ -209,9 +214,9 @@ export default function ListingDetailClient({ listing }: ListingDetailClientProp
                 <span className="px-3 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider shrink-0">
                   {categoryName}
                 </span>
-                {listing.subCategory && (
+                {subCategoryName && (
                   <span className="px-3 py-1 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold shrink-0">
-                    {getCategoryLocalizedName(listing.subCategory.name, lang)}
+                    {subCategoryName}
                   </span>
                 )}
                 {listing.paidTier === 'VIP_GOLD' && (

@@ -404,7 +404,7 @@ export async function getUserFullProfileAction() {
       },
       include: {
         category: {
-          select: { id: true, name: true, slug: true, icon: true },
+          select: { id: true, name: true, nameUz: true, nameRu: true, slug: true, icon: true } as any,
         },
         subCategory: {
           select: { id: true, name: true, slug: true },

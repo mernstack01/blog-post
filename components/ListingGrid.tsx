@@ -50,6 +50,7 @@ export default function ListingGrid({ listings, currentUser, isAdmin }: ListingG
     return Boolean(!effectiveUser || (item.userId !== effectiveUser.id && item.phone !== effectiveUser.phone));
   };
 
+  const hasFilters = ['q', 'location', 'category', 'subCategory'].some(key => Boolean(searchParams.get(key)));
   const myCount = listings.filter(isMyListing).length;
   const othersCount = listings.filter(isOthersListing).length;
 
@@ -107,7 +108,7 @@ export default function ListingGrid({ listings, currentUser, isAdmin }: ListingG
                 <span>{effectiveUser.phone}</span>
                 <span>•</span>
                 <span>
-                  {lang === 'ru' ? 'Лимит объявлений:' : "E'lon berish limitingiz:"} <strong className="text-primary font-extrabold">{effectiveUser.totalUsed ?? myCount} / {effectiveUser.listingLimit ?? 3}</strong> {lang === 'ru' ? 'объявл.' : "ta e'lon"}
+                  {lang === 'ru' ? 'Использовано:' : 'Ishlatilgan:'} <strong className="text-primary font-extrabold">{effectiveUser.totalUsed ?? myCount} / {effectiveUser.listingLimit ?? 3}</strong> {lang === 'ru' ? 'объявл.' : "ta e'lon"}. {lang === 'ru' ? 'Осталось:' : 'Qolgan:'} <strong>{effectiveUser.remaining ?? Math.max(0, (effectiveUser.listingLimit ?? 3) - (effectiveUser.totalUsed ?? myCount))}</strong> {lang === 'ru' ? 'объявл.' : "ta e'lon"}
                 </span>
               </p>
             </div>
@@ -146,7 +147,7 @@ export default function ListingGrid({ listings, currentUser, isAdmin }: ListingG
                   </>
                 ) : (
                   <>
-                    <span>{t.grid.titleAll}</span>
+                    <span>{hasFilters ? (lang === 'ru' ? 'Результаты поиска' : 'Qidiruv natijalari') : t.grid.titleAll}</span>
                     <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary shrink-0">
                       {filteredListings.length} {t.grid.countUnit}
                     </span>
@@ -155,7 +156,7 @@ export default function ListingGrid({ listings, currentUser, isAdmin }: ListingG
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              {isTop10 ? t.grid.descTop10 : t.grid.descAll}
+              {isTop10 ? t.grid.descTop10 : hasFilters ? (lang === 'ru' ? 'Объявления, соответствующие поиску и выбранным фильтрам' : "Qidiruv va tanlangan filtrlarga mos e'lonlar") : t.grid.descAll}
             </p>
           </div>
 

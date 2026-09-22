@@ -4,9 +4,9 @@ import { MapPin, Users, ShieldCheck, Zap } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface StatsSectionClientProps {
-  districtsCount: number;
-  approvedListingsCount: number;
-  verifiedCount: number;
+  districtsCount: number | null;
+  approvedListingsCount: number | null;
+  verifiedCount: number | null;
 }
 
 export default function StatsSectionClient({
@@ -16,16 +16,18 @@ export default function StatsSectionClient({
 }: StatsSectionClientProps) {
   const { t, lang } = useLanguage();
 
+  const formatCount = (value: number | null) => value === null ? t.stats.unavailable : `${value} ${t.stats.countUnit}`;
+
   const stats = [
     {
       icon: MapPin,
-      value: `${districtsCount} ${t.stats.countUnit}`,
+      value: formatCount(districtsCount),
       label: t.stats.districtsLabel,
       desc: t.stats.districtsDesc,
     },
     {
       icon: Users,
-      value: `${approvedListingsCount} ${t.stats.countUnit}`,
+      value: formatCount(approvedListingsCount),
       label: t.stats.specialistsLabel,
       desc: t.stats.specialistsDesc,
     },
@@ -37,7 +39,7 @@ export default function StatsSectionClient({
     },
     {
       icon: ShieldCheck,
-      value: verifiedCount > 0 ? `${verifiedCount} ${t.stats.countUnit}` : t.stats.verifiedVal,
+      value: formatCount(verifiedCount),
       label: t.stats.verifiedLabel,
       desc: t.stats.verifiedDesc,
     },
@@ -69,10 +71,10 @@ export default function StatsSectionClient({
                 <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shrink-0">
                   <Icon className="w-6 h-6 shrink-0" />
                 </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight mb-1 truncate max-w-full">
+                <div className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight mb-1 max-w-full">
                   {item.value}
                 </div>
-                <div className="text-sm font-semibold text-foreground mb-1 truncate max-w-full">
+                <div className="text-sm font-semibold text-foreground mb-1 max-w-full">
                   {item.label}
                 </div>
                 <div className="text-xs text-muted-foreground line-clamp-2">

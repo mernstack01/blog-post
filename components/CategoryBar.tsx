@@ -24,6 +24,8 @@ interface SubCategoryItem {
 interface CategoryItem {
   id: string;
   name: string;
+  nameUz?: string | null;
+  nameRu?: string | null;
   slug: string;
   icon: string | null;
   subCategories?: SubCategoryItem[];
@@ -64,7 +66,7 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
   };
 
   const getIcon = (iconName: string | null, isSelected: boolean) => {
-    const className = `w-4 h-4 shrink-0 ${isSelected ? 'text-primary-foreground' : 'text-muted-foreground'}`;
+    const className = `w-4 h-4 shrink-0 transition-transform ${isSelected ? 'scale-110' : ''}`;
     switch (iconName) {
       case 'Wrench':
         return <Wrench className={className} />;
@@ -84,7 +86,10 @@ export default function CategoryBar({ categories }: CategoryBarProps) {
   };
 
   const getCatName = (cat: CategoryItem) => {
-    return getCategoryLocalizedName(cat.slug, lang) || cat.name;
+    if (lang === 'ru') {
+      return cat.nameRu || getCategoryLocalizedName(cat.slug, 'ru') || getCategoryLocalizedName(cat.name, 'ru') || cat.name;
+    }
+    return cat.nameUz || getCategoryLocalizedName(cat.slug, 'uz') || getCategoryLocalizedName(cat.name, 'uz') || cat.name;
   };
 
   const activeCategoryObj = categories.find((c) => c.slug === currentCategory);

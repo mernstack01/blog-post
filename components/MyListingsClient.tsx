@@ -22,7 +22,7 @@ import SafeImage from '@/components/SafeImage';
 import { ListingWithRelations, userDeleteListingAction } from '@/actions/listing-actions';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { getCategoryLocalizedName, getLocationLocalizedName } from '@/lib/translations';
+import { getCategoryLocalizedName, getSubCategoryLocalizedName, getLocationLocalizedName } from '@/lib/translations';
 
 interface MyListingsClientProps {
   initialListings: ListingWithRelations[];
@@ -163,7 +163,7 @@ export default function MyListingsClient({
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <div className="px-4 py-2.5 rounded-2xl bg-secondary border border-border text-xs">
               <span className="text-muted-foreground block text-[10px] font-bold uppercase tracking-wider mb-0.5">
-                {lang === 'ru' ? "Лимит объявлений" : "E'lon berish limiti"}
+                {lang === 'ru' ? 'Использовано из лимита' : 'Limitdan ishlatilgan'}
               </span>
               <div className="flex items-center gap-1.5 font-extrabold text-foreground text-sm">
                 <span className="text-primary">{limitUsed}</span>
@@ -334,8 +334,13 @@ export default function MyListingsClient({
             const isRejected = item.status === 'REJECTED';
 
             const catName = item.subCategory
-              ? getCategoryLocalizedName(item.subCategory.name, lang)
-              : getCategoryLocalizedName(item.category.name, lang);
+              ? (getSubCategoryLocalizedName(item.subCategory.slug, lang) || getSubCategoryLocalizedName(item.subCategory.name, lang) || item.subCategory.name)
+              : (
+                  (lang === 'ru' ? (item.category as any)?.nameRu : (item.category as any)?.nameUz) ||
+                  getCategoryLocalizedName(item.category.slug, lang) ||
+                  getCategoryLocalizedName(item.category.name, lang) ||
+                  item.category.name
+                );
 
             const locName = getLocationLocalizedName(item.location, lang);
 

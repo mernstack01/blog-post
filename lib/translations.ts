@@ -19,13 +19,19 @@ export const categorySlugMap: Record<string, { uz: string; ru: string }> = {
   'yuk-tashish': { uz: 'Yuk tashish', ru: 'Грузоперевозки' },
   'konditsioner': { uz: 'Konditsioner', ru: 'Кондиционеры' },
   'maishiy-texnika': { uz: 'Maishiy texnika', ru: 'Бытовая техника' },
-  'qurilish': { uz: 'Qurilish va Mahsulotlar', ru: 'Строительство и Материалы' },
+  'maishiy-texnikalar': { uz: 'Maishiy texnikalar', ru: 'Бытовая техника' },
+  'elektronika': { uz: 'Elektronika va maishiy texnika', ru: 'Электроника и бытовая техника' },
+  'elektronika-va-maishiy-texnikalar': { uz: 'Elektronika va maishiy texnikalar', ru: 'Электроника и бытовая техника' },
+  'elektronika-va-maishiy-texnika': { uz: 'Elektronika va maishiy texnika', ru: 'Электроника и бытовая техника' },
+  'qurilish': { uz: 'Qurilish mahsulotlari', ru: 'Строительные материалы' },
   'gozallik': { uz: "Go'zallik va Salomatlik", ru: 'Красота и Здоровье' },
   'talim': { uz: "Ta'lim va Repetitorlik", ru: 'Образование и Репетиторы' },
   'temirchilik': { uz: 'Temirchilik', ru: 'Кузнечное дело' },
   'oquv markazi': { uz: "O'quv markazi", ru: 'Учебный центр' },
   'restoran': { uz: 'Restoran & Kafe', ru: 'Ресторан и Кафе' },
-  'kafe': { uz: 'Restoran & Kafe', ru: 'Ресторан и Кафе' },
+  'kafe': { uz: 'Restoran & Kafe', ru: 'Ресторан и Каfe' },
+  'super-marketlar': { uz: 'Super marketlar', ru: 'Супермаркеты' },
+  'klinikalar': { uz: 'Klinikalar', ru: 'Клиники' },
   'shifokor': { uz: 'Shifokor', ru: 'Врач' },
   'repetitor': { uz: 'Repetitor', ru: 'Репетитор' },
   'dasturchi': { uz: 'Dasturchi', ru: 'Программист' },
@@ -33,6 +39,9 @@ export const categorySlugMap: Record<string, { uz: string; ru: string }> = {
 };
 
 export const subCategorySlugMap: Record<string, { uz: string; ru: string }> = {
+  'gisht': { uz: "G'isht", ru: 'Кирпич' },
+  'sement': { uz: 'Sement', ru: 'Цемент' },
+  'laminat': { uz: 'Laminat', ru: 'Ламинат' },
   'santexnik': { uz: 'Santexnika xizmatlari', ru: 'Сантехнические услуги' },
   'santexnika': { uz: 'Santexnika xizmatlari', ru: 'Сантехнические услуги' },
   'elektrik': { uz: 'Elektr montaj', ru: 'Электромонтаж' },
@@ -75,9 +84,13 @@ export const categoryDescMap: Record<string, { uz: string; ru: string }> = {
     uz: "Konditsioner, muzlatgich, kir yuvish mashinalari",
     ru: "Кондиционеры, холодильники, стиральные машины",
   },
+  'elektronika': {
+    uz: "Telefon, kompyuter, maishiy texnika va elektronika ta'mirlash",
+    ru: "Ремонт телефонов, компьютеров, бытовой техники и электроники",
+  },
   'qurilish': {
-    uz: "Uy qurish, poydevor, g'isht terish va tom yopish",
-    ru: "Строительство домов, фундамент, кладка кирпича и кровля",
+    uz: "G'isht, sement, laminat va boshqa qurilish mahsulotlari",
+    ru: "Кирпич, цемент, ламинат и другие строительные материалы",
   },
   'gozallik': {
     uz: "Sartarosh, stilist, massaj va parvarish xizmatlari",
@@ -87,6 +100,14 @@ export const categoryDescMap: Record<string, { uz: string; ru: string }> = {
     uz: "Tillar, aniq fanlar va maktabga tayyorlov",
     ru: "Иностранные языки, точные науки и подготовка к школе",
   },
+  'super-marketlar': {
+    uz: "Oziq-ovqat, xo'jalik mollari va kundalik ehtiyoj tovarlari",
+    ru: "Продукты питания, хозяйственные и повседневные товары",
+  },
+  'klinikalar': {
+    uz: "Tibbiy xizmatlar, diagnostika va shifokor ko'rigi",
+    ru: "Медицинские услуги, диагностика и консультации врачей",
+  },
 };
 
 function normalizeKey(str: string): string {
@@ -95,10 +116,17 @@ function normalizeKey(str: string): string {
 
 export function getCategoryLocalizedName(nameOrSlug: string, lang: Language = 'uz'): string {
   if (!nameOrSlug) return '';
+  if (categorySlugMap[nameOrSlug]) {
+    return categorySlugMap[nameOrSlug][lang];
+  }
   const normalized = normalizeKey(nameOrSlug);
   for (const [key, val] of Object.entries(categorySlugMap)) {
-    const normKey = normalizeKey(key);
-    if (normalized === normKey || normalized.includes(normKey) || normKey.includes(normalized)) {
+    if (normalized === normalizeKey(key)) {
+      return val[lang];
+    }
+  }
+  for (const val of Object.values(categorySlugMap)) {
+    if (normalized === normalizeKey(val.uz) || normalized === normalizeKey(val.ru)) {
       return val[lang];
     }
   }
@@ -114,10 +142,17 @@ export function getCategoryLocalizedDesc(slug: string, defaultDesc?: string | nu
 
 export function getSubCategoryLocalizedName(slugOrName: string, lang: Language = 'uz'): string {
   if (!slugOrName) return '';
+  if (subCategorySlugMap[slugOrName]) {
+    return subCategorySlugMap[slugOrName][lang];
+  }
   const normalized = normalizeKey(slugOrName);
   for (const [key, val] of Object.entries(subCategorySlugMap)) {
-    const normKey = normalizeKey(key);
-    if (normalized === normKey || normalized.includes(normKey) || normKey.includes(normalized)) {
+    if (normalized === normalizeKey(key)) {
+      return val[lang];
+    }
+  }
+  for (const val of Object.values(subCategorySlugMap)) {
+    if (normalized === normalizeKey(val.uz) || normalized === normalizeKey(val.ru)) {
       return val[lang];
     }
   }

@@ -43,6 +43,8 @@ export interface ListingWithRelations {
   category: {
     id: string;
     name: string;
+    nameUz?: string;
+    nameRu?: string;
     slug: string;
     icon: string | null;
   };
@@ -158,9 +160,11 @@ export async function getListings(filters: Partial<ListingFilterParams> = {}): P
           select: {
             id: true,
             name: true,
+            nameUz: true,
+            nameRu: true,
             slug: true,
             icon: true,
-          },
+          } as any,
         },
         subCategory: {
           select: {
@@ -197,9 +201,11 @@ export async function getListingById(id: string): Promise<ListingWithRelations |
           select: {
             id: true,
             name: true,
+            nameUz: true,
+            nameRu: true,
             slug: true,
             icon: true,
-          },
+          } as any,
         },
         subCategory: {
           select: {
@@ -248,8 +254,8 @@ export async function incrementViewCountAction(id: string) {
 export async function getCategoriesAction() {
   try {
     const categories = await prisma.category.findMany({
-      where: { isActive: true },
-      orderBy: { order: 'asc' },
+      where: { isActive: true } as any,
+      orderBy: { order: 'asc' } as any,
       include: {
         subCategories: {
           orderBy: { createdAt: 'asc' },
@@ -477,9 +483,11 @@ export async function getUserListingsAction(): Promise<{
           select: {
             id: true,
             name: true,
+            nameUz: true,
+            nameRu: true,
             slug: true,
             icon: true,
-          },
+          } as any,
         },
         subCategory: {
           select: {
