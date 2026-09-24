@@ -666,8 +666,10 @@ export async function adminGetUsersAction() {
         name: u.name,
         role: u.role,
         listingLimit: userLimit,
+        telegram: u.telegram || null,
         totalListings: u._count.listings,
         createdAt: u.createdAt,
+        updatedAt: u.updatedAt,
       };
     });
 
@@ -715,6 +717,212 @@ export async function adminUpdateUserLimitAction(userId: string, newLimit: numbe
   }
 }
 
+/**
+ * Admin: Yangi xodim yoki mutaxassis yaratish (CRUD: Create)
+ */
+export interface AdminCreateUserInput {
+  name: string;
+  phone: string;
+  role?: Role;
+  listingLimit?: number;
+  telegram?: string | null;
+}
+
+export async function adminCreateUserAction(data: AdminCreateUserInput) {
+  const isAdmin = await isUserAdmin();
+  if (!isAdmin) return { success: false, message: "Ruxsat berilmagan" };
+
+  const name = data.name?.trim();
+  let cleanPhone = data.phone ? data.phone.replace(/[^\d+]/g, '').trim() : '';
+  if (!cleanPhone.startsWith('+') && cleanPhone.startsWith('998')) {
+    cleanPhone = `+${cleanPhone}`;
+  }
+
+  if (!name || name.length < 2) {
+    return { success: false, message: "Xodim ismi kamida 2 ta harfdan iborat bo'lishi kerak." };
+  }
+
+  if (!cleanPhone || cleanPhone.length < 9) {
+    return { success: false, message: "Telefon raqami to'g'ri kiritilishi shart." };
+  }
+
+  try {
+    const existing = await prisma.user.findUnique({
+      where: { phone: cleanPhone },
+    });
+    if (existing) {
+      return { success: false, message: "Ushbu telefon raqam bilan allaqachon foydalanuvchi mavjud." };
+    }
+
+    const limitVal = typeof data.listingLimit === 'number' && data.listingLimit >= 0 ? Math.floor(data.listingLimit) : 3;
+    const roleVal = data.role || Role.SPECIALIST;
+    const telegramVal = data.telegram ? data.telegram.replace(/^@/, '').trim() : null;
+
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        phone: cleanPhone,
+        role: roleVal,
+        listingLimit: limitVal,
+        telegram: telegramVal,
+      },
+    });
+
+    try {
+      revalidatePath('/admin');
+    } catch {}
+
+    return {
+      success: true,
+      message: `"${newUser.name}" xodimi muvaffaqiyatli qo'shildi!`,
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        phone: newUser.phone,
+        role: newUser.role,
+        listingLimit: newUser.listingLimit,
+        telegram: newUser.telegram,
+        totalListings: 0,
+        createdAt: newUser.createdAt,
+      },
+    };
+  } catch (error: any) {
+    console.error('adminCreateUserAction error:', error);
+    return { success: false, message: error?.message || "Xodim qo'shishda xatolik yuz berdi" };
+  }
+}
+
+/**
+ * Admin: Xodim ma'lumotlarini to'liq tahrirlash (CRUD: Update)
+ */
+export interface AdminUpdateUserInput {
+  name?: string;
+  phone?: string;
+  role?: Role;
+  listingLimit?: number;
+  telegram?: string | null;
+}
+
+export async function adminUpdateUserAction(userId: string, data: AdminUpdateUserInput) {
+  const isAdmin = await isUserAdmin();
+  if (!isAdmin) return { success: false, message: "Ruxsat berilmagan" };
+
+  try {
+    const existing = await prisma.user.findUnique({ where: { id: userId } });
+    if (!existing) return { success: false, message: "Xodim topilmadi" };
+
+    const updateData: any = {};
+
+    if (data.name !== undefined) {
+      const name = data.name.trim();
+      if (name.length < 2) {
+        return { success: false, message: "Ism kamida 2 ta belgidan iborat bo'lishi kerak" };
+      }
+      updateData.name = name;
+    }
+
+    if (data.phone !== undefined) {
+      let cleanPhone = data.phone.replace(/[^\d+]/g, '').trim();
+      if (!cleanPhone.startsWith('+') && cleanPhone.startsWith('998')) {
+        cleanPhone = `+${cleanPhone}`;
+      }
+      if (cleanPhone !== existing.phone) {
+        const phoneTaken = await prisma.user.findUnique({ where: { phone: cleanPhone } });
+        if (phoneTaken) {
+          return { success: false, message: "Ushbu telefon raqam boshqa foydalanuvchiga tegishli" };
+        }
+        updateData.phone = cleanPhone;
+      }
+    }
+
+    if (data.role !== undefined) {
+      updateData.role = data.role;
+    }
+
+    if (data.listingLimit !== undefined) {
+      const limitVal = Math.max(0, Math.floor(Number(data.listingLimit) || 0));
+      updateData.listingLimit = limitVal;
+    }
+
+    if (data.telegram !== undefined) {
+      updateData.telegram = data.telegram ? data.telegram.replace(/^@/, '').trim() : null;
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    });
+
+    try {
+      revalidatePath('/admin');
+    } catch {}
+
+    return {
+      success: true,
+      message: `${updated.name} ma'lumotlari muvaffaqiyatli yangilandi!`,
+      user: updated,
+    };
+  } catch (error: any) {
+    console.error('adminUpdateUserAction error:', error);
+    return { success: false, message: error?.message || "Xodimni yangilashda xatolik yuz berdi" };
+  }
+}
+
+/**
+ * Admin: Xodimni o'chirish (CRUD: Delete)
+ */
+export async function adminDeleteUserAction(userId: string, options?: { deleteListings?: boolean }) {
+  const isAdmin = await isUserAdmin();
+  if (!isAdmin) return { success: false, message: "Ruxsat berilmagan" };
+
+  try {
+    const existing = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { _count: { select: { listings: true } } },
+    });
+
+    if (!existing) return { success: false, message: "Foydalanuvchi topilmadi" };
+
+    const listingsCount = existing._count.listings;
+
+    if (options?.deleteListings) {
+      // Biriktirilgan barcha e'lonlarni o'chirish
+      await prisma.listing.deleteMany({
+        where: { userId },
+      });
+    } else {
+      // E'lonlarni saqlab qolish, userId sini null qilish (admin posti sifatida qoladi)
+      await prisma.listing.updateMany({
+        where: { userId },
+        data: { userId: null },
+      });
+    }
+
+    // OTP kodlarni tozalash
+    await prisma.otpCode.deleteMany({
+      where: { phone: existing.phone },
+    });
+
+    // Foydalanuvchini o'chirish
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    try {
+      revalidatePath('/admin');
+    } catch {}
+
+    return {
+      success: true,
+      message: options?.deleteListings
+        ? `Xodim va uning ${listingsCount} ta e'loni o'chirildi.`
+        : `Xodim o'chirildi. Uning ${listingsCount} ta e'loni saqlab qolindi.`,
+    };
+  } catch (error: any) {
+    console.error('adminDeleteUserAction error:', error);
+    return { success: false, message: error?.message || "Xodimni o'chirishda xatolik yuz berdi" };
+  }
+}
 
 /**
  * Admin: Foydalanuvchi rolini o'zgartirish
