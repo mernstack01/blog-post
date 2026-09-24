@@ -63,8 +63,12 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '', re
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         
         {/* Nishon */}
- 
-        {/* H1 Sarlavha */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary mb-4 shadow-2xs">
+          <div className="w-5 h-5 rounded-full overflow-hidden shrink-0 ring-1 ring-primary/30 bg-white">
+            <img src="/logo.jpg" alt="TopBaza.uz" className="w-full h-full object-cover" />
+          </div>
+          <span>TopBaza.uz — {t.hero.titleHighlight}</span>
+        </div>
         <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight leading-tight mb-3">
           {t.hero.title1} <br className="hidden sm:block" />
           <span className="text-primary">

@@ -42,8 +42,12 @@ export default function FooterClient({
           {/* Logo va tavsif */}
           <div className="md:col-span-1 space-y-4">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-md shadow-primary/20 group-hover:scale-105 transition-transform shrink-0">
-                <Wrench className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-full overflow-hidden ring-1.5 ring-border shadow-xs group-hover:scale-105 transition-transform shrink-0 bg-white">
+                <img
+                  src="/logo.jpg"
+                  alt="TopBaza.uz"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <span className="text-lg font-bold tracking-tight text-foreground">
                 {siteTitle.replace(/\.uz$/i, '')}

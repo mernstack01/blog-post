@@ -42,8 +42,12 @@ export function Header() {
           {/* Logo */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-700 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
-                <Wrench className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden ring-1.5 ring-primary/20 shadow-xs group-hover:scale-105 transition-transform shrink-0 bg-white">
+                <img
+                  src="/logo.jpg"
+                  alt="TopBaza.uz"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="flex flex-col">
                 <span className="text-base sm:text-lg font-black tracking-tight text-foreground flex items-center">

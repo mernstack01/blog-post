@@ -34,8 +34,12 @@ export default function Navbar() {
           {/* Logo va Jonli nishon */}
           <div className="flex items-center gap-3 sm:gap-4">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-700 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
-                <Wrench className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden ring-1.5 ring-blue-500/20 shadow-xs group-hover:scale-105 transition-transform shrink-0 bg-white">
+                <img
+                  src="/logo.jpg"
+                  alt="TopBaza.uz"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="flex flex-col">
                 <span className="text-base sm:text-lg font-extrabold tracking-tight text-[#1e293b] flex items-center gap-1">

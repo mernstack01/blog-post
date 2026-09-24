@@ -45,6 +45,17 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'TopBaza.uz' }],
   creator: 'TopBaza.uz',
+  icons: {
+    icon: [
+      { url: '/icon.png', sizes: '64x64', type: 'image/png' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    shortcut: '/icon.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'uz_UZ',
@@ -54,10 +65,10 @@ export const metadata: Metadata = {
     description: "Sirdaryo viloyatining barcha mutaxassislari, kadrlar, ziyorat va dam olish maskanlari, o'quv markazlari hamda xizmatlar bazasi.",
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=1200&auto=format&fit=crop&q=80',
+        url: '/logo.jpg',
         width: 1200,
-        height: 630,
-        alt: 'TopBaza.uz Xizmatlari',
+        height: 1200,
+        alt: 'TopBaza.uz Xizmatlar Portali Logosi',
       },
     ],
   },
@@ -65,7 +76,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'TopBaza.uz',
     description: "Guliston va Sirdaryo viloyatining barcha xizmatlari va ustalari bir joyda.",
-    images: ['https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=1200&auto=format&fit=crop&q=80'],
+    images: ['/logo.jpg'],
   },
   robots: {
     index: true,
