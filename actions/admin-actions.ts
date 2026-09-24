@@ -140,6 +140,7 @@ export async function getAdminStatsAction() {
     privilegedCount,
     totalCategories,
     activeCategories,
+    totalRegions,
     totalDistricts,
     totalViewsAggregate,
   ] = await Promise.all([
@@ -172,6 +173,7 @@ export async function getAdminStatsAction() {
         return await prisma.category.count();
       }
     })(),
+    (prisma as any).region?.count ? (prisma as any).region.count() : Promise.resolve(1),
     (prisma as any).district?.count ? (prisma as any).district.count() : Promise.resolve(10),
     prisma.listing.aggregate({ _sum: { view_count: true } }),
   ]);
@@ -185,6 +187,7 @@ export async function getAdminStatsAction() {
     privilegedCount,
     totalCategories,
     activeCategories,
+    totalRegions,
     totalDistricts,
     totalViews: totalViewsAggregate._sum.view_count || 0,
   };
@@ -508,6 +511,8 @@ export interface AdminUpdateListingInput {
   telegram?: string | null;
   websiteUrl?: string | null;
   location?: string;
+  regionId?: string | null;
+  districtId?: string | null;
   address?: string | null;
   price?: string | null;
   experience?: string | null;
@@ -551,6 +556,37 @@ export async function adminUpdateListingFullAction(id: string, data: AdminUpdate
       isVerified,
     });
 
+    let finalRegionId = data.regionId !== undefined ? data.regionId : existing.regionId;
+    let finalDistrictId = data.districtId !== undefined ? data.districtId : existing.districtId;
+
+    if (data.districtId) {
+      try {
+        const foundDist = await prisma.district.findUnique({
+          where: { id: data.districtId },
+          select: { id: true, regionId: true, nameUz: true },
+        });
+        if (foundDist) {
+          finalRegionId = foundDist.regionId;
+        }
+      } catch {}
+    } else if (data.location && !data.districtId) {
+      try {
+        const foundDist = await prisma.district.findFirst({
+          where: {
+            OR: [
+              { nameUz: { equals: data.location.trim(), mode: 'insensitive' } },
+              { nameRu: { equals: data.location.trim(), mode: 'insensitive' } },
+            ],
+          },
+          select: { id: true, regionId: true },
+        });
+        if (foundDist) {
+          finalDistrictId = foundDist.id;
+          finalRegionId = foundDist.regionId;
+        }
+      } catch {}
+    }
+
     const updated: any = await prisma.listing.update({
       where: { id },
       data: {
@@ -563,6 +599,8 @@ export async function adminUpdateListingFullAction(id: string, data: AdminUpdate
         ...(data.telegram !== undefined && { telegram: data.telegram ? data.telegram.trim() : null }),
         ...(data.websiteUrl !== undefined && { websiteUrl: data.websiteUrl ? data.websiteUrl.trim() : null }),
         ...(data.location !== undefined && { location: data.location.trim() }),
+        ...(finalRegionId !== undefined && { regionId: finalRegionId }),
+        ...(finalDistrictId !== undefined && { districtId: finalDistrictId }),
         ...(data.address !== undefined && { address: data.address ? data.address.trim() : null }),
         ...(data.price !== undefined && { price: data.price ? data.price.trim() : 'Kelishilgan holda' }),
         ...(data.experience !== undefined && { experience: data.experience ? data.experience.trim() : 'Mavjud' }),

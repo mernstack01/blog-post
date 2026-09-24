@@ -3,6 +3,7 @@ import { getUserAuthSession } from '@/lib/user-auth';
 import { redirect } from 'next/navigation';
 import { getAdminStatsAction, getAdminListingsAction } from '@/actions/admin-actions';
 import { getCategoriesAction } from '@/actions/listing-actions';
+import { getAdminRegionsAction } from '@/actions/region-actions';
 import AdminDashboardClient from '@/components/AdminDashboardClient';
 import type { Metadata } from 'next';
 
@@ -32,16 +33,19 @@ export default async function AdminPage() {
   };
   let listings: any[] = [];
   let categories: any[] = [];
+  let regions: any[] = [];
 
   try {
-    const [fetchedStats, rawListings, rawCategories] = await Promise.all([
+    const [fetchedStats, rawListings, rawCategories, rawRegions] = await Promise.all([
       getAdminStatsAction(),
       getAdminListingsAction(),
       getCategoriesAction(),
+      getAdminRegionsAction(),
     ]);
     stats = fetchedStats;
     listings = JSON.parse(JSON.stringify(rawListings));
     categories = JSON.parse(JSON.stringify(rawCategories));
+    regions = JSON.parse(JSON.stringify(rawRegions));
   } catch (err) {
     console.error('AdminPage error fetching data:', err);
   }
@@ -49,7 +53,7 @@ export default async function AdminPage() {
   return (
     <div className="min-h-screen bg-[#fffdfa] dark:bg-zinc-950 pt-6 pb-28 sm:py-10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <AdminDashboardClient stats={stats} initialListings={listings} categories={categories} />
+        <AdminDashboardClient stats={stats} initialListings={listings} categories={categories} regions={regions} />
       </div>
     </div>
   );

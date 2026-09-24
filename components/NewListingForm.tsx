@@ -54,6 +54,21 @@ interface NewListingFormProps {
   categories: CategoryItem[];
   initialUser?: any;
   isAdmin?: boolean;
+  regions?: {
+    id: string;
+    nameUz: string;
+    nameRu: string;
+    slug: string;
+    order: number;
+    districts: {
+      id: string;
+      nameUz: string;
+      nameRu: string;
+      slug: string;
+      order: number;
+      regionId: string;
+    }[];
+  }[];
 }
 
 // Ustalarga qulaylik uchun namunaviy professional rasmlar (18 ta toifa)
@@ -78,19 +93,26 @@ const PRESET_IMAGES = [
   { slug: 'foto', labelUz: "Foto & Video", labelRu: "Фото и видео", url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&auto=format&fit=crop&q=80" },
 ];
 
-export default function NewListingForm({ categories, initialUser, isAdmin }: NewListingFormProps) {
+export default function NewListingForm({ categories, initialUser, isAdmin, regions }: NewListingFormProps) {
   const router = useRouter();
   const { t, lang } = useLanguage();
 
   const [currentUser, setCurrentUser] = useState(initialUser);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const initialRegion = (regions && regions.length > 0) ? regions[0] : null;
+  const initialDistrict = initialRegion && initialRegion.districts.length > 0 ? initialRegion.districts[0] : null;
+
+  const [selectedRegionId, setSelectedRegionId] = useState<string>(initialRegion?.id || '');
+
   const [formData, setFormData] = useState({
     title: '',
     name: initialUser?.name && !initialUser.name.startsWith('Mutaxassis (') ? initialUser.name : '',
     categoryId: categories[0]?.id || '',
     subCategoryId: '',
-    location: 'Guliston shahri',
+    location: initialDistrict ? initialDistrict.nameUz : 'Guliston shahri',
+    regionId: initialRegion?.id || '',
+    districtId: initialDistrict?.id || '',
     address: '',
     phone: initialUser?.phone || '+998',
     telegram: '',
@@ -299,6 +321,8 @@ export default function NewListingForm({ categories, initialUser, isAdmin }: New
       categoryId: formData.categoryId,
       subCategoryId: formData.subCategoryId || undefined,
       location: formData.location,
+      regionId: formData.regionId || undefined,
+      districtId: formData.districtId || undefined,
       address: formData.address.trim() || undefined,
       phone: formData.phone.trim(),
       telegram: formData.telegram.trim() || undefined,
@@ -486,27 +510,100 @@ export default function NewListingForm({ categories, initialUser, isAdmin }: New
             {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
           </div>
 
-          {/* Hudud */}
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1.5">
-              {t.newListing.locationLabel} <span className="text-destructive">*</span>
-            </label>
-            <div className="relative">
-              <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-primary pointer-events-none shrink-0" />
-              <select
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full pl-10 pr-8 py-3 rounded-xl border border-border text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary cursor-pointer appearance-none transition-all"
-              >
-                {SIRDARYO_LOCATIONS.filter((l) => l !== 'Barcha hududlar').map((loc) => (
-                  <option key={loc} value={loc}>
-                    {getLocationLocalizedName(loc, lang)}
-                  </option>
-                ))}
-              </select>
+          {/* Hudud (Viloyat va Tuman) */}
+          {regions && regions.length > 0 ? (
+            <div className="space-y-4">
+              {regions.length > 1 && (
+                <div>
+                  <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1.5">
+                    Viloyat / Hudud <span className="text-destructive">*</span>
+                  </label>
+                  <div className="relative">
+                    <Globe className="absolute left-3.5 top-3.5 w-4 h-4 text-primary pointer-events-none shrink-0" />
+                    <select
+                      value={selectedRegionId}
+                      onChange={(e) => {
+                        const newRegId = e.target.value;
+                        setSelectedRegionId(newRegId);
+                        const reg = regions.find((r) => r.id === newRegId);
+                        const firstDist = reg?.districts?.[0];
+                        setFormData((prev) => ({
+                          ...prev,
+                          regionId: newRegId,
+                          districtId: firstDist?.id || '',
+                          location: firstDist ? firstDist.nameUz : prev.location,
+                        }));
+                      }}
+                      className="w-full pl-10 pr-8 py-3 rounded-xl border border-border text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary cursor-pointer appearance-none transition-all"
+                    >
+                      {regions.map((reg) => (
+                        <option key={reg.id} value={reg.id}>
+                          {lang === 'ru' ? reg.nameRu : reg.nameUz}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1.5">
+                  {t.newListing.locationLabel} (Shahar / Tuman) <span className="text-destructive">*</span>
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-primary pointer-events-none shrink-0" />
+                  <select
+                    value={formData.districtId || formData.location}
+                    onChange={(e) => {
+                      const selectedVal = e.target.value;
+                      const activeReg = regions.find((r) => r.id === (selectedRegionId || regions[0]?.id));
+                      const matchedDist = activeReg?.districts?.find(
+                        (d) => d.id === selectedVal || d.nameUz === selectedVal || d.nameRu === selectedVal
+                      );
+                      setFormData((prev) => ({
+                        ...prev,
+                        location: matchedDist ? matchedDist.nameUz : selectedVal,
+                        districtId: matchedDist ? matchedDist.id : prev.districtId,
+                        regionId: selectedRegionId || regions[0]?.id || '',
+                      }));
+                    }}
+                    className="w-full pl-10 pr-8 py-3 rounded-xl border border-border text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary cursor-pointer appearance-none transition-all"
+                  >
+                    {(() => {
+                      const activeReg = regions.find((r) => r.id === selectedRegionId) || regions[0];
+                      return (activeReg?.districts || []).map((dist) => (
+                        <option key={dist.id} value={dist.id}>
+                          {lang === 'ru' ? dist.nameRu : dist.nameUz}
+                        </option>
+                      ));
+                    })()}
+                  </select>
+                </div>
+                {errors.location && <p className="text-xs text-destructive mt-1">{errors.location}</p>}
+              </div>
             </div>
-            {errors.location && <p className="text-xs text-destructive mt-1">{errors.location}</p>}
-          </div>
+          ) : (
+            <div>
+              <label className="block text-xs sm:text-sm font-semibold text-foreground mb-1.5">
+                {t.newListing.locationLabel} <span className="text-destructive">*</span>
+              </label>
+              <div className="relative">
+                <MapPin className="absolute left-3.5 top-3.5 w-4 h-4 text-primary pointer-events-none shrink-0" />
+                <select
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  className="w-full pl-10 pr-8 py-3 rounded-xl border border-border text-sm text-foreground bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary cursor-pointer appearance-none transition-all"
+                >
+                  {SIRDARYO_LOCATIONS.filter((l) => l !== 'Barcha hududlar').map((loc) => (
+                    <option key={loc} value={loc}>
+                      {getLocationLocalizedName(loc, lang)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {errors.location && <p className="text-xs text-destructive mt-1">{errors.location}</p>}
+            </div>
+          )}
 
           {/* Kategoriya */}
           <div>

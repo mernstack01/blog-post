@@ -1,4 +1,5 @@
 import { getCategoriesAction } from '@/actions/listing-actions';
+import { getRegionsWithDistrictsAction } from '@/actions/region-actions';
 import { getCurrentUserAction } from '@/actions/user-auth-actions';
 import { isUserAdmin } from '@/lib/admin-auth';
 import NewListingForm from '@/components/NewListingForm';
@@ -14,8 +15,9 @@ export const dynamic = 'force-dynamic';
 
 
 export default async function NewListingPage() {
-  const [categories, userRes, isAdmin] = await Promise.all([
+  const [categories, regions, userRes, isAdmin] = await Promise.all([
     getCategoriesAction(),
+    getRegionsWithDistrictsAction(),
     getCurrentUserAction(),
     isUserAdmin(),
   ]);
@@ -26,6 +28,7 @@ export default async function NewListingPage() {
         <NewListingHeader />
         <NewListingForm
           categories={categories as any}
+          regions={regions as any}
           initialUser={userRes.user}
           isAdmin={isAdmin}
         />

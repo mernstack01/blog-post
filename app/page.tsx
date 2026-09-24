@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { getListings, getCategoriesAction } from '@/actions/listing-actions';
+import { getRegionsWithDistrictsAction } from '@/actions/region-actions';
 import { getCurrentUserAction } from '@/actions/user-auth-actions';
 import { isUserAdmin } from '@/lib/admin-auth';
 import HeroSearch from '@/components/HeroSearch';
@@ -28,9 +29,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const currentMode = resolvedSearchParams.mode === 'top10' ? 'top10' : 'all';
 
   // Parallel data fetching
-  const [listings, categories, userRes, isAdmin] = await Promise.all([
+  const [listings, categories, regions, userRes, isAdmin] = await Promise.all([
     getListings(resolvedSearchParams),
     getCategoriesAction(),
+    getRegionsWithDistrictsAction(),
     getCurrentUserAction(),
     isUserAdmin(),
   ]);
@@ -43,6 +45,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <HeroSearch
           initialQuery={resolvedSearchParams.q}
           initialLocation={resolvedSearchParams.location}
+          regions={regions}
         />
       </Suspense>
 
@@ -51,9 +54,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <CategoryBar categories={categories} />
       </Suspense>
 
-      {/* 3. Sirdaryo Tumanlari Filtr Piltalari */}
+      {/* 3. Tumanlar Filtr Piltalari */}
       <Suspense fallback={<div className="h-12 bg-slate-50" />}>
-        <LocationPills />
+        <LocationPills regions={regions} />
       </Suspense>
 
       {/* 4. Rejim Tanlash: Umumiy vs Top 10 Reyting */}

@@ -23,7 +23,9 @@ export const createListingSchema = z.object({
   websiteUrl: z.string().optional().or(z.literal('')),
   location: z
     .string()
-    .min(2, 'Iltimos, Sirdaryo hududini tanlang'),
+    .min(2, 'Iltimos, hududni tanlang'),
+  regionId: z.string().optional().or(z.literal('')),
+  districtId: z.string().optional().or(z.literal('')),
   address: z.string().optional().or(z.literal('')),
   price: z.string().optional().or(z.literal('')),
   experience: z.string().optional().or(z.literal('')),

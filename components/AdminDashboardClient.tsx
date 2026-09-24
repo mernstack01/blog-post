@@ -53,12 +53,14 @@ interface AdminDashboardClientProps {
   };
   initialListings: any[];
   categories?: any[];
+  regions?: any[];
 }
 
 export default function AdminDashboardClient({
   stats,
   initialListings,
   categories = [],
+  regions = [],
 }: AdminDashboardClientProps) {
   const [listings, setListings] = useState(initialListings);
   const [statusFilter, setStatusFilter] = useState<'ALL' | ListingStatus>('ALL');
@@ -296,6 +298,12 @@ export default function AdminDashboardClient({
             className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
           >
             Kategoriyalar
+          </Link>
+          <Link
+            href="/admin/regions"
+            className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
+          >
+            Hududlar
           </Link>
           <Link
             href="/admin/settings"
@@ -806,6 +814,7 @@ export default function AdminDashboardClient({
         <AdminEditListingModal
           listing={editingListing}
           categories={categories}
+          regions={regions}
           onClose={() => setEditingListing(null)}
           onSuccess={(updated) => {
             setListings((prev) =>

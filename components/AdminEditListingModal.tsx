@@ -23,6 +23,7 @@ import ImageCropperModal from '@/components/ImageCropperModal';
 interface AdminEditListingModalProps {
   listing: any;
   categories: any[];
+  regions?: any[];
   onClose: () => void;
   onSuccess: (updatedListing: any) => void;
 }
@@ -30,6 +31,7 @@ interface AdminEditListingModalProps {
 export default function AdminEditListingModal({
   listing,
   categories,
+  regions,
   onClose,
   onSuccess,
 }: AdminEditListingModalProps) {
@@ -41,6 +43,8 @@ export default function AdminEditListingModal({
     telegram: listing.telegram || '',
     websiteUrl: listing.websiteUrl || '',
     location: listing.location || 'Guliston shahri',
+    regionId: listing.regionId || null,
+    districtId: listing.districtId || null,
     address: listing.address || '',
     price: listing.price || '',
     experience: listing.experience || '',
@@ -341,14 +345,48 @@ export default function AdminEditListingModal({
               </label>
               <select
                 value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                onChange={(e) => {
+                  const selectedVal = e.target.value;
+                  let selectedDistId: string | null = null;
+                  let selectedRegId: string | null = null;
+                  if (regions && regions.length > 0) {
+                    for (const r of regions) {
+                      const d = r.districts?.find(
+                        (dist: any) => dist.nameUz === selectedVal || dist.nameRu === selectedVal
+                      );
+                      if (d) {
+                        selectedDistId = d.id;
+                        selectedRegId = r.id;
+                        break;
+                      }
+                    }
+                  }
+                  setFormData({
+                    ...formData,
+                    location: selectedVal,
+                    ...(selectedDistId && { districtId: selectedDistId }),
+                    ...(selectedRegId && { regionId: selectedRegId }),
+                  });
+                }}
                 className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
               >
-                {SIRDARYO_LOCATIONS.filter((l) => l !== 'Barcha hududlar').map((loc) => (
-                  <option key={loc} value={loc}>
-                    {loc}
-                  </option>
-                ))}
+                {regions && regions.length > 0 ? (
+                  regions.map((reg: any) => (
+                    <optgroup key={reg.id} label={`${reg.nameUz} (${reg.nameRu})`}>
+                      {reg.districts?.map((dist: any) => (
+                        <option key={dist.id} value={dist.nameUz}>
+                          {dist.nameUz} ({dist.nameRu})
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))
+                ) : (
+                  SIRDARYO_LOCATIONS.filter((l) => l !== 'Barcha hududlar').map((loc) => (
+                    <option key={loc} value={loc}>
+                      {loc}
+                    </option>
+                  ))
+                )}
               </select>
             </div>
           </div>

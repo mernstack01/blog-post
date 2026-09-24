@@ -9,9 +9,16 @@ import { useLanguage } from '@/context/LanguageContext';
 interface HeroSearchProps {
   initialQuery?: string;
   initialLocation?: string;
+  regions?: {
+    id: string;
+    nameUz: string;
+    nameRu: string;
+    slug: string;
+    districts: { id: string; nameUz: string; nameRu: string; slug: string }[];
+  }[];
 }
 
-export default function HeroSearch({ initialQuery = '', initialLocation = '' }: HeroSearchProps) {
+export default function HeroSearch({ initialQuery = '', initialLocation = '', regions }: HeroSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t, lang } = useLanguage();
@@ -86,19 +93,34 @@ export default function HeroSearch({ initialQuery = '', initialLocation = '' }: 
           <div className="hidden sm:block w-px h-6 bg-border shrink-0" />
 
           {/* Hududni tanlash */}
-          <div className="relative w-full sm:w-52 flex items-center shrink-0">
+          <div className="relative w-full sm:w-56 flex items-center shrink-0">
             <MapPin className="absolute left-3 w-4 h-4 text-primary pointer-events-none shrink-0" />
             <select
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="w-full pl-9 pr-6 py-2.5 sm:py-2 bg-secondary sm:bg-transparent rounded-xl sm:rounded-none text-xs sm:text-sm font-semibold text-foreground focus:outline-none cursor-pointer appearance-none"
+              className="w-full pl-9 pr-6 py-2.5 sm:py-2 bg-secondary sm:bg-transparent rounded-xl sm:rounded-none text-xs sm:text-sm font-semibold text-foreground focus:outline-none cursor-pointer appearance-none truncate"
             >
               <option value="Barcha hududlar">{t.locations.all}</option>
-              {SIRDARYO_LOCATIONS.filter(l => l !== 'Barcha hududlar').map((loc) => (
-                <option key={loc} value={loc}>
-                  {(t.locations as any)[loc] || loc}
-                </option>
-              ))}
+              {regions && regions.length > 0 ? (
+                regions.map((reg) => (
+                  <optgroup key={reg.id} label={lang === 'ru' ? reg.nameRu : reg.nameUz}>
+                    <option value={reg.nameUz}>
+                      {lang === 'ru' ? `Вся ${reg.nameRu}` : `Butun ${reg.nameUz}`}
+                    </option>
+                    {reg.districts.map((d) => (
+                      <option key={d.id} value={d.nameUz}>
+                        {lang === 'ru' ? d.nameRu : d.nameUz}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))
+              ) : (
+                SIRDARYO_LOCATIONS.filter(l => l !== 'Barcha hududlar').map((loc) => (
+                  <option key={loc} value={loc}>
+                    {(t.locations as any)[loc] || loc}
+                  </option>
+                ))
+              )}
             </select>
           </div>
 

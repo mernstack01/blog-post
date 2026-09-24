@@ -107,6 +107,12 @@ export default function AdminSettingsClient({ initialSettings }: AdminSettingsCl
             Kategoriyalar
           </Link>
           <Link
+            href="/admin/regions"
+            className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
+          >
+            Hududlar
+          </Link>
+          <Link
             href="/admin/settings"
             className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-primary/10 text-primary border border-primary/20 shrink-0"
           >

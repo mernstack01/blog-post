@@ -37,6 +37,8 @@ export interface ListingWithRelations {
   view_count: number;
   categoryId: string;
   subCategoryId: string | null;
+  regionId?: string | null;
+  districtId?: string | null;
   userId: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -51,6 +53,18 @@ export interface ListingWithRelations {
   subCategory: {
     id: string;
     name: string;
+    slug: string;
+  } | null;
+  region?: {
+    id: string;
+    nameUz: string;
+    nameRu: string;
+    slug: string;
+  } | null;
+  district?: {
+    id: string;
+    nameUz: string;
+    nameRu: string;
     slug: string;
   } | null;
   rank?: number;
@@ -102,11 +116,15 @@ export async function getListings(filters: Partial<ListingFilterParams> = {}): P
 
     // 3. Hudud bo'yicha (agar "Barcha hududlar" bo'lmasa)
     if (location && location !== 'Barcha hududlar' && location.trim() !== '') {
+      const trimmedLoc = location.trim();
       andConditions.push({
-        location: {
-          contains: location.trim(),
-          mode: 'insensitive',
-        },
+        OR: [
+          { location: { contains: trimmedLoc, mode: 'insensitive' } },
+          { region: { nameUz: { contains: trimmedLoc, mode: 'insensitive' } } },
+          { region: { nameRu: { contains: trimmedLoc, mode: 'insensitive' } } },
+          { district: { nameUz: { contains: trimmedLoc, mode: 'insensitive' } } },
+          { district: { nameRu: { contains: trimmedLoc, mode: 'insensitive' } } },
+        ],
       });
     }
 
@@ -170,6 +188,22 @@ export async function getListings(filters: Partial<ListingFilterParams> = {}): P
           select: {
             id: true,
             name: true,
+            slug: true,
+          },
+        },
+        region: {
+          select: {
+            id: true,
+            nameUz: true,
+            nameRu: true,
+            slug: true,
+          },
+        },
+        district: {
+          select: {
+            id: true,
+            nameUz: true,
+            nameRu: true,
             slug: true,
           },
         },
@@ -381,7 +415,39 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
       isVerified: isAdmin,
     });
 
-    // 4. Bazaga yaratish
+    // 4. Region va District identifikatorlarini aniqlash
+    let finalRegionId: string | null = (val as any).regionId || null;
+    let finalDistrictId: string | null = (val as any).districtId || null;
+
+    if (finalDistrictId) {
+      try {
+        const foundDist = await prisma.district.findUnique({
+          where: { id: finalDistrictId },
+          select: { id: true, regionId: true, nameUz: true },
+        });
+        if (foundDist) {
+          finalRegionId = foundDist.regionId;
+        }
+      } catch {}
+    } else if (val.location) {
+      try {
+        const foundDist = await prisma.district.findFirst({
+          where: {
+            OR: [
+              { nameUz: { equals: val.location.trim(), mode: 'insensitive' } },
+              { nameRu: { equals: val.location.trim(), mode: 'insensitive' } },
+            ],
+          },
+          select: { id: true, regionId: true },
+        });
+        if (foundDist) {
+          finalDistrictId = foundDist.id;
+          finalRegionId = foundDist.regionId;
+        }
+      } catch {}
+    }
+
+    // 5. Bazaga yaratish
     const newListing = await (prisma.listing as any).create({
       data: {
         title: sanitize(val.title),
@@ -409,6 +475,8 @@ export async function createListingAction(data: CreateListingInput): Promise<Act
         view_count: 1,
         categoryId: val.categoryId,
         subCategoryId: val.subCategoryId ? val.subCategoryId : null,
+        regionId: finalRegionId,
+        districtId: finalDistrictId,
         userId: activeUserId,
       },
     });
